@@ -19,6 +19,7 @@
     "test": "pnpm -r test",
     "db:migrate": "pnpm --filter @calories-diary/api migration:up",
     "db:seed": "pnpm --filter @calories-diary/api seed",
+    "db:seed:demo": "pnpm --filter @calories-diary/api seed:demo",
     "utente:crea": "pnpm --filter @calories-diary/api utente:crea"
   },
   "devDependencies": {
