@@ -91,28 +91,61 @@ onBeforeUnmount(ferma);
 </script>
 
 <template>
-  <UModal v-model:open="aperto" title="Scansiona il codice a barre" @after:enter="avvia">
+  <!-- Full screen on a black ground, whatever the theme: it is a camera viewfinder. -->
+  <UModal
+    v-model:open="aperto"
+    fullscreen
+    title="Scansiona il codice a barre"
+    :ui="{ content: 'bg-black text-white ring-0', header: 'hidden', body: 'p-0 sm:p-0 relative' }"
+    @after:enter="avvia"
+  >
     <template #body>
-      <div class="space-y-3">
-        <div class="relative aspect-[4/3] overflow-hidden rounded-md bg-black">
-          <video ref="video" class="size-full object-cover" muted playsinline />
-          <div
-            v-if="!errore"
-            class="pointer-events-none absolute inset-x-8 top-1/2 h-24 -translate-y-1/2 rounded-md border-2 border-white/80"
-          />
-          <div v-if="avvio" class="absolute inset-0 flex items-center justify-center text-white">
-            <UIcon name="i-lucide-loader-circle" class="size-8 animate-spin" />
-          </div>
+      <div class="absolute inset-0">
+        <video ref="video" class="size-full object-cover" muted playsinline />
+        <div
+          v-if="!errore"
+          class="pointer-events-none absolute inset-x-10 top-1/2 h-44 -translate-y-1/2 rounded-2xl border-[3px] border-white shadow-[0_0_0_200vmax_rgb(0_0_0/0.5)]"
+        />
+        <div v-if="avvio" class="absolute inset-0 flex items-center justify-center">
+          <UIcon name="i-lucide-loader-circle" class="size-8 animate-spin" />
         </div>
+      </div>
+
+      <div class="absolute inset-x-0 top-0 flex items-center gap-2 bg-black/55 px-4 py-3">
+        <UButton
+          icon="i-lucide-x"
+          variant="ghost"
+          color="neutral"
+          size="lg"
+          class="text-white hover:bg-white/15"
+          aria-label="Chiudi la scansione"
+          @click="aperto = false"
+        />
+        <h2 class="flex-1 text-[17px] font-semibold">Scansiona il codice a barre</h2>
+      </div>
+
+      <div class="absolute inset-x-0 bottom-0 flex flex-col items-center gap-4 px-4 pt-6 pb-10">
         <UAlert
           v-if="errore"
           color="error"
-          variant="subtle"
+          variant="solid"
           icon="i-lucide-camera-off"
           :title="errore"
-          :actions="[{ label: 'Riprova', onClick: avvia }]"
+          :actions="[{ label: 'Riprova', color: 'neutral', variant: 'solid', onClick: avvia }]"
         />
-        <p v-else class="text-sm text-muted">Inquadra il codice a barre dentro il riquadro.</p>
+        <p v-else class="text-center text-[15px] text-slate-200">
+          Inquadra il codice a barre dentro il riquadro.<br />
+          Lo leggiamo da soli, non serve toccare.
+        </p>
+        <UButton
+          icon="i-lucide-keyboard"
+          color="neutral"
+          size="lg"
+          class="rounded-full bg-white/15 text-white hover:bg-white/25"
+          @click="aperto = false"
+        >
+          Scrivi il codice a mano
+        </UButton>
       </div>
     </template>
   </UModal>
