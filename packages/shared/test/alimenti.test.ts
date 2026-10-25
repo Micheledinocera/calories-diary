@@ -29,7 +29,7 @@ describe("nuovoAlimentoSchema", () => {
   });
 
   it("richiede kcal e macro", () => {
-    const { grassi: _, ...senzaGrassi } = valoriPer100;
+    const senzaGrassi = { kcal: 97, proteine: 9, carboidrati: 4 };
     expect(nuovoAlimentoSchema.safeParse({ nome: "Y", valoriPer100: senzaGrassi }).success).toBe(
       false,
     );

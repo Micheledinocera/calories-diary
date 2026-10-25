@@ -124,4 +124,5 @@ export const filtriAlimentiSchema = z.object({
   limite: z.coerce.number().int().min(1).max(200).default(100),
 });
 
-export type FiltriAlimenti = z.input<typeof filtriAlimentiSchema>;
+/** Filters as the client sends them (the query string carries them as text). */
+export type FiltriAlimenti = Partial<z.output<typeof filtriAlimentiSchema>>;
