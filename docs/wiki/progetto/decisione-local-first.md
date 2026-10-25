@@ -1,14 +1,18 @@
 ---
 tipo: decisione
-stato: presa
+stato: superata
+sostituita_da: ./decisione-server-fonte-di-verita.md
 aggiornato: 2026-10-25
 fonti:
   - raw/compiled/first-develop/analisi-iniziale-calorie-tracker.md
   - raw/compiled/first-develop/setup-progetto.md
   - raw/compiled/first-develop/2026-10-25-decisioni-e-piano.md
+  - raw/compiled/offline-cache/2026-10-25-decisione-niente-sync.md
 ---
 
 # Local-first, con le fonti esterne dietro il back-end
+
+> **Superata** da [Server come fonte di verità](./decisione-server-fonte-di-verita.md): niente sync, il server è l'unica fonte di verità e offline c'è solo una cache in sola lettura. La parte sulle fonti esterne dietro il back-end resta valida ed è riportata lì.
 
 ## Decisione
 
@@ -28,7 +32,3 @@ fonti:
 
 - **Server come unica fonte di verità**, con cache offline in sola lettura: più semplice, ma non permette di registrare il diario offline.
 - **Chiamate a OFF direttamente dal browser**: il browser non può impostare lo User-Agent, e il front-end dipenderebbe dal provider.
-
-## Domande aperte
-
-- Dettagli del protocollo di sync: da definire nella feature `sync`.

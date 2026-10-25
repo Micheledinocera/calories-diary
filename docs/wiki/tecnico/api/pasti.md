@@ -34,7 +34,3 @@ Tutte dietro `richiediAutenticazione` (401 `NON_AUTENTICATO` senza token valido)
 | `GET /pasti/:id` | Un `Pasto`; 400 `VALIDAZIONE` se `id` non è un UUID, 404 `NON_TROVATO` se non esiste o è di un altro utente (non si rivela che esiste) |
 
 Il DTO esposto contiene solo `id`, `nome`, `ordine`.
-
-## Domande aperte
-
-- Quando i pasti entreranno nella sync, servirà la cancellazione logica come per le altre tabelle sincronizzate.

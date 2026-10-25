@@ -6,6 +6,7 @@ fonti:
   - raw/compiled/first-develop/2026-10-25-decisioni-e-piano.md
   - raw/compiled/food-catalog/2026-10-25-obiettivo.md
   - raw/compiled/food-catalog/2026-10-25-open-food-facts-e-perimetro.md
+  - raw/compiled/offline-cache/2026-10-25-decisione-niente-sync.md
 ---
 
 # Dati degli alimenti
@@ -14,14 +15,14 @@ Regole su provenienza, consolidamento e uso dei dati nutrizionali.
 
 ## Principio guida
 
-La fonte esterna serve **solo per trovare e importare** un alimento. Dopo l'import l'app lavora sulla **copia nostra**, che l'utente può verificare e correggere. Tutte le chiamate ai provider passano dal back-end (vedi [Architettura local-first](../progetto/decisione-local-first.md)).
+La fonte esterna serve **solo per trovare e importare** un alimento. Dopo l'import l'app lavora sulla **copia nostra**, che l'utente può verificare e correggere. Tutte le chiamate ai provider passano dal back-end (vedi [Server come fonte di verità](../progetto/decisione-server-fonte-di-verita.md)).
 
 ## Catalogo e alimenti dell'utente
 
 I dati degli alimenti stanno su due livelli:
 
 - **Catalogo condiviso**: i prodotti importati dal provider, comuni a tutti gli utenti. Fa da cache: un prodotto già scansionato da qualcuno si trova senza chiamare di nuovo il provider. Riflette i dati del provider, quindi i valori possono mancare. Codice: [Catalogo e lookup per barcode](../tecnico/api/catalogo.md).
-- **Alimenti dell'utente**: la copia di ogni utente, che lui può correggere e segnare come verificata, con frequenza e recenza d'uso. Le correzioni di un utente non toccano i dati degli altri. Arrivano con la feature `foods`, dopo `sync`, perché sono dati sincronizzati con il client.
+- **Alimenti dell'utente**: la copia di ogni utente, che lui può correggere e segnare come verificata, con frequenza e recenza d'uso. Le correzioni di un utente non toccano i dati degli altri. Arrivano con la feature `foods`.
 
 ## Fonti
 
@@ -59,7 +60,7 @@ I dati degli alimenti stanno su due livelli:
 
 ## Modello dati (bozza)
 
-Il catalogo è definito (vedi [Catalogo e lookup per barcode](../tecnico/api/catalogo.md)); il resto è da confermare nelle feature `sync`, `foods` e `diary`. I nomi restano in italiano anche nel codice.
+Il catalogo è definito (vedi [Catalogo e lookup per barcode](../tecnico/api/catalogo.md)); il resto è da confermare nelle feature `foods` e `diary`. I nomi restano in italiano anche nel codice.
 
 - **prodotto del catalogo** (condiviso): barcode (unico), fonte e id nella fonte, nome, marca, unità base, valori per 100 tutti facoltativi, porzione del provider, immagine, data di import e di aggiornamento.
 - **alimento** (per utente): nome, marca, barcode (unico), fonte (`off`, `manuale`, `crea`, `ciqual`, `usda`, `bda`) e id nella fonte, valori per 100 (kcal, proteine, carboidrati, grassi obbligatori; zuccheri, grassi saturi, fibre, sale facoltativi), unità base (g o ml), verificato, data di import, data di aggiornamento, ultimo uso, numero di utilizzi, archiviato.
@@ -67,8 +68,6 @@ Il catalogo è definito (vedi [Catalogo e lookup per barcode](../tecnico/api/cat
 - **voce del diario**: data, pasto, alimento (facoltativo), nome congelato, grammi, porzione, kcal, proteine, carboidrati e grassi congelati, data di creazione.
 - **pasto**: nome, ordine (già presente nel codice, vedi [Pasti](../tecnico/api/pasti.md)).
 - Fase 2: **ricetta** (nome, peso finale, esposta come alimento) e **ingrediente della ricetta** (alimento, grammi).
-
-Le tabelle sincronizzate col client avranno anche id UUID generati dal client, data di aggiornamento e cancellazione logica (vedi [Architettura local-first](../progetto/decisione-local-first.md)).
 
 ## Domande aperte
 
