@@ -11,4 +11,4 @@ Il requisito _Backup_ di `docs/wiki/business/prodotto.md` (e la feature `backup`
 - la protezione dai guasti è un backup del database lato server (es. `pg_dump` pianificato), da trattare nel `deploy`, non una funzione dell'app;
 - un export/import utente servirebbe solo a portare i dati altrove o a ripristinarli a mano, cosa che per un'app personale non è stata chiesta.
 
-Da confermare con l'utente: togliere il requisito _Backup_ e la feature `backup` dall'MVP, spostando il backup del DB nel `deploy`.
+**Confermato dall'utente**: si toglie il requisito _Backup_ (export/import JSON o CSV), la feature `backup` dal piano dell'MVP e la relativa domanda aperta sul formato. Resta solo l'export di condivisione in markdown; il backup del DB si tratta nel `deploy`.
