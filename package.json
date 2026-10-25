@@ -9,7 +9,9 @@
   "scripts": {
     "postinstall": "pnpm --filter @calories-diary/shared build",
     "prepare": "husky",
-    "dev": "node scripts/solo-pnpm.mjs dev && pnpm --parallel --filter \"./apps/*\" --filter @calories-diary/shared dev",
+    "dev": "node scripts/dev.mjs dev",
+    "dev:https": "node scripts/dev.mjs dev:https",
+    "dev:stop": "node scripts/ferma-dev.mjs",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "lint": "eslint . && pnpm --filter @calories-diary/web lint",
@@ -29,6 +31,7 @@
     "husky": "9.1.7",
     "lint-staged": "17.6.0",
     "prettier": "3.9.10",
+    "turbo": "2.11.10",
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.0"
   }
