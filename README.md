@@ -1,6 +1,6 @@
 # Calories Diary
 
-PWA personale per il tracciamento giornaliero di calorie e macronutrienti: diario per pasti, alimenti locali consolidati nel tempo, lookup dei prodotti per codice a barre (tramite il back-end, con Open Food Facts come primo provider). Local-first: l'app funziona offline e si sincronizza con l'API.
+PWA personale per il tracciamento giornaliero di calorie e macronutrienti: diario per pasti, alimenti locali consolidati nel tempo, lookup dei prodotti per codice a barre (tramite il back-end, con Open Food Facts come primo provider). Il server è l'unica fonte di verità: offline l'app mostra i dati già scaricati, in sola lettura.
 
 ## Stack
 
