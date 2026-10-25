@@ -6,10 +6,16 @@ const { crea, cercaBarcode } = useAlimenti();
 const stato = ref<StatoFormAlimento>(statoVuoto());
 const avvisi = ref<string[]>([]);
 
-// Barcode typed by hand: the camera comes with the barcode-scan feature.
+// Barcode typed by hand or read with the camera (ScansioneBarcode).
 const codice = ref("");
+const scansioneAperta = ref(false);
 const ricerca = ref<"ferma" | "in-corso" | "trovato" | "non-trovato">("ferma");
 const erroreRicerca = ref<ErroreNormalizzato | null>(null);
+
+function letto(valore: string) {
+  codice.value = valore;
+  cerca();
+}
 
 async function cerca() {
   const valore = codice.value.trim();
@@ -86,6 +92,13 @@ async function salva(dati: NuovoAlimento) {
               class="flex-1"
               autocomplete="off"
             />
+            <UButton
+              icon="i-lucide-scan-barcode"
+              color="neutral"
+              variant="outline"
+              aria-label="Scansiona con la fotocamera"
+              @click="scansioneAperta = true"
+            />
             <UButton type="submit" icon="i-lucide-search" :loading="ricerca === 'in-corso'">
               Cerca
             </UButton>
@@ -115,6 +128,8 @@ async function salva(dati: NuovoAlimento) {
         />
       </form>
     </UCard>
+
+    <ScansioneBarcode v-model:open="scansioneAperta" @letto="letto" />
 
     <AlimentoForm
       v-model="stato"
