@@ -45,7 +45,10 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
 
 <template>
   <UContainer class="py-6 max-w-xl space-y-4">
-    <h1 class="text-2xl font-bold">Calendario</h1>
+    <div class="flex items-center justify-between gap-2">
+      <h1 class="text-2xl font-bold">Calendario</h1>
+      <UButton icon="i-lucide-share" variant="subtle" to="/diario/export">Esporta</UButton>
+    </div>
 
     <UAlert
       v-if="errore"

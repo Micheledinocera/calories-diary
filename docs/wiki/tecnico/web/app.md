@@ -10,6 +10,7 @@ fonti:
   - raw/compiled/diary/2026-10-25-obiettivo.md
   - raw/compiled/barcode-scan/2026-10-25-libreria-scansione.md
   - raw/compiled/barcode-scan/2026-10-25-sviluppo-da-telefono.md
+  - raw/compiled/export/2026-10-25-implementazione.md
 ---
 
 # App web
@@ -54,8 +55,10 @@ La UI è provvisoria: flussi ed esperienza si validano con un giro di design a f
 - `layouts/default.vue`: barra in alto con "Oggi", "Calendario" e "Alimenti" e menu account con "Profilo" ed "Esci". `login.vue` è senza layout.
 - `pages/login.vue`: `UAuthForm` di Nuxt UI con email e password, validato con `credenzialiSchema`; mostra il messaggio d'errore dell'API.
 - `pages/index.vue` ("Oggi"): `DiarioGiornata` del giorno locale, sempre modificabile; il giorno si aggiorna quando l'app torna in primo piano (aperta a cavallo della mezzanotte).
-- `pages/diario/index.vue`: calendario (`UCalendar`) con un pallino sui giorni con voci: verde entro il fabbisogno, arancione oltre (`primary` se il fabbisogno non c'è). Carica i riepiloghi del mese mostrato più le settimane vicine; un giorno apre `/diario/<giorno>` (oggi apre `/`).
+- `pages/diario/index.vue`: calendario (`UCalendar`) con un pallino sui giorni con voci: verde entro il fabbisogno, arancione oltre (`primary` se il fabbisogno non c'è). Carica i riepiloghi del mese mostrato più le settimane vicine; un giorno apre `/diario/<giorno>` (oggi apre `/`). Il bottone "Esporta" apre `/diario/export`.
 - `pages/diario/[giorno].vue`: stessa `DiarioGiornata`, in sola lettura finché non si preme "Modifica"; frecce per il giorno prima e dopo.
+- `pages/diario/export.vue`: export di condivisione in markdown. `UCalendar` con `range`, `maximum-days` = `MAX_GIORNI_EXPORT` (7) e `max-value` oggi; parte dagli ultimi 7 giorni. "Genera" chiama in parallelo `GET /obiettivi` e `GET /diario/:giorno` per ogni giorno (nessun endpoint dedicato) e mostra l'anteprima; cambiare intervallo la svuota. Azioni: "Condividi" (Web Share API con il file, solo se `navigator.canShare` accetta file), "Scarica .md" (Blob e link `download`), "Copia" (appunti). File `diario-<da>_<a>.md` (`diario-<giorno>.md` per un giorno).
+- `app/utils/export.ts`: `markdownDiario(giornate, obiettivi)`, funzione pura. Titolo, periodo, obiettivi; tabella "Riepilogo" (kcal e macro per giorno) solo con più giorni; per ogni giorno, in ordine di data, kcal rispetto al fabbisogno e grammi e quota di ogni macro rispetto alla ripartizione, poi una tabella per pasto (alimento e marca, quantità, kcal, macro, totale). Pasti vuoti saltati, giorno vuoto con "Nessun alimento registrato.". Numeri con `formattaValore`; i caratteri markdown dei nomi sono escapati per non rompere le tabelle.
 - `pages/profilo.vue`: email, fabbisogno e ripartizione dei macro (validati con `obiettiviSchema`, con il totale delle quote e il ritorno a 50/30/20).
 - `pages/alimenti/index.vue`: ricerca (300 ms dopo l'ultimo tasto), sezioni "Recenti" e "Più usati" (solo se non vuote), "Tutti"; interruttore per gli archiviati.
 - `pages/alimenti/nuovo.vue`: ricerca per codice a barre, inserito a mano o letto con la fotocamera (icona accanto al campo, apre `ScansioneBarcode`; il codice letto va nel campo e avvia la ricerca). Se il prodotto c'è, precompila il form con kcal, macro e la porzione del provider come predefinita, e mostra avvisi e attribuzione a Open Food Facts; se non c'è, il barcode resta nel form per l'inserimento manuale. Su 409 `ALIMENTO_ESISTENTE` propone di aprire l'alimento esistente.
