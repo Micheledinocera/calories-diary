@@ -14,7 +14,7 @@ onBeforeUnmount(() => document.removeEventListener("visibilitychange", aggiornaO
   <UContainer class="py-6 max-w-xl space-y-4">
     <div class="flex items-center justify-between gap-2">
       <div>
-        <h1 class="text-2xl font-bold">Oggi</h1>
+        <h1 class="text-2xl font-bold text-highlighted">Oggi</h1>
         <p class="text-sm text-muted first-letter:uppercase">{{ formattaGiorno(oggi) }}</p>
       </div>
       <UButton
