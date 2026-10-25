@@ -21,20 +21,25 @@ export default async function setup() {
   } finally {
     await orm.close(true);
   }
-  await azzeraLimiteLogin(env.REDIS_URL, env.REDIS_PREFIX);
+  await azzeraChiaviRedis(env.REDIS_URL, env.REDIS_PREFIX);
 }
 
-/** Login counters survive between runs: without this, runs close together would get 429. */
-async function azzeraLimiteLogin(url: string, prefisso: string) {
+/**
+ * Login and provider counters and the "not found" cache survive between runs:
+ * without this, runs close together would get 429 or stale 404.
+ */
+async function azzeraChiaviRedis(url: string, prefisso: string) {
   // No keyPrefix: SCAN returns full keys, which DEL must receive unchanged.
   const redis = new Redis(url);
   try {
-    let cursore = "0";
-    do {
-      const [prossimo, chiavi] = await redis.scan(cursore, "MATCH", `${prefisso}login:*`);
-      if (chiavi.length) await redis.del(...chiavi);
-      cursore = prossimo;
-    } while (cursore !== "0");
+    for (const gruppo of ["login", "provider", "catalogo"]) {
+      let cursore = "0";
+      do {
+        const [prossimo, chiavi] = await redis.scan(cursore, "MATCH", `${prefisso}${gruppo}:*`);
+        if (chiavi.length) await redis.del(...chiavi);
+        cursore = prossimo;
+      } while (cursore !== "0");
+    }
   } finally {
     await redis.quit();
   }

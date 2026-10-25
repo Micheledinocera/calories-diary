@@ -10,6 +10,8 @@ const envTest = {
   REDIS_PREFIX: "calories-diary:test:",
   LOG_LEVEL: "silent",
   JWT_SECRET: "segreto-dei-test-lungo-almeno-32-caratteri",
+  // The tests use a fake provider: Open Food Facts is never called.
+  OFF_CONTATTO: "test@esempio.it",
 };
 
 // test.env reaches only the test workers: globalSetup runs in this process.

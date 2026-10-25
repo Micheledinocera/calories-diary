@@ -48,6 +48,8 @@ services:
       LOG_LEVEL: info
       # Local only: in production a random secret is set on the host.
       JWT_SECRET: segreto-locale-di-docker-lungo-almeno-32-caratteri
+      # Contact email for the Open Food Facts User-Agent: export OFF_CONTATTO before docker compose.
+      OFF_CONTATTO: ${OFF_CONTATTO:-}
     ports:
       - "3001:3001"
     depends_on:
