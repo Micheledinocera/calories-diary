@@ -5,6 +5,7 @@ fonti:
   - raw/compiled/first-develop/setup-progetto.md
   - raw/compiled/first-develop/2026-10-25-decisioni-e-piano.md
   - raw/compiled/first-develop/2026-10-25-scaffolding.md
+  - raw/compiled/auth/2026-10-25-bun-dev-ctrlc.md
 ---
 
 # Sviluppo, CI e ambienti
@@ -17,7 +18,8 @@ Ogni funzionalità si realizza e si verifica prima in locale con Docker. Il depl
 
 - `docker-compose.yml`: PostgreSQL e Redis. Con il profilo `api` avvia anche l'API dalla stessa immagine Docker della produzione.
 - Lo script di init di Postgres crea anche il database dei test (`calories_diary_test`).
-- `pnpm dev` avvia API, web e `packages/shared` in watch.
+- `pnpm dev` avvia API, web e `packages/shared` in watch. Va lanciato con pnpm: con un altro gestore (es. `bun dev`) lo script si ferma subito (`scripts/solo-pnpm.mjs`), perché sotto Git Bash bun non esce con Ctrl+C e lascia il terminale bloccato.
+- Gli utenti si creano con `pnpm utente:crea <email>`; l'API richiede `JWT_SECRET` nel `.env` (vedi `apps/api/.env.example`).
 
 ## Test e CI
 

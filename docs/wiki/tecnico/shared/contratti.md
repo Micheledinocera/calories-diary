@@ -4,6 +4,7 @@ aggiornato: 2026-10-25
 fonti:
   - raw/compiled/first-develop/2026-10-25-ruolo-monorepo.md
   - raw/compiled/first-develop/2026-10-25-scaffolding.md
+  - raw/compiled/auth/2026-10-25-implementazione.md
 ---
 
 # Contratti condivisi
@@ -17,6 +18,7 @@ fonti:
 | `src/health.ts` | `healthSchema`, `Health` | Risposta di `GET /health` |
 | `src/pasti.ts` | `pastoSchema`, `listaPastiSchema`, `Pasto` | DTO dei pasti |
 | `src/errori.ts` | `erroreApiSchema`, `ErroreApi` | Corpo di ogni risposta di errore |
+| `src/auth.ts` | `credenzialiSchema`, `utenteSchema`, `sessioneSchema` e tipi | Body del login (email normalizzata: trim e minuscole), utente corrente, risposta di login e rinnovo |
 
 Convenzione: per ogni contratto uno schema `xSchema` e il tipo `X = z.infer<typeof xSchema>`, esportati da `src/index.ts`.
 

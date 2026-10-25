@@ -3,6 +3,7 @@ tipo: info
 aggiornato: 2026-10-25
 fonti:
   - raw/compiled/first-develop/2026-10-25-scaffolding.md
+  - raw/compiled/auth/2026-10-25-implementazione.md
 ---
 
 # App web
@@ -26,12 +27,22 @@ fonti:
 
 ## Chiamate all'API
 
-- `app/composables/useApi.ts`: `api<T>(path, opzioni)` è `$fetch` con `baseURL` dell'API, un retry, timeout di **90 s** finché il server non ha risposto almeno una volta nella sessione (avvio a freddo dell'hosting gratuito), poi 15 s. Espone `sveglia` (il server ha già risposto).
+- `app/composables/useApi.ts`: `api<T>(path, opzioni)` è `$fetch` con `baseURL` dell'API e il token della sessione come `Authorization: Bearer`, un retry, timeout di **90 s** finché il server non ha risposto almeno una volta nella sessione (avvio a freddo dell'hosting gratuito), poi 15 s. Espone `sveglia` (il server ha già risposto).
+- Un 401 `NON_AUTENTICATO` su una chiamata con token chiude la sessione e porta a `/login`.
 - `app/utils/errori-api.ts`: `normalizzaErrore(err)` trasforma ogni errore in `{ codice, messaggio, status? }`: body di errore dell'API, `TIMEOUT`, `HTTP` o `RETE`.
+
+## Sessione e login
+
+Regole nella decisione [Autenticazione multiutente](../../progetto/decisione-autenticazione.md).
+
+- `app/composables/useSessione.ts`: `sessione`, `accedi(credenziali)`, `rinnova()`, `esci()`. La sessione (`Sessione` di shared) sta in `localStorage` (`calories-diary:sessione`) e viene validata con `sessioneSchema` alla lettura (`app/utils/sessione.ts`). Il login non fa retry: ogni tentativo conta nel rate limit.
+- `app/middleware/autenticazione.global.ts`: senza sessione ogni pagina porta a `/login`; con sessione `/login` porta alla home. Un token scaduto localmente non blocca l'app (uso offline): se ne accorge l'API alla prima chiamata.
+- `app/plugins/rinnovo-sessione.client.ts`: rinnovo scorrevole. Chiama `POST /auth/rinnova` all'avvio, al ritorno online e quando l'app torna in primo piano, ma solo se il token ha più di un giorno (`daRinnovare`): resta sempre circa una settimana di margine offline senza chiamare l'API a ogni apertura. Gli errori di rete si ignorano.
 
 ## Pagine
 
-- `pages/index.vue`: pagina provvisoria dello scaffolding. Mostra lo stato di `/health` e i pasti; dopo 3 s di attesa avvisa che il server si sta risvegliando.
+- `pages/login.vue`: `UAuthForm` di Nuxt UI con email e password, validato con `credenzialiSchema`; mostra il messaggio d'errore dell'API.
+- `pages/index.vue`: pagina provvisoria dello scaffolding. Mostra email dell'utente e pulsante "Esci", lo stato di `/health` e i pasti dell'utente; dopo 3 s di attesa avvisa che il server si sta risvegliando.
 
 ## Test
 
