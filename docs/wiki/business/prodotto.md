@@ -11,6 +11,8 @@ fonti:
   - raw/compiled/foods/2026-10-25-decisioni-utente.md
   - raw/compiled/diary/2026-10-25-obiettivo.md
   - raw/compiled/diary/2026-10-25-decisioni-diario.md
+  - raw/compiled/export/2026-10-25-obiettivo.md
+  - raw/compiled/export/2026-10-25-decisioni-utente.md
 ---
 
 # Prodotto
@@ -54,7 +56,9 @@ Applicazione **personale** per tracciare ogni giorno calorie e macronutrienti. �
 
 **Porzioni**: porzioni personalizzate per alimento (es. "1 vasetto = 125 g"); se il provider fornisce la porzione, viene proposta come predefinita.
 
-**Backup**: export e import dei dati (JSON o CSV).
+**Export di condivisione** (in `export`): si sceglie un intervallo di giorni, **al massimo una settimana**, e si ottiene un file **markdown**, facile da mandare in giro o da convertire in PDF. Contiene gli obiettivi (fabbisogno e ripartizione dei macro), un riepilogo dei giorni e, per ogni giorno, i totali di consumo rispetto agli obiettivi e il dettaglio di cosa si è mangiato per pasto, con kcal e macro di ogni alimento. Lo genera il front-end dai dati del diario.
+
+**Niente backup nell'app**: non c'è export/import dei dati in JSON o CSV. Il requisito veniva dall'analisi iniziale local-first, quando i dati stavano solo sul dispositivo; con il [server come fonte di verità](../progetto/decisione-server-fonte-di-verita.md) i dati stanno in PostgreSQL, e la protezione dai guasti è un backup del database lato server, da trattare nel `deploy`.
 
 ## Requisiti non funzionali
 
@@ -68,14 +72,12 @@ Applicazione **personale** per tracciare ogni giorno calorie e macronutrienti. �
 
 | Fase | Contenuto |
 |---|---|
-| **MVP** | Diario, alimenti manuali, lookup per barcode con import (anche da fotocamera), consolidamento locale, recenti e più usati, porzioni, totali, fabbisogno e rapporto macro, storico a calendario, cache offline in sola lettura, backup |
+| **MVP** | Diario, alimenti manuali, lookup per barcode con import (anche da fotocamera), consolidamento locale, recenti e più usati, porzioni, totali, fabbisogno e rapporto macro, storico a calendario, cache offline in sola lettura, export di condivisione in markdown |
 | **Fase 2** | Ricette (ingredienti + peso finale, usate come alimenti), grafici dello storico, ricerca testuale presso il provider |
 | **Fase 3** | Import di tabelle generiche (CIQUAL, USDA, BDA), ri-sincronizzazione di un alimento dal provider con diff |
 
-Ordine delle feature dell'MVP: `first-develop` (scaffolding), `auth`, `food-catalog`, `offline-cache` (decisione, cache in analisi), `foods`, `diary`, `barcode-scan`, `backup`, `deploy`, poi release `v0.1.0`.
+Ordine delle feature dell'MVP: `first-develop` (scaffolding), `auth`, `food-catalog`, `offline-cache` (decisione, cache in analisi), `foods`, `diary`, `barcode-scan`, `export`, `deploy` (con il backup del database), poi release `v0.1.0`.
 
 ## Domande aperte
 
 - La UI dell'MVP è provvisoria: flussi ed esperienza si validano con un giro di design verso la fine dell'MVP.
-
-- Formato di export/backup: JSON, CSV o entrambi; import in sostituzione o in unione con i dati esistenti.
