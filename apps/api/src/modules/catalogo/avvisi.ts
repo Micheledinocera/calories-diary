@@ -1,4 +1,4 @@
-import type { AvvisoCatalogo, ValoriPer100 } from "@calories-diary/shared";
+import type { AvvisoCatalogo, ValoriAlimento, ValoriPer100 } from "@calories-diary/shared";
 
 /** Above this gap between declared and estimated kcal the values are suspicious. */
 const SOGLIA_INCOERENZA = 0.2;
@@ -14,8 +14,18 @@ export function calcolaAvvisi(valori: ValoriPer100): AvvisoCatalogo[] {
   if (Object.values(valori).every((v) => v === null)) return ["SENZA_VALORI"];
   if (principali.some((v) => v === null)) return ["VALORI_PARZIALI"];
 
-  const stimate = kcalStimate(proteine!, carboidrati!, grassi!);
-  const incoerenti =
-    kcal === 0 ? stimate > 0 : Math.abs(kcal! - stimate) / kcal! > SOGLIA_INCOERENZA;
-  return incoerenti ? ["KCAL_INCOERENTI"] : [];
+  return kcalIncoerenti({
+    kcal: kcal!,
+    proteine: proteine!,
+    carboidrati: carboidrati!,
+    grassi: grassi!,
+  })
+    ? ["KCAL_INCOERENTI"]
+    : [];
+}
+
+/** Declared kcal more than 20% away from the estimate (with 0 kcal, any positive estimate). */
+export function kcalIncoerenti({ kcal, proteine, carboidrati, grassi }: ValoriAlimento): boolean {
+  const stimate = kcalStimate(proteine, carboidrati, grassi);
+  return kcal === 0 ? stimate > 0 : Math.abs(kcal - stimate) / kcal > SOGLIA_INCOERENZA;
 }
