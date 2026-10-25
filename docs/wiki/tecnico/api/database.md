@@ -1,0 +1,37 @@
+---
+tipo: info
+aggiornato: 2026-10-25
+fonti:
+  - raw/compiled/first-develop/2026-10-25-scaffolding.md
+---
+
+# Database, migrazioni e seed
+
+Documentazione di MikroORM: https://mikro-orm.io/docs (qui solo le scelte del progetto).
+
+## Configurazione
+
+`src/db/mikro-orm.config.ts`, funzione `creaConfigOrm(env, { diretta })`:
+- driver PostgreSQL, `clientUrl` da `DATABASE_URL`, oppure da `DATABASE_URL_DIRECT` con `diretta: true` (migrazioni);
+- entità elencate in `src/db/entita.ts`;
+- estensioni `Migrator` e `SeedManager`;
+- naming di default: proprietà camelCase → colonne snake_case (`creatoIl` → `creato_il`).
+
+## Migrazioni e seed
+
+Si usa uno script nostro, `src/db/cli.ts`, non la CLI di MikroORM: lo stesso comando funziona in sviluppo (tsx, con `.env`) e in produzione dall'immagine compilata (`node dist/src/db/cli.js migration:up`).
+
+| Comando (in `apps/api`) | Cosa fa |
+|---|---|
+| `pnpm migration:create <nome>` | Genera una migrazione TS dalle differenze tra entità e snapshot |
+| `pnpm migration:up` | Applica le migrazioni pendenti (anche `pnpm db:migrate` dalla root) |
+| `pnpm migration:down` | Annulla l'ultima migrazione |
+| `pnpm seed` | Lancia `DatabaseSeeder` (anche `pnpm db:seed` dalla root) |
+
+- Le migrazioni stanno in `apps/api/migrations/` con lo snapshot dello schema (`.snapshot-*.json`, aggiornato solo da `migration:create`); vengono compilate in `dist/migrations/`.
+- Le migrazioni **non** girano all'avvio del container: le lancerà la pipeline di deploy.
+- `DatabaseSeeder` è idempotente: inserisce solo i pasti predefiniti mancanti.
+
+## Test
+
+Il `globalSetup` di Vitest ricrea il database `calories_diary_test` (drop, migrazioni, seed). Le variabili di test sono in `vitest.config.ts`; in CI gli URL si possono cambiare con `DATABASE_URL_TEST` e `REDIS_URL_TEST`.

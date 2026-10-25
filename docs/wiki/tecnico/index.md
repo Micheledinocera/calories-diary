@@ -1,5 +1,7 @@
 # Tecnico
 
-Documentazione del codice custom, una sotto-cartella per app (`api/`, `web/`, `shared/`).
+Documentazione del codice custom, una sotto-cartella per app.
 
-Nessuna pagina.
+- [API](./api/index.md): `apps/api`, Express + MikroORM + Redis.
+- [Web](./web/index.md): `apps/web`, PWA Nuxt.
+- [Shared](./shared/index.md): `packages/shared`, contratti tra API e web.
