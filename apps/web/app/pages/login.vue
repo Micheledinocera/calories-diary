@@ -7,13 +7,21 @@ definePageMeta({ layout: false });
 const { accedi } = useSessione();
 
 const campi: AuthFormField[] = [
-  { name: "email", type: "email", label: "Email", autocomplete: "username", required: true },
+  {
+    name: "email",
+    type: "email",
+    label: "Email",
+    autocomplete: "username",
+    required: true,
+    size: "xl",
+  },
   {
     name: "password",
     type: "password",
     label: "Password",
     autocomplete: "current-password",
     required: true,
+    size: "xl",
   },
 ];
 
@@ -35,15 +43,20 @@ async function invia({ data }: FormSubmitEvent<Credenziali>) {
 </script>
 
 <template>
-  <UContainer class="py-10 flex justify-center">
-    <UPageCard class="w-full max-w-md">
+  <UContainer class="min-h-dvh max-w-md flex flex-col justify-center py-10">
+    <div class="flex flex-col items-center gap-3 mb-6">
+      <img src="/logo.svg" alt="" class="size-16" />
+      <div class="text-center">
+        <h1 class="text-2xl font-bold text-highlighted">Calories Diary</h1>
+        <p class="text-sm text-muted">Accedi con le tue credenziali.</p>
+      </div>
+    </div>
+
+    <UCard :ui="{ body: 'sm:p-5' }">
       <UAuthForm
         :schema="credenzialiSchema"
         :fields="campi"
-        title="Calories Diary"
-        description="Accedi con le tue credenziali."
-        icon="i-lucide-lock"
-        :submit="{ label: 'Accedi' }"
+        :submit="{ label: 'Accedi', size: 'xl' }"
         :loading="inCorso"
         @submit="invia"
       >
@@ -57,6 +70,6 @@ async function invia({ data }: FormSubmitEvent<Credenziali>) {
           />
         </template>
       </UAuthForm>
-    </UPageCard>
+    </UCard>
   </UContainer>
 </template>

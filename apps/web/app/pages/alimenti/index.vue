@@ -42,24 +42,71 @@ const sezioni = computed(() => {
   ].filter((s): s is { titolo: string; alimenti: Alimento[] } => s.alimenti.length > 0);
 });
 
+// A scanned code opens the food if it is already saved, otherwise a new food with the code.
+const scansione = ref(false);
+const toast = useToast();
+async function letto(codice: string) {
+  try {
+    const alimento = (await elenca({ q: codice, archiviati: archiviati.value })).find(
+      (a) => a.barcode === codice,
+    );
+    await navigateTo(
+      alimento
+        ? `/alimenti/${alimento.id}`
+        : { path: "/alimenti/nuovo", query: { barcode: codice } },
+    );
+  } catch (err) {
+    const errore = err as ErroreNormalizzato;
+    toast.add({ title: errore.messaggio, color: "error", icon: "i-lucide-circle-alert" });
+  }
+}
+
 const errore = computed(() => (error.value ? normalizzaErrore(error.value) : null));
 </script>
 
 <template>
-  <UContainer class="py-6 max-w-xl space-y-4">
+  <UContainer class="py-6 max-w-xl space-y-3">
     <div class="flex items-center justify-between gap-2">
-      <h1 class="text-2xl font-bold">Alimenti</h1>
+      <h1 class="text-2xl font-bold text-highlighted">Alimenti</h1>
       <UButton icon="i-lucide-plus" to="/alimenti/nuovo">Nuovo</UButton>
     </div>
 
     <UInput
       v-model="cerca"
       icon="i-lucide-search"
-      placeholder="Cerca per nome, marca o codice a barre"
+      placeholder="Cerca per nome, marca o codice"
+      size="xl"
       class="w-full"
       :loading="status === 'pending'"
-    />
-    <USwitch v-model="archiviati" label="Mostra gli archiviati" />
+      :ui="{ trailing: 'pe-1' }"
+    >
+      <template #trailing>
+        <UButton
+          icon="i-lucide-scan-barcode"
+          variant="ghost"
+          aria-label="Scansiona il codice a barre"
+          @click="scansione = true"
+        />
+      </template>
+    </UInput>
+    <ScansioneBarcode v-model:open="scansione" @letto="letto" />
+
+    <div class="flex gap-2" role="group" aria-label="Filtro">
+      <UButton
+        v-for="f in [
+          { valore: false, etichetta: 'Attivi' },
+          { valore: true, etichetta: 'Archiviati' },
+        ]"
+        :key="f.etichetta"
+        :variant="archiviati === f.valore ? 'soft' : 'outline'"
+        :color="archiviati === f.valore ? 'primary' : 'neutral'"
+        class="rounded-full"
+        :aria-pressed="archiviati === f.valore"
+        @click="archiviati = f.valore"
+      >
+        {{ f.etichetta }}
+      </UButton>
+    </div>
 
     <UAlert
       v-if="errore"
@@ -71,15 +118,24 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
     />
 
     <div v-else-if="status === 'pending' && !data" class="space-y-3">
-      <USkeleton v-for="i in 4" :key="i" class="h-12 w-full" />
+      <USkeleton v-for="i in 4" :key="i" class="h-14 w-full rounded-lg" />
     </div>
 
     <template v-else>
-      <section v-for="sezione in sezioni" :key="sezione.titolo">
-        <h2 class="text-sm font-medium text-muted mt-4">{{ sezione.titolo }}</h2>
-        <div class="divide-y divide-default">
-          <AlimentoRiga v-for="a in sezione.alimenti" :key="a.id" :alimento="a" />
-        </div>
+      <section v-for="sezione in sezioni" :key="sezione.titolo" class="space-y-2 pt-2">
+        <h2 class="text-xs font-semibold tracking-wide uppercase text-muted">
+          {{ sezione.titolo }}
+        </h2>
+        <UCard :ui="{ body: 'py-0 sm:py-0 sm:px-4' }">
+          <div class="divide-y divide-default">
+            <AlimentoRiga
+              v-for="a in sezione.alimenti"
+              :key="a.id"
+              :alimento="a"
+              :to="`/alimenti/${a.id}`"
+            />
+          </div>
+        </UCard>
       </section>
 
       <UEmpty

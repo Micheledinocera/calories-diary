@@ -43,6 +43,16 @@ async function cerca() {
   }
 }
 
+// A code scanned elsewhere (food picker, Alimenti list) arrives already looked up.
+const route = useRoute();
+onMounted(() => {
+  const barcode = route.query.barcode;
+  if (typeof barcode === "string" && barcode) {
+    codice.value = barcode;
+    cerca();
+  }
+});
+
 const inCorso = ref(false);
 const errore = ref<ErroreNormalizzato | null>(null);
 const esistente = computed(() =>
@@ -66,8 +76,8 @@ async function salva(dati: NuovoAlimento) {
 </script>
 
 <template>
-  <UContainer class="py-6 max-w-xl space-y-6">
-    <div class="flex items-center gap-2">
+  <UContainer class="py-6 max-w-xl space-y-4">
+    <div class="flex items-center gap-1">
       <UButton
         icon="i-lucide-arrow-left"
         variant="ghost"
@@ -75,33 +85,32 @@ async function salva(dati: NuovoAlimento) {
         to="/alimenti"
         aria-label="Indietro"
       />
-      <h1 class="text-2xl font-bold">Nuovo alimento</h1>
+      <h1 class="text-2xl font-bold text-highlighted">Nuovo alimento</h1>
     </div>
 
-    <UCard>
+    <UCard :ui="{ body: 'sm:p-4' }">
       <form class="space-y-3" @submit.prevent="cerca">
         <UFormField
           label="Hai il codice a barre?"
-          description="Cerchiamo il prodotto e precompiliamo i valori."
+          description="Cerchiamo il prodotto e compiliamo i valori per te."
         >
           <div class="flex gap-2">
             <UInput
               v-model="codice"
               inputmode="numeric"
               placeholder="es. 8076809513753"
-              class="flex-1"
+              size="xl"
+              class="flex-1 min-w-0"
               autocomplete="off"
             />
             <UButton
               icon="i-lucide-scan-barcode"
-              color="neutral"
-              variant="outline"
+              variant="soft"
+              size="xl"
               aria-label="Scansiona con la fotocamera"
               @click="scansioneAperta = true"
             />
-            <UButton type="submit" icon="i-lucide-search" :loading="ricerca === 'in-corso'">
-              Cerca
-            </UButton>
+            <UButton type="submit" size="xl" :loading="ricerca === 'in-corso'">Cerca</UButton>
           </div>
         </UFormField>
         <UAlert
@@ -113,7 +122,7 @@ async function salva(dati: NuovoAlimento) {
         />
         <UAlert
           v-else-if="ricerca === 'non-trovato'"
-          color="info"
+          color="primary"
           variant="subtle"
           icon="i-lucide-info"
           title="Prodotto non trovato: inseriscilo a mano dall'etichetta."
@@ -122,7 +131,7 @@ async function salva(dati: NuovoAlimento) {
           v-else-if="ricerca === 'trovato'"
           color="success"
           variant="subtle"
-          icon="i-lucide-check"
+          icon="i-lucide-circle-check"
           title="Prodotto trovato: controlla i valori prima di salvare."
           description="Dati da Open Food Facts (licenza ODbL)."
         />
