@@ -1,0 +1,59 @@
+# Local development services.
+#   docker compose up -d                  -> Postgres + Redis (run API and web with `pnpm dev`)
+#   docker compose --profile api up -d    -> also the API from its Docker image (same image as production)
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: calories
+      POSTGRES_PASSWORD: calories
+      POSTGRES_DB: calories_diary
+    ports:
+      - "5432:5432"
+    volumes:
+      # Postgres 18+ images keep data under /var/lib/postgresql/<version>.
+      - postgres-data:/var/lib/postgresql
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U calories -d calories_diary"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:8-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    profiles: [api]
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgres://calories:calories@postgres:5432/calories_diary
+      REDIS_URL: redis://redis:6379
+      REDIS_PREFIX: "calories-diary:docker:"
+      CORS_ORIGINS: http://localhost:3000
+      LOG_LEVEL: info
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+  redis-data:
