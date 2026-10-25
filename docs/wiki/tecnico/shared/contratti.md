@@ -5,6 +5,7 @@ fonti:
   - raw/compiled/first-develop/2026-10-25-ruolo-monorepo.md
   - raw/compiled/first-develop/2026-10-25-scaffolding.md
   - raw/compiled/auth/2026-10-25-implementazione.md
+  - raw/compiled/food-catalog/2026-10-25-open-food-facts-e-perimetro.md
 ---
 
 # Contratti condivisi
@@ -19,6 +20,7 @@ fonti:
 | `src/pasti.ts` | `pastoSchema`, `listaPastiSchema`, `Pasto` | DTO dei pasti |
 | `src/errori.ts` | `erroreApiSchema`, `ErroreApi` | Corpo di ogni risposta di errore |
 | `src/auth.ts` | `credenzialiSchema`, `utenteSchema`, `sessioneSchema` e tipi | Body del login (email normalizzata: trim e minuscole), utente corrente, risposta di login e rinnovo |
+| `src/catalogo.ts` | `valoriPer100Schema`, `unitaBaseSchema`, `prodottoCatalogoSchema`, `avvisoCatalogoSchema`, `lookupBarcodeSchema` e tipi | Risposta di `GET /catalogo/barcode/:codice` (vedi [Catalogo](../api/catalogo.md)) |
 
 Convenzione: per ogni contratto uno schema `xSchema` e il tipo `X = z.infer<typeof xSchema>`, esportati da `src/index.ts`.
 
