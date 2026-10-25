@@ -15,7 +15,8 @@
     "migration:create": "tsx --env-file-if-exists=.env src/db/cli.ts migration:create",
     "migration:up": "tsx --env-file-if-exists=.env src/db/cli.ts migration:up",
     "migration:down": "tsx --env-file-if-exists=.env src/db/cli.ts migration:down",
-    "seed": "tsx --env-file-if-exists=.env src/db/cli.ts seed"
+    "seed": "tsx --env-file-if-exists=.env src/db/cli.ts seed",
+    "utente:crea": "tsx --env-file-if-exists=.env src/db/cli.ts utente:crea"
   },
   "dependencies": {
     "@calories-diary/shared": "workspace:*",
@@ -27,6 +28,7 @@
     "express": "^5.3.0",
     "helmet": "^8.3.0",
     "ioredis": "^6.0.0",
+    "jose": "^6.2.13",
     "pino": "^10.4.0",
     "pino-http": "^11.0.0",
     "zod": "^4.6.7"

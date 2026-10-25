@@ -5,8 +5,11 @@ import type { Redis } from "ioredis";
 import type { Logger } from "pino";
 import { pinoHttp } from "pino-http";
 import type { Env } from "./config/env.js";
+import { richiediAutenticazione } from "./middlewares/autenticazione.js";
 import { corsConOrigini } from "./middlewares/cors.js";
 import { gestoreErrori, rottaNonTrovata } from "./middlewares/errori.js";
+import { authRouter } from "./modules/auth/auth.routes.js";
+import { creaGestoreToken } from "./modules/auth/token.js";
 import { healthRouter } from "./modules/health/health.routes.js";
 import { pastiRouter } from "./modules/pasti/pasti.routes.js";
 
@@ -32,7 +35,10 @@ export function creaApp({ env, orm, redis, logger }: DipendenzeApp): Express {
 
   // One EntityManager fork per request: orm.em resolves to it inside the context.
   app.use((_req, _res, next) => RequestContext.create(orm.em, next));
-  app.use("/pasti", pastiRouter(orm.em));
+  const gestore = creaGestoreToken(env.JWT_SECRET);
+  const autenticazione = richiediAutenticazione(orm.em, gestore);
+  app.use("/auth", authRouter({ em: orm.em, redis, logger, gestore, autenticazione }));
+  app.use("/pasti", autenticazione, pastiRouter(orm.em));
 
   app.use(rottaNonTrovata);
   app.use(gestoreErrori);

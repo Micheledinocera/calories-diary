@@ -4,6 +4,7 @@ aggiornato: 2026-10-25
 fonti:
   - raw/compiled/first-develop/analisi-iniziale-calorie-tracker.md
   - raw/compiled/first-develop/2026-10-25-decisioni-e-piano.md
+  - raw/compiled/auth/2026-10-25-decisioni-utente.md
 ---
 
 # Prodotto
@@ -60,4 +61,5 @@ Ordine delle feature dell'MVP: `first-develop` (scaffolding), `auth`, `food-cata
 
 ## Domande aperte
 
+- **Multiutente** (conflitto, da `auth`): "Multi-utente" è tra i non obiettivi e il prodotto è descritto "per un solo utente", ma in `auth` si è deciso di gestire più utenti (qualche amico), ognuno con i propri dati — vedi [Autenticazione multiutente](../progetto/decisione-autenticazione.md). Riformulare i non obiettivi lasciando esclusi solo social e condivisione?
 - Formato di export/backup: JSON, CSV o entrambi; import in sostituzione o in unione con i dati esistenti.

@@ -19,6 +19,8 @@ const envSchema = z.object({
         .filter(Boolean),
     ),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
+  // HS256 key of the session tokens. Generate it with: openssl rand -base64 48
+  JWT_SECRET: z.string().min(32, "almeno 32 caratteri"),
   APP_VERSION: z.preprocess(vuotoComeAssente, z.string().default("dev")),
 });
 

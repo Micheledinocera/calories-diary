@@ -9,14 +9,15 @@
   "scripts": {
     "postinstall": "pnpm --filter @calories-diary/shared build",
     "prepare": "husky",
-    "dev": "pnpm --parallel --filter \"./apps/*\" --filter @calories-diary/shared dev",
+    "dev": "node scripts/solo-pnpm.mjs dev && pnpm --parallel --filter \"./apps/*\" --filter @calories-diary/shared dev",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "lint": "eslint . && pnpm --filter @calories-diary/web lint",
     "format": "prettier --write .",
     "test": "pnpm -r test",
     "db:migrate": "pnpm --filter @calories-diary/api migration:up",
-    "db:seed": "pnpm --filter @calories-diary/api seed"
+    "db:seed": "pnpm --filter @calories-diary/api seed",
+    "utente:crea": "pnpm --filter @calories-diary/api utente:crea"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.4",

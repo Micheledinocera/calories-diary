@@ -2,6 +2,12 @@
 import type { Health, Pasto } from "@calories-diary/shared";
 
 const { api } = useApi();
+const { sessione, esci } = useSessione();
+
+async function logout() {
+  esci();
+  await navigateTo("/login");
+}
 
 // Scaffolding check page: API status and the default meals.
 const { data, status, error, refresh } = useAsyncData("stato-api", async () => {
@@ -28,7 +34,15 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
 
 <template>
   <UContainer class="py-10 max-w-xl">
-    <h1 class="text-2xl font-bold mb-6">Calories Diary</h1>
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold">Calories Diary</h1>
+      <div class="flex items-center gap-2">
+        <span class="text-sm text-muted">{{ sessione?.utente.email }}</span>
+        <UButton icon="i-lucide-log-out" variant="ghost" color="neutral" @click="logout">
+          Esci
+        </UButton>
+      </div>
+    </div>
 
     <UCard>
       <template #header>
@@ -77,7 +91,7 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
             <li v-for="pasto in data.pasti" :key="pasto.id">{{ pasto.nome }}</li>
           </ul>
           <p v-if="!data.pasti.length" class="text-sm text-muted">
-            Nessun pasto: esegui <code>pnpm db:seed</code>.
+            Nessun pasto: esegui <code>pnpm db:seed</code> per creare quelli predefiniti.
           </p>
         </div>
       </div>
