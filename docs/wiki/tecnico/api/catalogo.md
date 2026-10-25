@@ -8,7 +8,7 @@ fonti:
 
 # Catalogo e lookup per barcode
 
-Modulo `src/modules/catalogo/`. Il catalogo è il primo dei due livelli di dati degli alimenti (vedi [Dati degli alimenti](../../business/dati-alimenti.md#catalogo-e-alimenti-dellutente)): i prodotti importati dal provider, **condivisi tra tutti gli utenti** come cache comune. Gli alimenti dell'utente arriveranno con la feature `foods`.
+Modulo `src/modules/catalogo/`. Il catalogo è il primo dei due livelli di dati degli alimenti (vedi [Dati degli alimenti](../../business/dati-alimenti.md#catalogo-e-alimenti-dellutente)): i prodotti importati dal provider, **condivisi tra tutti gli utenti** come cache comune. Il secondo livello sono gli [alimenti dell'utente](./alimenti.md).
 
 ## Entità `ProdottoCatalogo`
 
