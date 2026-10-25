@@ -16,7 +16,8 @@
     "format": "prettier --write .",
     "test": "pnpm -r test",
     "db:migrate": "pnpm --filter @calories-diary/api migration:up",
-    "db:seed": "pnpm --filter @calories-diary/api seed"
+    "db:seed": "pnpm --filter @calories-diary/api seed",
+    "utente:crea": "pnpm --filter @calories-diary/api utente:crea"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.4",

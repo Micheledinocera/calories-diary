@@ -46,6 +46,8 @@ services:
       REDIS_PREFIX: "calories-diary:docker:"
       CORS_ORIGINS: http://localhost:3000
       LOG_LEVEL: info
+      # Local only: in production a random secret is set on the host.
+      JWT_SECRET: segreto-locale-di-docker-lungo-almeno-32-caratteri
     ports:
       - "3001:3001"
     depends_on:

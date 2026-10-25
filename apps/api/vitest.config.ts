@@ -9,6 +9,7 @@ const envTest = {
   REDIS_URL: process.env.REDIS_URL_TEST ?? "redis://localhost:6379",
   REDIS_PREFIX: "calories-diary:test:",
   LOG_LEVEL: "silent",
+  JWT_SECRET: "segreto-dei-test-lungo-almeno-32-caratteri",
 };
 
 // test.env reaches only the test workers: globalSetup runs in this process.
