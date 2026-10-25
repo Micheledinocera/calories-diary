@@ -60,12 +60,12 @@ gh pr create --base develop --head feature/<name> --title "<title>" --body-file 
 ```
 
 - **Title**: Conventional Commits format, description in Italian, summarizing the feature (e.g. `feat: diario giornaliero`).
-- **Body**: fill `.github/pull_request_template.md` in Italian:
-  - *Summary* from the goal note in `docs/raw/compiled/<name>/` and the commits;
-  - *Changes*: one line per commit or group of commits (`git log --no-merges origin/develop..HEAD`);
+- **Body**: fill `.github/pull_request_template.md` (Italian, sections Sommario, Modifiche, Wiki, Come verificare, Note):
+  - *Sommario* from the goal note in `docs/raw/compiled/<name>/` and the commits;
+  - *Modifiche*: one line per commit or group of commits (`git log --no-merges origin/develop..HEAD`);
   - *Wiki*: pages from the `/ingest` report and its conflicts, or "None";
-  - *Notes*: list the outputs created in this feature (`docs/output/…`, from `git diff --name-only origin/develop...HEAD -- docs/output`), if any;
-  - *How to verify*: tick the checks that passed, describe the manual check. For a `study-` feature, replace the checklist with "Study feature: documentation only, code checks skipped" and what to read to review it;
+  - *Note*: list the outputs created in this feature (`docs/output/…`, from `git diff --name-only origin/develop...HEAD -- docs/output`), if any;
+  - *Come verificare*: tick the checks that passed, describe the manual check. For a `study-` feature, replace the checklist with "Study feature: documentation only, code checks skipped" and what to read to review it;
   - end the body with the attribution line required by the session for pull requests.
 - Write the body to a temporary file in the scratchpad, not in the repo.
 

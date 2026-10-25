@@ -1,0 +1,8 @@
+pnpm-lock.yaml
+dist
+.output
+.nuxt
+coverage
+docs/raw
+.claude
+docs

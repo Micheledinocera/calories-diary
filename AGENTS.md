@@ -7,7 +7,7 @@ Monorepo pnpm: `apps/api` (Express + MikroORM + PostgreSQL + Redis), `apps/web` 
 
 - **Local-first**: il front-end lavora su uno store locale (IndexedDB) e si sincronizza con l'API.
 - **Tutte le fonti esterne passano dal back-end**: il front-end parla solo con la nostra API. La scelta del prodotto (DB nostro, poi provider esterno come Open Food Facts) e la normalizzazione dei dati stanno nel back-end, dietro un adapter per provider.
-- **Lingua**: italiano ovunque possibile (UI, wiki, nomi di dominio nel codice, descrizioni dei commit). Dettagli in `docs/CLAUDE.md`, sezione *Language*.
+- **Lingua**: italiano ovunque possibile (UI, wiki, nomi di dominio nel codice, descrizioni dei commit). Dettagli in `docs/CLAUDE.md`, sezione _Language_.
 - **Prima lo sviluppo locale con Docker**, il deploy viene dopo.
 - Ultime versioni stabili delle dipendenze, verificate sulla documentazione ufficiale.
 
@@ -21,7 +21,10 @@ Monorepo pnpm: `apps/api` (Express + MikroORM + PostgreSQL + Redis), `apps/web` 
 
 ## Framework docs
 
-- Nuxt: server MCP `Nuxt` (documentazione, moduli) e https://nuxt.com/docs
+MCP: `Nuxt` (livello utente: documentazione e moduli Nuxt), `nuxt-ui` (componenti Nuxt UI), `context7` (documentazione aggiornata delle librerie: MikroORM, Express, zod, Dexie, Vitest…), `playwright` (provare la PWA nel browser). Configurati in `.mcp.json`.
+
+- Nuxt: https://nuxt.com/docs
+- Nuxt UI: https://ui.nuxt.com/docs
 - Vite PWA per Nuxt: https://vite-pwa-org.netlify.app/frameworks/nuxt
 - Express: https://expressjs.com/
 - MikroORM: https://mikro-orm.io/docs
