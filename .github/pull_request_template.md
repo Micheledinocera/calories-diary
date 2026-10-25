@@ -1,24 +1,27 @@
-## Summary
+## Sommario
 
-<!-- What this PR does and why, in 1-3 sentences. Link the feature's raw notes if useful (docs/raw/...). -->
+<!-- Cosa fa questa PR e perché, in 1-3 frasi. Se utile, link alle note raw della feature (docs/raw/...). -->
 
-## Changes
+## Modifiche
 
-<!-- One line per atomic commit or group of commits. -->
+<!-- Una riga per commit atomico o gruppo di commit. -->
 
 -
 
 ## Wiki
 
-<!-- Pages created / updated / deleted by the `docs(wiki): ...` commit, and any conflicts or open questions it reported. "None" if nothing changed. -->
+<!-- Pagine create / aggiornate / eliminate dal commit `docs(wiki): ...`, con eventuali conflitti o domande aperte segnalati. "Nessuna" se non è cambiato nulla. -->
 
 -
 
-## How to verify
+## Come verificare
 
-- [ ] <!-- check command 1, from CONTRIBUTING.md -->
-- [ ] Manual check: <!-- what to click or call to see the change working -->
+- [ ] `pnpm typecheck`
+- [ ] `pnpm lint`
+- [ ] `pnpm test` (con `docker compose up -d`)
+- [ ] `pnpm build`
+- [ ] Verifica manuale: <!-- cosa cliccare o chiamare per vedere la modifica funzionare -->
 
-## Notes
+## Note
 
-<!-- Anything the reviewer should know: follow-ups, known limits, migrations to run. -->
+<!-- Cosa deve sapere chi rivede: follow-up, limiti noti, migrazioni da eseguire. -->
