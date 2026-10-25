@@ -8,6 +8,8 @@ fonti:
   - raw/compiled/foods/2026-10-25-implementazione.md
   - raw/compiled/diary/2026-10-25-decisioni-diario.md
   - raw/compiled/diary/2026-10-25-obiettivo.md
+  - raw/compiled/barcode-scan/2026-10-25-libreria-scansione.md
+  - raw/compiled/barcode-scan/2026-10-25-sviluppo-da-telefono.md
 ---
 
 # App web
@@ -18,14 +20,15 @@ fonti:
 
 - `ssr: false`: SPA generata come sito statico con `pnpm build` (`nuxt generate`, output in `.output/public`).
 - Moduli: `@nuxt/ui` (tema in `app/app.config.ts`: primary `green`, neutral `zinc`), `@nuxt/eslint`, `@vite-pwa/nuxt`.
-- `runtimeConfig.public.apiBase`: URL dell'API, da `NUXT_PUBLIC_API_BASE` (default `http://localhost:3001`).
+- `runtimeConfig.public.apiBase`: URL dell'API, da `NUXT_PUBLIC_API_BASE` (default `http://localhost:3001`), usato dalla build.
+- In sviluppo (`$development`) `apiBase` è `/api` e `nitro.devProxy` inoltra `/api/*` a `http://localhost:3001`, togliendo il prefisso: il web chiama la propria origine, senza CORS, e dal telefono l'API si raggiunge attraverso Nuxt. Per questo nel `.env` del web `NUXT_PUBLIC_API_BASE` resta commentato in sviluppo.
 - `lang="it"`; in `app.vue` `UApp` usa la locale italiana di Nuxt UI (etichette dei componenti e date del calendario).
 
 ## PWA
 
 - Manifest "Calories Diary" / "Calorie", `display: standalone`, colore `#16a34a`.
 - Icone generate in build da `public/logo.svg` (`pwa-assets.config.ts`, preset `minimal2023`) e inserite nel manifest; `<NuxtPwaAssets />` in `app.vue`.
-- Service worker `generateSW` con aggiornamento automatico, fallback di navigazione su `/`, precache di JS, CSS, HTML, immagini e font.
+- Service worker `generateSW` con aggiornamento automatico, fallback di navigazione su `/`, precache di JS, CSS, HTML, immagini e font (non del `.wasm` del lettore di barcode, che serve solo online).
 - PWA disattivata in `nuxt dev` (`devOptions.enabled: false`): per provarla serve una build.
 - `vite-plugin-pwa` è dipendenza diretta perché i tipi referenziati dal modulo siano risolvibili con pnpm.
 
@@ -55,9 +58,11 @@ La UI è provvisoria: flussi ed esperienza si validano con un giro di design a f
 - `pages/diario/[giorno].vue`: stessa `DiarioGiornata`, in sola lettura finché non si preme "Modifica"; frecce per il giorno prima e dopo.
 - `pages/profilo.vue`: email, fabbisogno e ripartizione dei macro (validati con `obiettiviSchema`, con il totale delle quote e il ritorno a 50/30/20).
 - `pages/alimenti/index.vue`: ricerca (300 ms dopo l'ultimo tasto), sezioni "Recenti" e "Più usati" (solo se non vuote), "Tutti"; interruttore per gli archiviati.
-- `pages/alimenti/nuovo.vue`: ricerca per codice a barre inserito a mano (la fotocamera arriva con `barcode-scan`). Se il prodotto c'è, precompila il form con kcal, macro e la porzione del provider come predefinita, e mostra avvisi e attribuzione a Open Food Facts; se non c'è, il barcode resta nel form per l'inserimento manuale. Su 409 `ALIMENTO_ESISTENTE` propone di aprire l'alimento esistente.
+- `pages/alimenti/nuovo.vue`: ricerca per codice a barre, inserito a mano o letto con la fotocamera (icona accanto al campo, apre `ScansioneBarcode`; il codice letto va nel campo e avvia la ricerca). Se il prodotto c'è, precompila il form con kcal, macro e la porzione del provider come predefinita, e mostra avvisi e attribuzione a Open Food Facts; se non c'è, il barcode resta nel form per l'inserimento manuale. Su 409 `ALIMENTO_ESISTENTE` propone di aprire l'alimento esistente.
 - `pages/alimenti/[id].vue`: modifica, verifica, archivia/ripristina, elimina (solo se mai usato).
 - `components/AlimentoForm.vue`: form condiviso (validato con `nuovoAlimentoSchema`), con valori per 100, porzioni e flag verificato. Lo stato è `StatoFormAlimento` (`app/utils/alimenti.ts`), con valori vuoti mentre si compila; lì anche `statoDaProdotto`, `statoDaAlimento` e `formattaValore` (arrotondamento solo in visualizzazione).
+- `components/ScansioneBarcode.vue`: modale (`v-model:open`, evento `letto`) con la fotocamera posteriore (`getUserMedia`, `facingMode: "environment"`) e una lettura ogni 200 ms; al primo codice valido ferma la fotocamera e si chiude. Lettore: ponyfill `BarcodeDetector` di `barcode-detector` (ZXing-C++ in WebAssembly, via `zxing-wasm`), uguale su tutti i browser (iOS Safari e Firefox non hanno l'API nativa). Ponyfill e `.wasm` (~950 KB) si caricano con `import()` solo all'apertura; il `.wasm` è servito dal nostro bundle (`prepareZXingModule` con `locateFile`), non dal CDN jsDelivr predefinito. Gli errori della fotocamera si mostrano con "Riprova". `getUserMedia` richiede un contesto sicuro: localhost o HTTPS.
+- `app/utils/barcode.ts`: `FORMATI_BARCODE` (`ean_13`, `ean_8`, `upc_a`, `upc_e`), `codiceLetto` (primo valore di sole cifre, come la ricerca a mano), `messaggioErroreFotocamera` (errori di `getUserMedia` in italiano).
 - `components/AlimentoRiga.vue`: riga della lista con kcal e macro per 100.
 - `components/DiarioGiornata.vue`: riepilogo (kcal rispetto al fabbisogno, grammi e quota di ogni macro rispetto alla ripartizione) e pasti del giorno. Ogni scrittura sostituisce la giornata con quella restituita dall'API; gli errori vanno in un toast. Un alimento in un pasto principale si aggiunge con `POST /diario/:giorno/pasti` (il pasto può non avere ancora un id), in uno spuntino con `POST /diario/pasti/:id/voci`.
 - Drag and drop degli spuntini: `useSortable` di `@vueuse/integrations` (con `sortablejs`, che gestisce anche il touch), solo dalla maniglia degli spuntini. `onUpdate` rimette il nodo dov'era (il DOM resta a Vue), calcola il nuovo ordine con `nuovoOrdine` (`app/utils/diario.ts`, rifiuta gli spostamenti che cambiano l'ordine dei principali) e lo invia con `PUT /diario/:giorno/ordine`.
