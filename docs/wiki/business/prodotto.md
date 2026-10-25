@@ -13,6 +13,8 @@ fonti:
   - raw/compiled/diary/2026-10-25-decisioni-diario.md
   - raw/compiled/export/2026-10-25-obiettivo.md
   - raw/compiled/export/2026-10-25-decisioni-utente.md
+  - raw/compiled/pre-deploy/2026-10-25-tasks.md
+  - raw/compiled/pre-deploy/2026-10-25-design.md
 ---
 
 # Prodotto
@@ -37,16 +39,23 @@ Applicazione **personale** per tracciare ogni giorno calorie e macronutrienti. �
 - Pagina **"Oggi"** divisa per pasti, in quest'ordine: Colazione, Pranzo, Cena (tipi fissi; nessuna schermata di configurazione nell'MVP).
 - Colazione, Pranzo e Cena: **uno per giorno**, visibili vuoti anche prima di aggiungerli. Lo **Spuntino** può essere più di uno, si aggiunge con un bottone e si **sposta** in qualsiasi posizione, anche tra gli altri pasti (drag and drop). Gli altri pasti restano nel loro ordine.
 - In un pasto vuoto l'app propone gli alimenti dello stesso pasto del giorno prima, da accettare e poi modificare.
-- Aggiunta di una voce: alimento e quantità, per ora **solo in grammi o ml** (le porzioni restano nell'MVP, più avanti). Modifica della quantità ed eliminazione.
+- Aggiunta di una voce: alimento e quantità, sempre **in grammi o ml**. Le porzioni dell'alimento sono scorciatoie che impostano la quantità (la predefinita è già scelta); prima di confermare si vedono kcal e macro di quella quantità e come cambia la giornata. Modifica della quantità ed eliminazione.
 - Calcolo automatico di kcal e macro; totali per pasto e per giorno: kcal, proteine, carboidrati, grassi.
 - Navigazione tra i giorni.
 
 **Obiettivi ed equilibrio** (in `diary`)
 - **Fabbisogno calorico giornaliero** dell'utente, inserito a mano nella **schermata utente** (Profilo), confrontato con quanto consumato nella giornata. È un valore unico, che vale per tutti i giorni; in futuro forse uno storico.
 - **Rapporto carboidrati/grassi/proteine**: l'app propone il valore indicativo **50/30/20**, modificabile a mano, e mostra il rapporto della giornata per far capire se la dieta è equilibrata.
+- **Obiettivo in grammi** di ogni macro: fabbisogno × quota ÷ kcal per grammo (4 per carboidrati e proteine, 9 per i grassi). Con 2000 kcal e 50/30/20: 250 g di carboidrati, 100 g di proteine, 67 g di grassi.
+- **Stato della giornata**, uguale nella giornata e nel calendario, sempre con colore e parola:
+  - **verde** (entro il fabbisogno): kcal ≤ fabbisogno e ogni macro entro il suo obiettivo in grammi;
+  - **arancione** (macro oltre l'obiettivo): kcal ≤ fabbisogno, ma almeno un macro oltre il suo obiettivo;
+  - **rosso** (oltre il fabbisogno): kcal > fabbisogno.
+  Senza fabbisogno impostato non c'è stato.
+- **Pasto più pesante**: solo quando la giornata è oltre il fabbisogno, l'app segnala il pasto con più kcal (a parità, il primo della giornata), con la sua quota sul totale.
 
 **Storico** (in `diary`)
-- Vista a **calendario** per il colpo d'occhio, poi il dettaglio giorno per giorno: stessa identica visualizzazione della pagina "Oggi", in sola lettura, con un tasto "Modifica".
+- Vista a **calendario** per il colpo d'occhio (un pallino per giorno nel colore del suo stato), poi il dettaglio giorno per giorno: stessa identica visualizzazione della pagina "Oggi", in sola lettura, con un tasto "Modifica".
 
 **Ricerca e aggiunta alimenti**, in quest'ordine:
 1. alimenti locali, ordinati per frequenza e recenza d'uso, con sezioni "Recenti" e "Più usati" in evidenza;
@@ -66,7 +75,7 @@ Applicazione **personale** per tracciare ogni giorno calorie e macronutrienti. �
 - **Inserimento rapido**: un alimento già noto si aggiunge in pochi tocchi.
 - **Privacy**: dati solo locali o sul nostro back-end, nessuna telemetria.
 - **Attribuzione**: l'app indica che parte dei dati viene da Open Food Facts (licenza ODbL).
-- Interfaccia in italiano.
+- Interfaccia in italiano, tema chiaro, scuro o come il sistema. Linee guida grafiche in [Design](../progetto/design.md).
 
 ## Fasi
 

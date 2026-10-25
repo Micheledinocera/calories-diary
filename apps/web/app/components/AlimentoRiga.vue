@@ -1,34 +1,46 @@
 <script setup lang="ts">
 import type { Alimento } from "@calories-diary/shared";
 
-defineProps<{ alimento: Alimento }>();
+// With `to` the row is a link (Alimenti list); without it a button (food picker).
+defineProps<{ alimento: Alimento; to?: string }>();
+const NuxtLink = resolveComponent("NuxtLink");
 </script>
 
 <template>
-  <NuxtLink
-    :to="`/alimenti/${alimento.id}`"
-    class="flex items-center justify-between gap-3 py-3 px-1 hover:bg-elevated/50 rounded-md"
+  <component
+    :is="to ? NuxtLink : 'button'"
+    :to="to"
+    :type="to ? undefined : 'button'"
+    class="w-full flex items-center justify-between gap-3 py-3 text-start min-h-14 hover:bg-elevated/60"
   >
-    <div class="min-w-0">
-      <p class="font-medium truncate">
-        {{ alimento.nome }}
+    <span class="min-w-0">
+      <span class="flex items-center gap-1 font-medium text-highlighted">
+        <span class="truncate">{{ alimento.nome }}</span>
         <UIcon
           v-if="alimento.verificato"
           name="i-lucide-badge-check"
-          class="text-primary align-middle"
+          class="text-primary size-4 shrink-0"
           aria-label="Verificato"
         />
-      </p>
-      <p class="text-sm text-muted truncate">
-        <span v-if="alimento.marca">{{ alimento.marca }} · </span>
-        C {{ formattaValore(alimento.valoriPer100.carboidrati) }} · G
-        {{ formattaValore(alimento.valoriPer100.grassi) }} · P
-        {{ formattaValore(alimento.valoriPer100.proteine) }}
-      </p>
-    </div>
-    <div class="text-end shrink-0">
-      <p class="font-semibold">{{ formattaValore(alimento.valoriPer100.kcal) }} kcal</p>
-      <p class="text-xs text-muted">per 100 {{ alimento.unitaBase }}</p>
-    </div>
-  </NuxtLink>
+        <UIcon
+          v-if="alimento.archiviato"
+          name="i-lucide-archive"
+          class="text-muted size-4 shrink-0"
+          aria-label="Archiviato"
+        />
+      </span>
+      <span class="block text-sm text-muted truncate tabular-nums">
+        <template v-if="alimento.marca">{{ alimento.marca }} · </template>
+        C {{ formattaValore(alimento.valoriPer100.carboidrati) }} · P
+        {{ formattaValore(alimento.valoriPer100.proteine) }} · G
+        {{ formattaValore(alimento.valoriPer100.grassi) }}
+      </span>
+    </span>
+    <span class="text-end shrink-0 tabular-nums">
+      <span class="block text-[15px] font-semibold text-highlighted">
+        {{ formattaValore(alimento.valoriPer100.kcal) }} kcal
+      </span>
+      <span class="block text-xs text-muted">per 100 {{ alimento.unitaBase }}</span>
+    </span>
+  </component>
 </template>

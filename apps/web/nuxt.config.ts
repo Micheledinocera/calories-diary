@@ -38,8 +38,8 @@ export default defineNuxtConfig({
       short_name: "Calorie",
       description: "Diario personale di calorie e macronutrienti",
       lang: "it",
-      theme_color: "#16a34a",
-      background_color: "#ffffff",
+      theme_color: "#0369a1",
+      background_color: "#f1f5f9",
       display: "standalone",
     },
     // Icons generated from public/logo.svg (pwa-assets.config.ts) and added to the manifest.

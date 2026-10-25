@@ -16,13 +16,13 @@ const { data: obiettivi } = useAsyncData("obiettivi", () => diario.obiettivi());
 
 const pasti = computed(() => data.value?.pasti ?? []);
 const totali = computed(() => data.value?.totali);
-const ripartizione = computed(() => (totali.value ? ripartizioneGiorno(totali.value) : null));
 
-const macro = [
-  { chiave: "carboidrati", etichetta: "Carboidrati" },
-  { chiave: "grassi", etichetta: "Grassi" },
-  { chiave: "proteine", etichetta: "Proteine" },
-] as const;
+// Only over the need: the meal that weighed most is pointed out in the summary and on its card.
+const pesante = computed(() => {
+  const o = obiettivi.value;
+  if (!o || !totali.value || statoGiornata(totali.value, o)?.tipo !== "oltre") return null;
+  return pastoPiuPesante(pasti.value);
+});
 
 const inCorso = ref(false);
 
@@ -97,51 +97,19 @@ const erroreCaricamento = computed(() => (error.value ? normalizzaErrore(error.v
     />
 
     <template v-else-if="data && totali">
-      <UCard>
-        <div class="space-y-3">
-          <div class="flex items-baseline justify-between gap-2">
-            <span class="text-2xl font-bold"
-              >{{ formattaValore(Math.round(totali.kcal)) }} kcal</span
-            >
-            <span v-if="obiettivi?.fabbisogno" class="text-sm text-muted">
-              di {{ formattaValore(obiettivi.fabbisogno) }} ·
-              <template v-if="totali.kcal <= obiettivi.fabbisogno">
-                ne restano {{ formattaValore(Math.round(obiettivi.fabbisogno - totali.kcal)) }}
-              </template>
-              <span v-else class="text-warning">
-                {{ formattaValore(Math.round(totali.kcal - obiettivi.fabbisogno)) }} in più
-              </span>
-            </span>
-            <NuxtLink v-else to="/profilo" class="text-sm text-primary"
-              >Imposta il fabbisogno</NuxtLink
-            >
-          </div>
-          <UProgress
-            v-if="obiettivi?.fabbisogno"
-            :model-value="Math.min(totali.kcal, obiettivi.fabbisogno)"
-            :max="obiettivi.fabbisogno"
-            :color="totali.kcal > obiettivi.fabbisogno ? 'warning' : 'primary'"
-          />
-          <div class="grid grid-cols-3 gap-2 text-center">
-            <div v-for="m in macro" :key="m.chiave">
-              <p class="text-xs text-muted">{{ m.etichetta }}</p>
-              <p class="font-semibold">{{ formattaValore(totali[m.chiave]) }} g</p>
-              <p class="text-xs text-muted">
-                {{ ripartizione ? `${Math.round(ripartizione[m.chiave])}%` : "–" }}
-                <template v-if="obiettivi">/ {{ obiettivi.ripartizione[m.chiave] }}%</template>
-              </p>
-            </div>
-          </div>
-        </div>
-      </UCard>
+      <RiepilogoGiornata :totali="totali" :obiettivi="obiettivi ?? null" :pesante="pesante" />
 
       <div ref="lista" class="space-y-3">
         <DiarioPasto
           v-for="pasto in pasti"
+          :id="pasto.id ? `pasto-${pasto.id}` : undefined"
           :key="pasto.id ?? pasto.tipo"
           :pasto="pasto"
           :modificabile="modificabile"
           :in-corso="inCorso"
+          :piu-pesante="!!pesante && pesante.id === pasto.id"
+          :totali-giorno="totali"
+          :fabbisogno="obiettivi?.fabbisogno ?? null"
           @aggiungi="aggiungi(pasto, $event)"
           @modifica-voce="(id, q) => esegui(() => diario.modificaVoce(id, q))"
           @elimina-voce="(id) => esegui(() => diario.eliminaVoce(id))"
@@ -152,8 +120,8 @@ const erroreCaricamento = computed(() => (error.value ? normalizzaErrore(error.v
       <UButton
         v-if="modificabile"
         icon="i-lucide-plus"
-        variant="subtle"
-        color="neutral"
+        variant="soft"
+        size="lg"
         block
         :loading="inCorso"
         @click="aggiungiSpuntino"
@@ -163,7 +131,7 @@ const erroreCaricamento = computed(() => (error.value ? normalizzaErrore(error.v
     </template>
 
     <div v-else class="space-y-3">
-      <USkeleton class="h-28 w-full" />
+      <USkeleton class="h-52 w-full rounded-lg" />
       <USkeleton v-for="i in 3" :key="i" class="h-24 w-full" />
     </div>
   </div>

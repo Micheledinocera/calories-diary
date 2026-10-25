@@ -93,7 +93,7 @@ async function copia() {
 <template>
   <UContainer class="py-6 max-w-xl space-y-4">
     <div>
-      <h1 class="text-2xl font-bold">Esporta</h1>
+      <h1 class="text-2xl font-bold text-highlighted">Esporta</h1>
       <NuxtLink to="/diario" class="text-sm text-muted">Calendario</NuxtLink>
     </div>
 
