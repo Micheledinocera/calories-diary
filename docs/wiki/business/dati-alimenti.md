@@ -10,6 +10,7 @@ fonti:
   - raw/compiled/foods/2026-10-25-obiettivo.md
   - raw/compiled/foods/2026-10-25-decisioni-utente.md
   - raw/compiled/foods/2026-10-25-implementazione.md
+  - raw/compiled/diary/2026-10-25-decisioni-diario.md
 ---
 
 # Dati degli alimenti
@@ -56,20 +57,20 @@ I dati degli alimenti stanno su due livelli:
 
 ## Regole del diario
 
-- **Valori congelati**: ogni voce del diario salva nome, grammi e valori calcolati al momento dell'inserimento. Modificare un alimento in seguito non altera lo storico.
-- Gli alimenti usati nel diario non si eliminano: si **archiviano** (nascosti dalla ricerca). Un alimento mai usato si può eliminare.
+- **Valori ricalcolati**: ogni voce del diario salva solo alimento e quantità. Kcal e macro si calcolano sempre dai valori attuali dell'alimento: correggere un alimento cambia anche i totali dei giorni passati. (Sostituisce la regola precedente dei valori congelati, per decisione dell'utente nella feature `diary`.)
+- Per questo gli alimenti usati nel diario non si eliminano mai: si **archiviano** (nascosti dalla ricerca, ancora visibili nei giorni in cui sono stati usati). Un alimento mai usato si può eliminare.
 - Calcolo: `valore_per_100 × grammi / 100`. L'arrotondamento si applica solo in visualizzazione.
 - Per "Recenti" e "Più usati" ogni alimento tiene data dell'ultimo uso e numero di utilizzi.
 
 ## Modello dati (bozza)
 
-Catalogo e alimenti dell'utente sono definiti (vedi [Catalogo](../tecnico/api/catalogo.md) e [Alimenti dell'utente](../tecnico/api/alimenti.md)); il resto è da confermare nella feature `diary`. I nomi restano in italiano anche nel codice.
+Catalogo, alimenti dell'utente e diario sono definiti (vedi [Catalogo](../tecnico/api/catalogo.md), [Alimenti dell'utente](../tecnico/api/alimenti.md) e [Diario](../tecnico/api/diario.md)); le ricette sono ancora una bozza. I nomi restano in italiano anche nel codice.
 
 - **prodotto del catalogo** (condiviso): barcode (unico), fonte e id nella fonte, nome, marca, unità base, valori per 100 tutti facoltativi, porzione del provider, immagine, data di import e di aggiornamento.
 - **alimento** (per utente): nome, marca, barcode (unico per utente), fonte (oggi `manuale` o `off`; le tabelle generiche arriveranno in fase 3), riferimento al prodotto del catalogo, valori per 100 (**solo kcal, proteine, carboidrati, grassi** nell'MVP, obbligatori), unità base (g o ml), verificato, data di import, data di aggiornamento, ultimo uso, numero di utilizzi, archiviato.
 - **porzione**: alimento, nome (es. "1 vasetto"), quantità nell'unità base dell'alimento, predefinita.
-- **voce del diario**: data, pasto, alimento (facoltativo), nome congelato, grammi, porzione, kcal, proteine, carboidrati e grassi congelati, data di creazione.
-- **pasto**: nome, ordine (già presente nel codice, vedi [Pasti](../tecnico/api/pasti.md)).
+- **pasto**: un pasto di un giorno dell'utente: giorno, tipo (colazione, pranzo, cena, spuntino), ordine nella giornata.
+- **voce**: pasto, alimento, quantità in g o ml. Niente valori salvati: si ricalcolano dall'alimento.
 - Fase 2: **ricetta** (nome, peso finale, esposta come alimento) e **ingrediente della ricetta** (alimento, grammi).
 
 ## Domande aperte

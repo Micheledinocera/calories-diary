@@ -5,6 +5,7 @@ fonti:
   - raw/compiled/first-develop/2026-10-25-scaffolding.md
   - raw/compiled/auth/2026-10-25-implementazione.md
   - raw/compiled/food-catalog/2026-10-25-open-food-facts-e-perimetro.md
+  - raw/compiled/diary/2026-10-25-decisioni-diario.md
 ---
 
 # Struttura dell'API
@@ -32,14 +33,14 @@ fonti:
 - **Router** creato da una funzione (`xRouter(em)`), montato in `app.ts`. Ogni richiesta ha il proprio fork dell'EntityManager tramite `RequestContext`.
 - Validazione con il middleware `valida({ params, query, body })`: i valori validati si leggono con `datiValidati(res, parte)`, perché in Express 5 `req.query` è in sola lettura.
 
-Esempio: [Pasti](./pasti.md). Le rotte protette leggono l'utente con `utenteCorrente(res)` (vedi [Autenticazione e utenti](./auth.md)).
+Esempio: [Diario](./diario.md). Le rotte protette leggono l'utente con `utenteCorrente(res)` (vedi [Autenticazione e utenti](./auth.md)).
 
 ## Middleware, in ordine
 
 1. `helmet`; CORS limitato a `CORS_ORIGINS` (lista separata da virgole, `*` vale qualsiasi sequenza: es. `https://calories-diary-*.vercel.app`; le richieste senza `Origin` passano).
 2. `pino-http` (escluso `/health` dai log di accesso), `express.json` (max 1 MB).
 3. `GET /health`, fuori dal `RequestContext`.
-4. `RequestContext` di MikroORM, poi le rotte dei moduli: `/auth` e, dietro `richiediAutenticazione`, `/pasti` e `/catalogo`.
+4. `RequestContext` di MikroORM, poi le rotte dei moduli: `/auth` e, dietro `richiediAutenticazione`, `/diario`, `/obiettivi`, `/alimenti` e `/catalogo`.
 5. 404 JSON per le rotte sconosciute, gestore centrale degli errori.
 
 ## Formato degli errori
@@ -57,6 +58,9 @@ Ogni errore è un JSON `{ errore: { codice, messaggio, dettagli? } }` (schema `e
 | Prodotto sconosciuto anche al provider | 404 | `PRODOTTO_NON_TROVATO` |
 | Provider irraggiungibile o in errore | 503 | `PROVIDER_NON_DISPONIBILE` |
 | Troppe chiamate al provider | 429 | `PROVIDER_OCCUPATO` (`dettagli.riprovaTraS`) |
+| Ordine dei pasti non valido | 400 | `ORDINE_NON_VALIDO` |
+| Eliminazione di un pasto principale | 409 | `PASTO_NON_ELIMINABILE` |
+| Prime scritture concorrenti dello stesso giorno | 409 | `CONFLITTO` |
 | Rotta sconosciuta | 404 | `NON_TROVATO` |
 | Altro | 500 | `ERRORE_INTERNO` (loggato) |
 

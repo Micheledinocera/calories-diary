@@ -9,6 +9,8 @@ fonti:
   - raw/compiled/offline-cache/2026-10-25-decisione-niente-sync.md
   - raw/compiled/foods/2026-10-25-note-ui-ux.md
   - raw/compiled/foods/2026-10-25-decisioni-utente.md
+  - raw/compiled/diary/2026-10-25-obiettivo.md
+  - raw/compiled/diary/2026-10-25-decisioni-diario.md
 ---
 
 # Prodotto
@@ -30,17 +32,19 @@ Applicazione **personale** per tracciare ogni giorno calorie e macronutrienti. �
 ## Requisiti funzionali dell'MVP
 
 **Diario**
-- Vista giornaliera divisa per pasti: Colazione, Pranzo, Cena, Spuntino (precaricati; nessuna schermata di configurazione nell'MVP).
-- Aggiunta di una voce: alimento, quantità in grammi o in porzioni, pasto. Modifica ed eliminazione.
-- Totali per pasto e per giorno: kcal, proteine, carboidrati, grassi.
+- Pagina **"Oggi"** divisa per pasti, in quest'ordine: Colazione, Pranzo, Cena (tipi fissi; nessuna schermata di configurazione nell'MVP).
+- Colazione, Pranzo e Cena: **uno per giorno**, visibili vuoti anche prima di aggiungerli. Lo **Spuntino** può essere più di uno, si aggiunge con un bottone e si **sposta** in qualsiasi posizione, anche tra gli altri pasti (drag and drop). Gli altri pasti restano nel loro ordine.
+- In un pasto vuoto l'app propone gli alimenti dello stesso pasto del giorno prima, da accettare e poi modificare.
+- Aggiunta di una voce: alimento e quantità, per ora **solo in grammi o ml** (le porzioni restano nell'MVP, più avanti). Modifica della quantità ed eliminazione.
+- Calcolo automatico di kcal e macro; totali per pasto e per giorno: kcal, proteine, carboidrati, grassi.
 - Navigazione tra i giorni.
 
 **Obiettivi ed equilibrio** (in `diary`)
-- **Fabbisogno calorico giornaliero** dell'utente, inserito a mano, confrontato con quanto consumato nella giornata.
+- **Fabbisogno calorico giornaliero** dell'utente, inserito a mano nella **schermata utente** (Profilo), confrontato con quanto consumato nella giornata. È un valore unico, che vale per tutti i giorni; in futuro forse uno storico.
 - **Rapporto carboidrati/grassi/proteine**: l'app propone il valore indicativo **50/30/20**, modificabile a mano, e mostra il rapporto della giornata per far capire se la dieta è equilibrata.
 
 **Storico** (in `diary`)
-- Vista a **calendario** per il colpo d'occhio, poi il dettaglio giorno per giorno: stessa visualizzazione della pagina "Oggi", in sola lettura, con un tasto "Modifica".
+- Vista a **calendario** per il colpo d'occhio, poi il dettaglio giorno per giorno: stessa identica visualizzazione della pagina "Oggi", in sola lettura, con un tasto "Modifica".
 
 **Ricerca e aggiunta alimenti**, in quest'ordine:
 1. alimenti locali, ordinati per frequenza e recenza d'uso, con sezioni "Recenti" e "Più usati" in evidenza;

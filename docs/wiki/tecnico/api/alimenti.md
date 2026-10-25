@@ -5,6 +5,7 @@ fonti:
   - raw/compiled/foods/2026-10-25-obiettivo.md
   - raw/compiled/foods/2026-10-25-decisioni-utente.md
   - raw/compiled/foods/2026-10-25-implementazione.md
+  - raw/compiled/diary/2026-10-25-decisioni-diario.md
 ---
 
 # Alimenti dell'utente
@@ -26,7 +27,7 @@ Tabella `alimento`:
 | `unitaBase` | enum `g` \| `ml` | |
 | `kcal`, `proteine`, `carboidrati`, `grassi` | numeric(10,3) | Per 100 g o 100 ml, obbligatori |
 | `verificato`, `archiviato` | boolean | Default `false` |
-| `ultimoUso` / `utilizzi` | timestamptz facoltativo / int | Per "Recenti" e "Più usati"; li aggiornerà il diario |
+| `ultimoUso` / `utilizzi` | timestamptz facoltativo / int | Per "Recenti" e "Più usati"; li aggiorna il [diario](./diario.md#entità-voce) quando si aggiunge o si elimina una voce |
 | `importatoIl` | timestamptz, facoltativo | Valorizzato quando l'alimento nasce dal catalogo |
 | `creatoIl` / `aggiornatoIl` | timestamptz | `onCreate` / `onUpdate` |
 
