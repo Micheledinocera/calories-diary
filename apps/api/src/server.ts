@@ -4,6 +4,7 @@ import { caricaEnv, EnvNonValidaError } from "./config/env.js";
 import { creaConfigOrm } from "./db/mikro-orm.config.js";
 import { creaLogger } from "./lib/logger.js";
 import { creaRedis } from "./lib/redis.js";
+import { creaOpenFoodFacts } from "./modules/catalogo/open-food-facts.js";
 
 let env;
 try {
@@ -20,7 +21,13 @@ const redis = creaRedis(env);
 redis.on("error", (err) => logger.warn({ err }, "redis non raggiungibile"));
 await redis.connect().catch((err) => logger.warn({ err }, "connessione redis fallita all'avvio"));
 
-const server = creaApp({ env, orm, redis, logger }).listen(env.PORT, () => {
+const provider = creaOpenFoodFacts({
+  baseUrl: env.OFF_BASE_URL,
+  userAgent: `CaloriesDiary/${env.APP_VERSION} (${env.OFF_CONTATTO})`,
+  logger,
+});
+
+const server = creaApp({ env, orm, redis, logger, provider }).listen(env.PORT, () => {
   logger.info({ port: env.PORT, versione: env.APP_VERSION }, "API in ascolto");
 });
 

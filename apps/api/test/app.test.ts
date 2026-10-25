@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { MikroORM } from "@mikro-orm/postgresql";
-import { sessioneSchema } from "@calories-diary/shared";
+import { lookupBarcodeSchema, sessioneSchema } from "@calories-diary/shared";
 import type { Express } from "express";
 import type { Redis } from "ioredis";
 import request from "supertest";
@@ -11,18 +11,21 @@ import { creaConfigOrm } from "../src/db/mikro-orm.config.js";
 import { creaLogger } from "../src/lib/logger.js";
 import { creaRedis } from "../src/lib/redis.js";
 import { creaGestoreToken } from "../src/modules/auth/token.js";
+import { creaLimiteProvider } from "../src/modules/catalogo/limite-provider.js";
+import { creaProviderFinto } from "./provider-finto.js";
 import { altroUtenteTest, utenteTest } from "./utenti-test.js";
 
 let orm: MikroORM;
 let redis: Redis;
 let app: Express;
+const { provider, stato } = creaProviderFinto();
 
 beforeAll(async () => {
   const env = caricaEnv();
   orm = await MikroORM.init(creaConfigOrm(env));
   redis = creaRedis(env);
   await redis.connect();
-  app = creaApp({ env, orm, redis, logger: creaLogger(env) });
+  app = creaApp({ env, orm, redis, logger: creaLogger(env), provider });
 });
 
 afterAll(async () => {
@@ -151,6 +154,87 @@ describe("/pasti", () => {
       .set(bearer(await login()))
       .expect(404);
     expect(res.body.errore.codice).toBe("NON_TROVATO");
+  });
+});
+
+describe("/catalogo/barcode/:codice", () => {
+  // One login for the whole block: every attempt counts towards the per-IP login limit.
+  let auth: ReturnType<typeof bearer>;
+  beforeAll(async () => {
+    auth = bearer(await login());
+  });
+
+  const cerca = (codice: string, status: number) =>
+    request(app).get(`/catalogo/barcode/${codice}`).set(auth).expect(status);
+
+  it("richiede l'autenticazione", async () => {
+    await request(app).get("/catalogo/barcode/8076809513753").expect(401);
+  });
+
+  it("importa dal provider, poi risponde dal catalogo", async () => {
+    const primo = lookupBarcodeSchema.parse((await cerca("8076809513753", 200)).body);
+    expect(primo).toMatchObject({
+      origine: "provider",
+      avvisi: [],
+      prodotto: {
+        barcode: "8076809513753",
+        nome: "Pesto alla genovese",
+        valoriPer100: { kcal: 492 },
+      },
+    });
+
+    const chiamate = stato.chiamate.length;
+    const secondo = lookupBarcodeSchema.parse((await cerca("8076809513753", 200)).body);
+    expect(secondo.origine).toBe("catalogo");
+    expect(secondo.prodotto).toEqual(primo.prodotto);
+    expect(stato.chiamate.length).toBe(chiamate);
+  });
+
+  it("normalizza il codice e segnala i valori parziali", async () => {
+    const res = await cerca("000000000012345", 200);
+    expect(res.body.prodotto).toMatchObject({ barcode: "00012345", unitaBase: "ml" });
+    expect(res.body.avvisi).toEqual(["VALORI_PARZIALI"]);
+    await cerca("12345", 200);
+    expect(stato.chiamate.filter((c) => c === "00012345")).toHaveLength(1);
+  });
+
+  it("risponde 404 e non richiama il provider per lo stesso codice", async () => {
+    const res = await cerca("4000000000001", 404);
+    expect(res.body.errore.codice).toBe("PRODOTTO_NON_TROVATO");
+    await cerca("4000000000001", 404);
+    expect(stato.chiamate.filter((c) => c === "4000000000001")).toHaveLength(1);
+  });
+
+  it("risponde 503 se il provider non è raggiungibile", async () => {
+    stato.guasto = true;
+    try {
+      const res = await cerca("4000000000002", 503);
+      expect(res.body.errore.codice).toBe("PROVIDER_NON_DISPONIBILE");
+    } finally {
+      stato.guasto = false;
+    }
+  });
+
+  it("risponde 400 se il codice non è valido", async () => {
+    for (const codice of ["abc", "000", "123456789012345"]) {
+      const res = await cerca(codice, 400);
+      expect(res.body.errore.codice).toBe("VALIDAZIONE");
+    }
+  });
+});
+
+describe("limite delle chiamate al provider", () => {
+  it("blocca con 429 oltre il massimo della finestra", async () => {
+    const limite = creaLimiteProvider(redis, creaLogger(caricaEnv()), {
+      chiave: `provider:test:${randomUUID()}`,
+      max: 2,
+    });
+    await limite.registraChiamata();
+    await limite.registraChiamata();
+    await expect(limite.registraChiamata()).rejects.toMatchObject({
+      status: 429,
+      codice: "PROVIDER_OCCUPATO",
+    });
   });
 });
 

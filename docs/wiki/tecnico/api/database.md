@@ -4,6 +4,7 @@ aggiornato: 2026-10-25
 fonti:
   - raw/compiled/first-develop/2026-10-25-scaffolding.md
   - raw/compiled/auth/2026-10-25-implementazione.md
+  - raw/compiled/food-catalog/2026-10-25-open-food-facts-e-perimetro.md
 ---
 
 # Database, migrazioni e seed
@@ -37,4 +38,4 @@ Si usa uno script nostro, `src/db/cli.ts`, non la CLI di MikroORM: lo stesso com
 
 ## Test
 
-Il `globalSetup` di Vitest ricrea il database `calories_diary_test` (drop, migrazioni, utenti di test, seed) e azzera i contatori del rate limit del login su Redis. Le variabili di test sono in `vitest.config.ts`; in CI gli URL si possono cambiare con `DATABASE_URL_TEST` e `REDIS_URL_TEST`.
+Il `globalSetup` di Vitest ricrea il database `calories_diary_test` (drop, migrazioni, utenti di test, seed) e azzera su Redis le chiavi che sopravvivono tra un'esecuzione e l'altra (`login:*`, `provider:*`, `catalogo:*`). I test dell'API usano un provider finto: Open Food Facts non viene mai chiamato. Le variabili di test sono in `vitest.config.ts`; in CI gli URL si possono cambiare con `DATABASE_URL_TEST` e `REDIS_URL_TEST`.

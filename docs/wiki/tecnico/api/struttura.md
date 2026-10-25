@@ -4,6 +4,7 @@ aggiornato: 2026-10-25
 fonti:
   - raw/compiled/first-develop/2026-10-25-scaffolding.md
   - raw/compiled/auth/2026-10-25-implementazione.md
+  - raw/compiled/food-catalog/2026-10-25-open-food-facts-e-perimetro.md
 ---
 
 # Struttura dell'API
@@ -38,7 +39,7 @@ Esempio: [Pasti](./pasti.md). Le rotte protette leggono l'utente con `utenteCorr
 1. `helmet`; CORS limitato a `CORS_ORIGINS` (lista separata da virgole, `*` vale qualsiasi sequenza: es. `https://calories-diary-*.vercel.app`; le richieste senza `Origin` passano).
 2. `pino-http` (escluso `/health` dai log di accesso), `express.json` (max 1 MB).
 3. `GET /health`, fuori dal `RequestContext`.
-4. `RequestContext` di MikroORM, poi le rotte dei moduli: `/auth` e, dietro `richiediAutenticazione`, `/pasti`.
+4. `RequestContext` di MikroORM, poi le rotte dei moduli: `/auth` e, dietro `richiediAutenticazione`, `/pasti` e `/catalogo`.
 5. 404 JSON per le rotte sconosciute, gestore centrale degli errori.
 
 ## Formato degli errori
@@ -53,6 +54,9 @@ Ogni errore è un JSON `{ errore: { codice, messaggio, dettagli? } }` (schema `e
 | Token mancante, non valido o scaduto | 401 | `NON_AUTENTICATO` |
 | Login con credenziali errate | 401 | `CREDENZIALI_ERRATE` |
 | Troppi tentativi di login | 429 | `TROPPI_TENTATIVI` (`dettagli.riprovaTraS`) |
+| Prodotto sconosciuto anche al provider | 404 | `PRODOTTO_NON_TROVATO` |
+| Provider irraggiungibile o in errore | 503 | `PROVIDER_NON_DISPONIBILE` |
+| Troppe chiamate al provider | 429 | `PROVIDER_OCCUPATO` (`dettagli.riprovaTraS`) |
 | Rotta sconosciuta | 404 | `NON_TROVATO` |
 | Altro | 500 | `ERRORE_INTERNO` (loggato) |
 
@@ -62,11 +66,11 @@ Ogni errore è un JSON `{ errore: { codice, messaggio, dettagli? } }` (schema `e
 
 ## Redis
 
-Client unico (`creaRedis`), connessione lazy, prefisso chiavi `REDIS_PREFIX` per ambiente; `rediss://` attiva TLS (Upstash). Upstash Free ha una quota mensile di comandi: niente polling né comandi bloccanti. Oggi è usato dall'health check e dal [rate limit del login](./auth.md#rate-limit-del-login); servirà per la cache dei provider.
+Client unico (`creaRedis`), connessione lazy, prefisso chiavi `REDIS_PREFIX` per ambiente; `rediss://` attiva TLS (Upstash). Upstash Free ha una quota mensile di comandi: niente polling né comandi bloccanti. Oggi è usato dall'health check, dal [rate limit del login](./auth.md#rate-limit-del-login) e dal [catalogo](./catalogo.md#redis) (limite verso il provider e cache dei non trovati).
 
 ## Variabili d'ambiente
 
-Documentate in `apps/api/.env.example`: `NODE_ENV`, `PORT`, `DATABASE_URL` (Neon pooled), `DATABASE_URL_DIRECT` (Neon diretta, solo migrazioni), `REDIS_URL`, `REDIS_PREFIX`, `CORS_ORIGINS`, `LOG_LEVEL`, `JWT_SECRET` (chiave dei token, almeno 32 caratteri), `APP_VERSION`.
+Documentate in `apps/api/.env.example`: `NODE_ENV`, `PORT`, `DATABASE_URL` (Neon pooled), `DATABASE_URL_DIRECT` (Neon diretta, solo migrazioni), `REDIS_URL`, `REDIS_PREFIX`, `CORS_ORIGINS`, `LOG_LEVEL`, `JWT_SECRET` (chiave dei token, almeno 32 caratteri), `APP_VERSION`, `OFF_BASE_URL` (Open Food Facts, default produzione), `OFF_CONTATTO` (email nello User-Agent di OFF, obbligatoria).
 
 ## Immagine Docker
 

@@ -5,11 +5,12 @@ fonti:
   - raw/compiled/first-develop/analisi-iniziale-calorie-tracker.md
   - raw/compiled/first-develop/2026-10-25-decisioni-e-piano.md
   - raw/compiled/auth/2026-10-25-decisioni-utente.md
+  - raw/compiled/food-catalog/2026-10-25-obiettivo.md
 ---
 
 # Prodotto
 
-Applicazione **personale** (un solo utente) per tracciare ogni giorno calorie e macronutrienti. È una PWA installabile, usata soprattutto da Android, che funziona anche offline.
+Applicazione **personale** per tracciare ogni giorno calorie e macronutrienti. È una PWA installabile, usata soprattutto da Android, che funziona anche offline. Può essere resa disponibile a qualche amico, ognuno per uso personale e con i propri dati (vedi [Autenticazione multiutente](../progetto/decisione-autenticazione.md)).
 
 ## Obiettivi
 
@@ -19,7 +20,7 @@ Applicazione **personale** (un solo utente) per tracciare ogni giorno calorie e 
 
 ## Non obiettivi (prima versione)
 
-- Multi-utente, social, condivisione.
+- Qualsiasi interazione social o condivisione tra utenti: ognuno vede solo i propri dati.
 - Piani dietetici, consigli nutrizionali, obiettivi calcolati automaticamente.
 - Micronutrienti dettagliati (vitamine, minerali).
 
@@ -61,5 +62,4 @@ Ordine delle feature dell'MVP: `first-develop` (scaffolding), `auth`, `food-cata
 
 ## Domande aperte
 
-- **Multiutente** (conflitto, da `auth`): "Multi-utente" è tra i non obiettivi e il prodotto è descritto "per un solo utente", ma in `auth` si è deciso di gestire più utenti (qualche amico), ognuno con i propri dati — vedi [Autenticazione multiutente](../progetto/decisione-autenticazione.md). Riformulare i non obiettivi lasciando esclusi solo social e condivisione?
 - Formato di export/backup: JSON, CSV o entrambi; import in sostituzione o in unione con i dati esistenti.

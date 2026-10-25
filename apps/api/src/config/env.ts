@@ -22,6 +22,9 @@ const envSchema = z.object({
   // HS256 key of the session tokens. Generate it with: openssl rand -base64 48
   JWT_SECRET: z.string().min(32, "almeno 32 caratteri"),
   APP_VERSION: z.preprocess(vuotoComeAssente, z.string().default("dev")),
+  OFF_BASE_URL: z.preprocess(vuotoComeAssente, z.url().default("https://world.openfoodfacts.org")),
+  // Contact email in the User-Agent, required by Open Food Facts.
+  OFF_CONTATTO: z.email(),
 });
 
 export type Env = z.infer<typeof envSchema>;
