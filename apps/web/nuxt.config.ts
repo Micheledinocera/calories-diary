@@ -21,6 +21,14 @@ export default defineNuxtConfig({
     },
   },
 
+  $development: {
+    runtimeConfig: { public: { apiBase: "/api" } },
+    // Same origin in dev: the phone (dev server on 0.0.0.0) reaches the API through Nuxt.
+    nitro: {
+      devProxy: { "/api": { target: "http://localhost:3001", changeOrigin: true } },
+    },
+  },
+
   typescript: { strict: true },
 
   pwa: {

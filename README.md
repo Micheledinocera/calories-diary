@@ -30,7 +30,11 @@ pnpm dev
 ```
 
 - Web: http://localhost:3000
-- API: http://localhost:3001 (stato: `/health`)
+- API: http://localhost:3001 (stato: `/health`); dal web in sviluppo si chiama `/api`, che Nuxt inoltra all'API.
+
+`pnpm dev` usa Turborepo: una schermata con un pannello di log per processo (frecce per cambiare processo, `i` per scrivere nel processo selezionato, Ctrl+C per fermare tutto). Prima di partire chiude i processi di sviluppo rimasti appesi da un terminale chiuso male; `pnpm dev:stop` fa solo quello.
+
+Da telefono (stessa rete Wi-Fi): il web è esposto anche sulla rete locale, all'URL `http://<ip-del-pc>:3000` stampato da Nuxt. La fotocamera (scansione del barcode) richiede HTTPS: per provarla usa `pnpm dev:https`, con certificato autofirmato da accettare sul telefono.
 
 Per provare l'API dalla stessa immagine Docker della produzione: `docker compose --profile api up -d --build` (prima ferma `pnpm dev`, usa la porta 3001).
 
@@ -38,7 +42,9 @@ Per provare l'API dalla stessa immagine Docker della produzione: `docker compose
 
 | Script                                                      | Cosa fa                                                               |
 | ----------------------------------------------------------- | --------------------------------------------------------------------- |
-| `pnpm dev`                                                  | API (tsx watch), web (Nuxt) e `shared` in watch, in parallelo         |
+| `pnpm dev`                                                  | API (tsx watch), web (Nuxt) e `shared` in watch, con Turborepo        |
+| `pnpm dev:https`                                            | Come `pnpm dev`, con il web in HTTPS (serve per la fotocamera)        |
+| `pnpm dev:stop`                                             | Chiude i processi di sviluppo rimasti appesi                          |
 | `pnpm build`                                                | Build di tutti i pacchetti (web: sito statico in `.output/public`)    |
 | `pnpm typecheck` · `pnpm lint` · `pnpm test`                | Controlli; i test dell'API richiedono `docker compose up -d`          |
 | `pnpm format`                                               | Prettier su tutto il repo                                             |

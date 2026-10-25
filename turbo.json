@@ -1,0 +1,15 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "@calories-diary/web#dev:https": {
+      "cache": false,
+      "persistent": true,
+      "with": ["@calories-diary/api#dev", "@calories-diary/shared#dev"]
+    }
+  }
+}
