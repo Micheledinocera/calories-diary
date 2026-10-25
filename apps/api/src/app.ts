@@ -13,8 +13,9 @@ import { authRouter } from "./modules/auth/auth.routes.js";
 import { creaGestoreToken } from "./modules/auth/token.js";
 import { catalogoRouter } from "./modules/catalogo/catalogo.routes.js";
 import type { ProviderAlimenti } from "./modules/catalogo/provider.js";
+import { diarioRouter } from "./modules/diario/diario.routes.js";
 import { healthRouter } from "./modules/health/health.routes.js";
-import { pastiRouter } from "./modules/pasti/pasti.routes.js";
+import { obiettiviRouter } from "./modules/obiettivi/obiettivi.routes.js";
 
 export interface DipendenzeApp {
   env: Env;
@@ -43,7 +44,8 @@ export function creaApp({ env, orm, redis, logger, provider }: DipendenzeApp): E
   const gestore = creaGestoreToken(env.JWT_SECRET);
   const autenticazione = richiediAutenticazione(orm.em, gestore);
   app.use("/auth", authRouter({ em: orm.em, redis, logger, gestore, autenticazione }));
-  app.use("/pasti", autenticazione, pastiRouter(orm.em));
+  app.use("/diario", autenticazione, diarioRouter(orm.em));
+  app.use("/obiettivi", autenticazione, obiettiviRouter(orm.em));
   app.use("/alimenti", autenticazione, alimentiRouter(orm.em));
   app.use("/catalogo", autenticazione, catalogoRouter({ em: orm.em, redis, logger, provider }));
 

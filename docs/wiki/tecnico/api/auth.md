@@ -3,6 +3,7 @@ tipo: info
 aggiornato: 2026-10-25
 fonti:
   - raw/compiled/auth/2026-10-25-implementazione.md
+  - raw/compiled/diary/2026-10-25-decisioni-diario.md
 ---
 
 # Autenticazione e utenti
@@ -18,6 +19,7 @@ Tabella `utente`:
 | `id` | uuid | Generato alla creazione |
 | `email` | varchar(254) | Unica, sempre minuscola (`credenzialiSchema` la normalizza) |
 | `passwordHash` | varchar(255) | `hidden`: mai serializzato |
+| `fabbisogno`, `quotaCarboidrati`, `quotaGrassi`, `quotaProteine` | int | Obiettivi dell'utente, vedi [Obiettivi](./obiettivi.md) |
 | `creatoIl` / `aggiornatoIl` | timestamptz | Impostati da `onCreate` / `onUpdate` |
 
 Il DTO esposto (`Utente` in shared) contiene solo `id` ed `email`.
@@ -28,7 +30,7 @@ Non c'è una rotta di registrazione. `pnpm utente:crea <email>` (dalla root o da
 
 - chiede la password senza mostrarla e la fa ripetere; senza TTY legge la prima riga di stdin (`echo … | pnpm utente:crea …`);
 - password di almeno **12 caratteri**, email valida;
-- `creaUtentiService(em).crea()` salva l'utente e i [pasti predefiniti](./pasti.md); email già usata → `EMAIL_IN_USO`;
+- `creaUtentiService(em).crea()` salva l'utente; email già usata → `EMAIL_IN_USO`;
 - gli errori attesi si stampano senza stack trace, con exit code 1.
 
 ## Password
@@ -55,7 +57,7 @@ Con un'email sconosciuta il login verifica comunque un hash fittizio, così il t
 
 ## Middleware `richiediAutenticazione`
 
-Montato in `app.ts` davanti alle rotte protette (oggi `/pasti`, `/auth/rinnova`, `/auth/io`):
+Montato in `app.ts` davanti alle rotte protette (`/diario`, `/obiettivi`, `/alimenti`, `/catalogo`, `/auth/rinnova`, `/auth/io`):
 
 - richiede `Authorization: Bearer <token>` valido **e** un utente ancora esistente: un utente cancellato perde l'accesso subito, anche con un token non scaduto;
 - altrimenti 401 `NON_AUTENTICATO`;

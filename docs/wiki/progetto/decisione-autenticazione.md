@@ -7,6 +7,7 @@ fonti:
   - raw/compiled/auth/2026-10-25-obiettivo.md
   - raw/compiled/auth/2026-10-25-decisioni-utente.md
   - raw/compiled/auth/2026-10-25-implementazione.md
+  - raw/compiled/diary/2026-10-25-pasti-del-giorno.md
 ---
 
 # Autenticazione multiutente
@@ -18,7 +19,7 @@ fonti:
 - Login con **email e password**; restituisce un token (JWT) che il client invia come `Authorization: Bearer`.
 - Il token dura **una settimana**, con **rinnovo scorrevole**: quando l'app parla con l'API riceve un token nuovo di 7 giorni. Chi resta offline più di 7 giorni rifà il login alla riconnessione; i dati locali restano.
 - Rate limit sul login con Redis.
-- I **pasti sono per utente** (i predefiniti si creano insieme all'utente). Scelta conservativa: più avanti si valuterà se renderli comuni.
+- I **dati del diario sono per utente**: i pasti di ogni giorno e i loro alimenti. I **tipi di pasto** (Colazione, Pranzo, Cena, Spuntino) sono invece fissi nel codice, uguali per tutti.
 
 Dettagli di implementazione: [Autenticazione e utenti](../tecnico/api/auth.md) (API) e [App web](../tecnico/web/app.md#sessione-e-login) (PWA).
 
@@ -29,11 +30,11 @@ Dettagli di implementazione: [Autenticazione e utenti](../tecnico/api/auth.md) (
 - Il front-end (Vercel) e l'API (Render) sono su domini diversi: i cookie sarebbero cross-site, un header `Authorization` evita il problema.
 - Con pochi utenti noti la registrazione aperta servirebbe solo agli sconosciuti: la CLI basta.
 - Una settimana con rinnovo scorrevole: chi usa l'app almeno una volta a settimana non rifà mai il login, e resta comunque un margine ampio per l'uso offline.
-- Pasti per utente: ogni riga ha un solo proprietario, nessun dato condiviso tra utenti da gestire.
+- Diario per utente: ogni riga ha un solo proprietario, nessun dato condiviso tra utenti da gestire. I tipi di pasto non si configurano nell'MVP, quindi non serve una tabella.
 
 ## Alternative scartate
 
 - **Utente singolo con le credenziali nelle variabili d'ambiente** (la prima versione di questa decisione): niente tabella utenti, ma nessuna possibilità di aggiungere altre persone.
 - **Registrazione aperta o con codice d'invito**: più lavoro (pagine, abusi) senza un bisogno reale oggi.
 - **Token a scadenza fissa**: costringerebbe al login ogni settimana anche chi usa l'app tutti i giorni.
-- **Pasti comuni a tutti gli utenti**: più semplici, ma ogni modifica toccherebbe tutti; rinviata.
+- **Tipi di pasto per utente, in tabella** (la prima implementazione): nessun vantaggio finché non c'è una schermata per configurarli.

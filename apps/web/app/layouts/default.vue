@@ -6,6 +6,7 @@ const { sessione, esci } = useSessione();
 // Provisional navigation: the flows will be validated with a design pass at the end of the MVP.
 const voci: NavigationMenuItem[] = [
   { label: "Oggi", icon: "i-lucide-calendar-check", to: "/" },
+  { label: "Calendario", icon: "i-lucide-calendar-days", to: "/diario" },
   { label: "Alimenti", icon: "i-lucide-apple", to: "/alimenti" },
 ];
 
@@ -23,6 +24,7 @@ async function logout() {
         <UDropdownMenu
           :items="[
             { label: sessione?.utente.email, type: 'label' },
+            { label: 'Profilo', icon: 'i-lucide-target', to: '/profilo' },
             { label: 'Esci', icon: 'i-lucide-log-out', onSelect: logout },
           ]"
         >

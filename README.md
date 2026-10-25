@@ -36,15 +36,15 @@ Per provare l'API dalla stessa immagine Docker della produzione: `docker compose
 
 ## Script principali (dalla root)
 
-| Script                                                      | Cosa fa                                                            |
-| ----------------------------------------------------------- | ------------------------------------------------------------------ |
-| `pnpm dev`                                                  | API (tsx watch), web (Nuxt) e `shared` in watch, in parallelo      |
-| `pnpm build`                                                | Build di tutti i pacchetti (web: sito statico in `.output/public`) |
-| `pnpm typecheck` · `pnpm lint` · `pnpm test`                | Controlli; i test dell'API richiedono `docker compose up -d`       |
-| `pnpm format`                                               | Prettier su tutto il repo                                          |
-| `pnpm db:migrate` · `pnpm db:seed`                          | Migrazioni e dati iniziali (pasti predefiniti)                     |
-| `pnpm --filter @calories-diary/api migration:create <nome>` | Nuova migrazione dalle differenze tra entità e schema              |
-| `pnpm --filter @calories-diary/api migration:down`          | Annulla l'ultima migrazione                                        |
+| Script                                                      | Cosa fa                                                               |
+| ----------------------------------------------------------- | --------------------------------------------------------------------- |
+| `pnpm dev`                                                  | API (tsx watch), web (Nuxt) e `shared` in watch, in parallelo         |
+| `pnpm build`                                                | Build di tutti i pacchetti (web: sito statico in `.output/public`)    |
+| `pnpm typecheck` · `pnpm lint` · `pnpm test`                | Controlli; i test dell'API richiedono `docker compose up -d`          |
+| `pnpm format`                                               | Prettier su tutto il repo                                             |
+| `pnpm db:migrate` · `pnpm db:seed`                          | Migrazioni e dati iniziali (oggi nessuno: i tipi di pasto sono fissi) |
+| `pnpm --filter @calories-diary/api migration:create <nome>` | Nuova migrazione dalle differenze tra entità e schema                 |
+| `pnpm --filter @calories-diary/api migration:down`          | Annulla l'ultima migrazione                                           |
 
 ## Struttura
 

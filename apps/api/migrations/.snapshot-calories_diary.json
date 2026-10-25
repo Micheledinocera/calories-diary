@@ -421,6 +421,23 @@
           "enumItems": [],
           "mappedType": "datetime"
         },
+        "giorno": {
+          "name": "giorno",
+          "type": "date",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "date"
+        },
         "id": {
           "name": "id",
           "type": "uuid",
@@ -437,23 +454,6 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "uuid"
-        },
-        "nome": {
-          "name": "nome",
-          "type": "varchar(50)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "unique": false,
-          "length": 50,
-          "precision": null,
-          "scale": null,
-          "default": null,
-          "comment": null,
-          "collation": null,
-          "enumItems": [],
-          "mappedType": "string"
         },
         "ordine": {
           "name": "ordine",
@@ -472,6 +472,23 @@
           "enumItems": [],
           "mappedType": "integer"
         },
+        "tipo": {
+          "name": "tipo",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": ["colazione", "pranzo", "cena", "spuntino"],
+          "mappedType": "enum"
+        },
         "utente_id": {
           "name": "utente_id",
           "type": "uuid",
@@ -479,7 +496,7 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "unique": true,
+          "unique": false,
           "length": null,
           "precision": null,
           "scale": null,
@@ -500,15 +517,22 @@
           "unique": true
         },
         {
-          "columnNames": ["utente_id", "nome"],
+          "columnNames": ["utente_id", "giorno"],
           "composite": true,
-          "constraint": true,
-          "keyName": "pasto_utente_id_nome_unique",
+          "constraint": false,
+          "keyName": "pasto_utente_id_giorno_index",
           "primary": false,
-          "unique": true
+          "unique": false
         }
       ],
-      "checks": [],
+      "checks": [
+        {
+          "name": "pasto_tipo_check",
+          "expression": "\"tipo\" in ('colazione', 'pranzo', 'cena', 'spuntino')",
+          "definition": "check (\"tipo\" in ('colazione', 'pranzo', 'cena', 'spuntino'))",
+          "columnName": "tipo"
+        }
+      ],
       "triggers": [],
       "foreignKeys": {
         "pasto_utente_id_foreign": {
@@ -1080,6 +1104,23 @@
           "enumItems": [],
           "mappedType": "string"
         },
+        "fabbisogno": {
+          "name": "fabbisogno",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
         "id": {
           "name": "id",
           "type": "uuid",
@@ -1113,6 +1154,57 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "string"
+        },
+        "quota_carboidrati": {
+          "name": "quota_carboidrati",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "50",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "quota_grassi": {
+          "name": "quota_grassi",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "30",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "quota_proteine": {
+          "name": "quota_proteine",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "20",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
         }
       },
       "indexes": [
@@ -1136,6 +1228,160 @@
       "checks": [],
       "triggers": [],
       "foreignKeys": {},
+      "comment": null
+    },
+    {
+      "name": "voce",
+      "schema": "public",
+      "columns": {
+        "aggiornato_il": {
+          "name": "aggiornato_il",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "alimento_id": {
+          "name": "alimento_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "pasto_id": {
+          "name": "pasto_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "quantita": {
+          "name": "quantita",
+          "type": "numeric(10,3)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": 10,
+          "scale": 3,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "decimal"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": ["alimento_id"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "voce_alimento_id_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": ["pasto_id"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "voce_pasto_id_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "keyName": "voce_pkey",
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "triggers": [],
+      "foreignKeys": {
+        "voce_alimento_id_foreign": {
+          "columnNames": ["alimento_id"],
+          "constraintName": "voce_alimento_id_foreign",
+          "localTableName": "public.voce",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.alimento"
+        },
+        "voce_pasto_id_foreign": {
+          "columnNames": ["pasto_id"],
+          "constraintName": "voce_pasto_id_foreign",
+          "localTableName": "public.voce",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.pasto",
+          "deleteRule": "cascade"
+        }
+      },
       "comment": null
     }
   ],
