@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import type { NuovaVoce, Pasto, Voce } from "@calories-diary/shared";
+import type { NuovaVoce, Pasto, Valori, Voce } from "@calories-diary/shared";
 
 const props = defineProps<{
   pasto: Pasto;
   /** Same view for any day: read-only until "Modifica" (always editable today). */
   modificabile: boolean;
   inCorso?: boolean;
+  /** The meal that weighed most in a day over the need. */
+  piuPesante?: boolean;
+  /** Day totals and need: the food picker shows how the day changes before adding. */
+  totaliGiorno: Valori;
+  fabbisogno: number | null;
 }>();
 
 const emit = defineEmits<{
@@ -56,7 +61,7 @@ const spuntino = computed(() => props.pasto.tipo === "spuntino");
 </script>
 
 <template>
-  <UCard :ui="{ header: 'py-3', body: 'py-2 sm:py-2' }">
+  <UCard class="scroll-mt-4" :ui="{ header: 'py-3 sm:px-4', body: 'py-2 sm:py-2 sm:px-4' }">
     <template #header>
       <div class="flex items-center gap-2">
         <UIcon
@@ -65,8 +70,20 @@ const spuntino = computed(() => props.pasto.tipo === "spuntino");
           class="maniglia text-muted cursor-grab touch-none size-5"
           aria-label="Trascina per spostare"
         />
-        <h2 class="font-medium flex-1">{{ nomiPasti[pasto.tipo] }}</h2>
-        <span class="text-sm font-semibold">{{ formattaValore(pasto.totali.kcal) }} kcal</span>
+        <h2 class="font-semibold flex-1 text-highlighted">{{ nomiPasti[pasto.tipo] }}</h2>
+        <span
+          v-if="piuPesante"
+          class="inline-flex items-center gap-1 rounded-full bg-oltre-tenue px-2 text-xs leading-5 font-semibold text-error"
+        >
+          <UIcon name="i-lucide-flame" class="size-3.5" />
+          Più pesante
+        </span>
+        <span
+          class="text-[15px] font-semibold tabular-nums"
+          :class="piuPesante ? 'text-error' : 'text-highlighted'"
+        >
+          {{ formattaValore(Math.round(pasto.totali.kcal)) }} kcal
+        </span>
         <UButton
           v-if="spuntino && modificabile"
           icon="i-lucide-trash-2"
@@ -86,7 +103,7 @@ const spuntino = computed(() => props.pasto.tipo === "spuntino");
         :key="voce.id"
         type="button"
         class="w-full flex items-center justify-between gap-3 py-2 text-start"
-        :class="modificabile ? 'hover:bg-elevated/50 rounded-md cursor-pointer' : 'cursor-default'"
+        :class="modificabile ? 'hover:bg-elevated/50 cursor-pointer' : 'cursor-default'"
         :disabled="!modificabile"
         @click="apri(voce)"
       >
@@ -102,12 +119,14 @@ const spuntino = computed(() => props.pasto.tipo === "spuntino");
           </span>
           <span class="block text-sm text-muted">
             {{ formattaValore(voce.quantita) }} {{ voce.alimento.unitaBase }} · C
-            {{ formattaValore(voce.valori.carboidrati) }} · G
-            {{ formattaValore(voce.valori.grassi) }} · P
-            {{ formattaValore(voce.valori.proteine) }}
+            {{ formattaValore(voce.valori.carboidrati) }} · P
+            {{ formattaValore(voce.valori.proteine) }} · G
+            {{ formattaValore(voce.valori.grassi) }}
           </span>
         </span>
-        <span class="text-sm shrink-0">{{ formattaValore(voce.valori.kcal) }} kcal</span>
+        <span class="text-sm shrink-0"
+          >{{ formattaValore(Math.round(voce.valori.kcal)) }} kcal</span
+        >
       </button>
     </div>
 
@@ -125,7 +144,7 @@ const spuntino = computed(() => props.pasto.tipo === "spuntino");
       <p class="text-sm">
         <span class="font-medium">Come ieri:</span>
         {{ pasto.suggerite.map((v) => v.alimento.nome).join(", ") }}
-        <span class="text-muted">({{ formattaValore(kcalSuggerite) }} kcal)</span>
+        <span class="text-muted">({{ formattaValore(Math.round(kcalSuggerite)) }} kcal)</span>
       </p>
       <UButton
         size="sm"
@@ -152,7 +171,9 @@ const spuntino = computed(() => props.pasto.tipo === "spuntino");
 
     <SceltaAlimento
       v-model:open="scelta"
-      :titolo="`Aggiungi a ${nomiPasti[pasto.tipo]}`"
+      :nome-pasto="nomiPasti[pasto.tipo]"
+      :totali-giorno="totaliGiorno"
+      :fabbisogno="fabbisogno"
       @scelta="emit('aggiungi', [$event])"
     />
 
