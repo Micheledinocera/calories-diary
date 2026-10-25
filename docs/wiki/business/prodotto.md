@@ -6,11 +6,12 @@ fonti:
   - raw/compiled/first-develop/2026-10-25-decisioni-e-piano.md
   - raw/compiled/auth/2026-10-25-decisioni-utente.md
   - raw/compiled/food-catalog/2026-10-25-obiettivo.md
+  - raw/compiled/offline-cache/2026-10-25-decisione-niente-sync.md
 ---
 
 # Prodotto
 
-Applicazione **personale** per tracciare ogni giorno calorie e macronutrienti. È una PWA installabile, usata soprattutto da Android, che funziona anche offline. Può essere resa disponibile a qualche amico, ognuno per uso personale e con i propri dati (vedi [Autenticazione multiutente](../progetto/decisione-autenticazione.md)).
+Applicazione **personale** per tracciare ogni giorno calorie e macronutrienti. È una PWA installabile, usata soprattutto da Android; offline si possono consultare i dati già scaricati. Può essere resa disponibile a qualche amico, ognuno per uso personale e con i propri dati (vedi [Autenticazione multiutente](../progetto/decisione-autenticazione.md)).
 
 ## Obiettivi
 
@@ -44,7 +45,7 @@ Applicazione **personale** per tracciare ogni giorno calorie e macronutrienti. �
 
 ## Requisiti non funzionali
 
-- **Offline-first**: diario e alimenti locali funzionano senza rete; la ricerca presso il provider esterno richiede la rete.
+- **Offline in sola lettura**: senza rete si consultano i dati già scaricati, ma non si registra né si modifica nulla (vedi [Server come fonte di verità](../progetto/decisione-server-fonte-di-verita.md)).
 - **Inserimento rapido**: un alimento già noto si aggiunge in pochi tocchi.
 - **Privacy**: dati solo locali o sul nostro back-end, nessuna telemetria.
 - **Attribuzione**: l'app indica che parte dei dati viene da Open Food Facts (licenza ODbL).
@@ -54,11 +55,11 @@ Applicazione **personale** per tracciare ogni giorno calorie e macronutrienti. �
 
 | Fase | Contenuto |
 |---|---|
-| **MVP** | Diario, alimenti manuali, lookup per barcode con import (anche da fotocamera), consolidamento locale, recenti e più usati, porzioni, totali, sync, backup |
+| **MVP** | Diario, alimenti manuali, lookup per barcode con import (anche da fotocamera), consolidamento locale, recenti e più usati, porzioni, totali, cache offline in sola lettura, backup |
 | **Fase 2** | Ricette (ingredienti + peso finale, usate come alimenti), obiettivi kcal e macro impostati a mano, storico settimanale e mensile con grafici, ricerca testuale presso il provider |
 | **Fase 3** | Import di tabelle generiche (CIQUAL, USDA, BDA), ri-sincronizzazione di un alimento dal provider con diff |
 
-Ordine delle feature dell'MVP: `first-develop` (scaffolding), `auth`, `food-catalog`, `sync`, `foods`, `diary`, `barcode-scan`, `backup`, `deploy`, poi release `v0.1.0`.
+Ordine delle feature dell'MVP: `first-develop` (scaffolding), `auth`, `food-catalog`, `offline-cache` (decisione, cache in analisi), `foods`, `diary`, `barcode-scan`, `backup`, `deploy`, poi release `v0.1.0`.
 
 ## Domande aperte
 

@@ -4,6 +4,7 @@ aggiornato: 2026-10-25
 fonti:
   - raw/compiled/first-develop/2026-10-25-scaffolding.md
   - raw/compiled/auth/2026-10-25-implementazione.md
+  - raw/compiled/offline-cache/2026-10-25-cache-in-analisi.md
 ---
 
 # App web
@@ -50,4 +51,4 @@ Vitest in ambiente node per il codice puro (`test/`). Per testare i componenti s
 
 ## Domande aperte
 
-- Lo store locale (Dexie su IndexedDB) e la sync arriveranno con la feature `sync`.
+- Cache offline in sola lettura: contenuto e implementazione in analisi (vedi [Cache offline](../../progetto/decisione-cache-offline.md)).
