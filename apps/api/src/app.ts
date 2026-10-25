@@ -8,6 +8,7 @@ import type { Env } from "./config/env.js";
 import { richiediAutenticazione } from "./middlewares/autenticazione.js";
 import { corsConOrigini } from "./middlewares/cors.js";
 import { gestoreErrori, rottaNonTrovata } from "./middlewares/errori.js";
+import { alimentiRouter } from "./modules/alimenti/alimenti.routes.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { creaGestoreToken } from "./modules/auth/token.js";
 import { catalogoRouter } from "./modules/catalogo/catalogo.routes.js";
@@ -43,6 +44,7 @@ export function creaApp({ env, orm, redis, logger, provider }: DipendenzeApp): E
   const autenticazione = richiediAutenticazione(orm.em, gestore);
   app.use("/auth", authRouter({ em: orm.em, redis, logger, gestore, autenticazione }));
   app.use("/pasti", autenticazione, pastiRouter(orm.em));
+  app.use("/alimenti", autenticazione, alimentiRouter(orm.em));
   app.use("/catalogo", autenticazione, catalogoRouter({ em: orm.em, redis, logger, provider }));
 
   app.use(rottaNonTrovata);

@@ -2,14 +2,8 @@
 import type { Health, Pasto } from "@calories-diary/shared";
 
 const { api } = useApi();
-const { sessione, esci } = useSessione();
 
-async function logout() {
-  esci();
-  await navigateTo("/login");
-}
-
-// Scaffolding check page: API status and the default meals.
+// Provisional "Oggi" page: the diary arrives with the diary feature. Scaffolding check page: API status and the default meals.
 const { data, status, error, refresh } = useAsyncData("stato-api", async () => {
   const [health, pasti] = await Promise.all([api<Health>("/health"), api<Pasto[]>("/pasti")]);
   return { health, pasti };
@@ -34,15 +28,7 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
 
 <template>
   <UContainer class="py-10 max-w-xl">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold">Calories Diary</h1>
-      <div class="flex items-center gap-2">
-        <span class="text-sm text-muted">{{ sessione?.utente.email }}</span>
-        <UButton icon="i-lucide-log-out" variant="ghost" color="neutral" @click="logout">
-          Esci
-        </UButton>
-      </div>
-    </div>
+    <h1 class="text-2xl font-bold mb-6">Oggi</h1>
 
     <UCard>
       <template #header>

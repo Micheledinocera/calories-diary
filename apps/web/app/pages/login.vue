@@ -2,6 +2,8 @@
 import { credenzialiSchema, type Credenziali } from "@calories-diary/shared";
 import type { AuthFormField, FormSubmitEvent } from "@nuxt/ui";
 
+definePageMeta({ layout: false });
+
 const { accedi } = useSessione();
 
 const campi: AuthFormField[] = [

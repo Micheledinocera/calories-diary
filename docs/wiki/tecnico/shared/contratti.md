@@ -6,6 +6,8 @@ fonti:
   - raw/compiled/first-develop/2026-10-25-scaffolding.md
   - raw/compiled/auth/2026-10-25-implementazione.md
   - raw/compiled/food-catalog/2026-10-25-open-food-facts-e-perimetro.md
+  - raw/compiled/foods/2026-10-25-note-ui-ux.md
+  - raw/compiled/foods/2026-10-25-implementazione.md
 ---
 
 # Contratti condivisi
@@ -21,8 +23,9 @@ fonti:
 | `src/errori.ts` | `erroreApiSchema`, `ErroreApi` | Corpo di ogni risposta di errore |
 | `src/auth.ts` | `credenzialiSchema`, `utenteSchema`, `sessioneSchema` e tipi | Body del login (email normalizzata: trim e minuscole), utente corrente, risposta di login e rinnovo |
 | `src/catalogo.ts` | `valoriPer100Schema`, `unitaBaseSchema`, `prodottoCatalogoSchema`, `avvisoCatalogoSchema`, `lookupBarcodeSchema` e tipi | Risposta di `GET /catalogo/barcode/:codice` (vedi [Catalogo](../api/catalogo.md)) |
+| `src/alimenti.ts` | `valoriAlimentoSchema`, `porzioneSchema`, `alimentoSchema`, `listaAlimentiSchema`, `nuovoAlimentoSchema`, `modificaAlimentoSchema`, `ordineAlimentiSchema`, `filtriAlimentiSchema` e tipi | DTO e body di `/alimenti` (vedi [Alimenti](../api/alimenti.md)). I body normalizzano i testi (trim, vuoto → `null`) e applicano i default; `NuovoAlimento` e `ModificaAlimento` sono i tipi di input (`z.input`), `FiltriAlimenti` i filtri come li manda il client |
 
-Convenzione: per ogni contratto uno schema `xSchema` e il tipo `X = z.infer<typeof xSchema>`, esportati da `src/index.ts`.
+Convenzione: per ogni contratto uno schema `xSchema` e il tipo `X = z.infer<typeof xSchema>`, esportati da `src/index.ts`. Il front-end prende i tipi sempre da qui; tipi propri solo se servono alla UI (es. lo stato di un form).
 
 ## Build
 
