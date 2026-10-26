@@ -4,7 +4,7 @@ Convenzioni del repo, valide per le persone e per gli agenti AI (anche per le sk
 
 ## Rami (git-flow)
 
-- `main`: solo release, taggate `v<versione>` (es. `v1.0.0`).
+- `main`: solo release, taggate `v<versione>` (es. `v1.0.0`). Procedura in [Release](#release).
 - `develop`: integrazione, ramo di default su GitHub. Le PR puntano qui.
 - `feature/<nome>`: un ramo per ogni task. Si apre da `develop` con `/start <nome>` (oppure `git flow feature start <nome>`).
 - `bugfix/`, `release/`, `hotfix/`: come da git-flow (configurazione dopo il clone: `git flow init -d && git config gitflow.prefix.versiontag v`; non viene versionata).
@@ -21,15 +21,15 @@ Formato [Conventional Commits](https://www.conventionalcommits.org/): tipo e amb
 <corpo opzionale: perché, non come>
 ```
 
-| Tipo | Quando |
-|---|---|
-| `feat` | Nuova funzionalità |
-| `fix` | Correzione di un bug |
-| `docs` | Solo documentazione (anche wiki: `docs(wiki): …`) |
-| `refactor` | Modifica del codice senza cambiare il comportamento |
-| `test` | Test |
-| `build` / `ci` | Dipendenze, build, pipeline |
-| `chore` | Tutto il resto (configurazione, pulizia) |
+| Tipo           | Quando                                              |
+| -------------- | --------------------------------------------------- |
+| `feat`         | Nuova funzionalità                                  |
+| `fix`          | Correzione di un bug                                |
+| `docs`         | Solo documentazione (anche wiki: `docs(wiki): …`)   |
+| `refactor`     | Modifica del codice senza cambiare il comportamento |
+| `test`         | Test                                                |
+| `build` / `ci` | Dipendenze, build, pipeline                         |
+| `chore`        | Tutto il resto (configurazione, pulizia)            |
 
 Ambiti: `api`, `web`, `shared`, più `wiki`, `raw`, `output`, `docs`, `ci`.
 
@@ -60,6 +60,19 @@ pnpm build
 - feature e bugfix verso `develop`: **squash** (un commit per feature, con il titolo della PR);
 - release e hotfix verso `main`, e il loro ritorno su `develop`: **merge normale**, altrimenti `main` e `develop` divergono;
 - dopo lo squash il ramo locale si cancella con `git branch -D feature/<nome>` (git non lo vede come unito).
+
+## Release
+
+Versioni [SemVer](https://semver.org/) (`MAJOR.MINOR.PATCH`). Il campo `version` dei pacchetti del workspace (`apps/api`, `apps/web`, `packages/shared`) è sempre quello dell'ultima release; la root non ha versione.
+
+1. Da `develop` aggiornato: `git flow release start <versione>` (es. `0.1.0`, senza `v`).
+2. Sul ramo `release/<versione>`, allinea le versioni e committa:
+   ```bash
+   pnpm -r exec npm pkg set version=<versione>
+   git commit -am "chore: versione <versione>"
+   ```
+3. `git flow release finish <versione>`: merge normale su `main`, tag `v<versione>`, ritorno su `develop`.
+4. `git push origin main develop --tags`. Il push su `main` pubblica API e web (vedi `docs/wiki/progetto/deploy.md`).
 
 ## Documentazione
 
