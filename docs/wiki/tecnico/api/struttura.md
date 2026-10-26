@@ -1,6 +1,6 @@
 ---
 tipo: info
-aggiornato: 2026-10-25
+aggiornato: 2026-10-26
 fonti:
   - raw/compiled/first-develop/2026-10-25-scaffolding.md
   - raw/compiled/auth/2026-10-25-implementazione.md
@@ -66,7 +66,7 @@ Ogni errore è un JSON `{ errore: { codice, messaggio, dettagli? } }` (schema `e
 
 ## Health check
 
-`GET /health` risponde `{ stato, db, redis, versione }`: 200 se DB e Redis rispondono, 503 altrimenti. Il DB si verifica con `select 1`, perché MikroORM 7 si connette in modo lazy. `versione` è `APP_VERSION` (sha git passato all'immagine Docker, `dev` in locale). È usato dall'HEALTHCHECK Docker e servirà a Render e allo smoke test del deploy.
+`GET /health` risponde `{ stato, db, redis, versione }`: 200 se DB e Redis rispondono, 503 altrimenti. Il DB si verifica con `select 1`, perché MikroORM 7 si connette in modo lazy. `versione` è `APP_VERSION` (sha git passato all'immagine Docker, `dev` in locale). È usato dall'HEALTHCHECK Docker, dall'health check di Render e dallo smoke test del [deploy](../../progetto/deploy.md).
 
 ## Redis
 

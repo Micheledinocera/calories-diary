@@ -1,19 +1,20 @@
 ---
 tipo: info
-aggiornato: 2026-10-25
+aggiornato: 2026-10-26
 fonti:
   - raw/compiled/first-develop/setup-progetto.md
   - raw/compiled/first-develop/2026-10-25-decisioni-e-piano.md
   - raw/compiled/first-develop/2026-10-25-scaffolding.md
   - raw/compiled/auth/2026-10-25-bun-dev-ctrlc.md
   - raw/compiled/barcode-scan/2026-10-25-sviluppo-da-telefono.md
+  - raw/compiled/deploy/2026-10-26-roadmap.md
 ---
 
 # Sviluppo, CI e ambienti
 
 ## Priorità: prima lo sviluppo locale
 
-Ogni funzionalità si realizza e si verifica prima in locale con Docker. Il deploy è in secondo piano: arriva con una feature dedicata (`deploy`). Comandi di avvio nel `README.md` della root.
+Ogni funzionalità si realizza e si verifica prima in locale con Docker. Il deploy è descritto in [Deploy](./deploy.md). Comandi di avvio nel `README.md` della root.
 
 ## Sviluppo locale
 
@@ -32,24 +33,21 @@ Ogni funzionalità si realizza e si verifica prima in locale con Docker. Il depl
 - `ci.yml` (su ogni PR e sui push a `main` e `develop`): lint, typecheck, test e build di tutti i pacchetti, più la build dell'immagine Docker dell'API senza push.
 - Check da lanciare prima di ogni PR: sezione *Comandi di check* di `CONTRIBUTING.md`.
 
-## Ambienti previsti
+## Ambienti
 
 Hosting interamente gratuito (senza carta di credito né crediti a scadenza); cold start e sospensione per inattività sono accettati. Tutto ciò che gira lato server è containerizzato, per poterlo spostare (es. su AWS) cambiando solo il target di deploy.
 
 | Ambiente | Branch | Web | API | DB | Redis |
 |---|---|---|---|---|---|
 | Locale | — | localhost:3000 (anche dalla rete locale) | localhost:3001 (dal web: `/api`) | Docker | Docker |
-| Preview | PR | Vercel preview | API di produzione (o staging) | — | — |
+| Preview | PR | Vercel preview | API di produzione | — | — |
 | Production | `main` | Vercel | Render (immagine da GHCR) | Neon | Upstash |
 
-- Staging facoltativo (branch `develop`, secondo servizio Render, branch Neon dedicato): da predisporre nei workflow ma lasciare spento finché non serve.
-- Pipeline di deploy dell'API prevista: build e push su GHCR, migrazioni verso Neon con la connessione diretta, deploy hook di Render, smoke test su `/health` con attesa lunga.
-- Le migrazioni non girano mai all'avvio del container.
+- Staging facoltativo (branch `develop`, secondo servizio Render, branch Neon dedicato): predisposto nel workflow di deploy, spento.
+- Pipeline di deploy dell'API, configurazione e backup: [Deploy](./deploy.md).
+- Le migrazioni non girano mai all'avvio del container: le lancia la pipeline di deploy.
 
 ## Identità git
 
 I commit di questo repo usano l'email noreply dell'account GitHub `Micheledinocera` (`user.email` locale al repo).
 
-## Domande aperte
-
-- Dettagli del deploy (come passare a Render l'immagine appena pubblicata, accesso di Render al pacchetto GHCR, quote gratuite aggiornate): da verificare nella feature `deploy`.
