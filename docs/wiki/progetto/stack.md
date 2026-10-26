@@ -1,12 +1,13 @@
 ---
 tipo: info
-aggiornato: 2026-10-25
+aggiornato: 2026-10-26
 fonti:
   - raw/compiled/first-develop/setup-progetto.md
   - raw/compiled/first-develop/2026-10-25-scaffolding.md
   - raw/compiled/remove-dependabot/2026-10-25-versioni-fissate.md
   - raw/compiled/barcode-scan/2026-10-25-libreria-scansione.md
   - raw/compiled/barcode-scan/2026-10-25-sviluppo-da-telefono.md
+  - raw/compiled/deploy/2026-10-26-roadmap.md
 ---
 
 # Stack e strumenti
@@ -48,4 +49,4 @@ Regola: si usano le **ultime versioni stabili compatibili tra loro**, verificate
 | `context7` | `.mcp.json` | Documentazione aggiornata delle librerie (MikroORM, Express, zod, Dexie, Vitest…) |
 | `playwright` | `.mcp.json` | Provare la PWA nel browser |
 
-Da valutare con la feature `deploy`: gli MCP ufficiali di Neon, Render, Vercel e Upstash.
+Non configurati: gli MCP ufficiali di Render, Neon e Vercel (per Upstash non ne risulta uno ufficiale). Vedi le domande aperte di [Deploy](./deploy.md).

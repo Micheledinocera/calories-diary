@@ -1,6 +1,6 @@
 ---
 tipo: info
-aggiornato: 2026-10-25
+aggiornato: 2026-10-26
 fonti:
   - raw/compiled/first-develop/analisi-iniziale-calorie-tracker.md
   - raw/compiled/first-develop/2026-10-25-decisioni-e-piano.md
@@ -67,7 +67,7 @@ Applicazione **personale** per tracciare ogni giorno calorie e macronutrienti. �
 
 **Export di condivisione** (in `export`): si sceglie un intervallo di giorni, **al massimo una settimana**, e si ottiene un file **markdown**, facile da mandare in giro o da convertire in PDF. Contiene gli obiettivi (fabbisogno e ripartizione dei macro), un riepilogo dei giorni e, per ogni giorno, i totali di consumo rispetto agli obiettivi e il dettaglio di cosa si è mangiato per pasto, con kcal e macro di ogni alimento. Lo genera il front-end dai dati del diario.
 
-**Niente backup nell'app**: non c'è export/import dei dati in JSON o CSV. Il requisito veniva dall'analisi iniziale local-first, quando i dati stavano solo sul dispositivo; con il [server come fonte di verità](../progetto/decisione-server-fonte-di-verita.md) i dati stanno in PostgreSQL, e la protezione dai guasti è un backup del database lato server, da trattare nel `deploy`.
+**Niente backup nell'app**: non c'è export/import dei dati in JSON o CSV. Il requisito veniva dall'analisi iniziale local-first, quando i dati stavano solo sul dispositivo; con il [server come fonte di verità](../progetto/decisione-server-fonte-di-verita.md) i dati stanno in PostgreSQL, e la protezione dai guasti è il [backup notturno del database](../progetto/deploy.md#backup-del-database) lato server.
 
 ## Requisiti non funzionali
 

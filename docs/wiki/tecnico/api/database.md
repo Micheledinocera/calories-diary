@@ -1,6 +1,6 @@
 ---
 tipo: info
-aggiornato: 2026-10-25
+aggiornato: 2026-10-26
 fonti:
   - raw/compiled/first-develop/2026-10-25-scaffolding.md
   - raw/compiled/auth/2026-10-25-implementazione.md
@@ -35,7 +35,7 @@ Si usa uno script nostro, `src/db/cli.ts`, non la CLI di MikroORM: lo stesso com
 | `pnpm utente:crea <email>` | Crea un utente (anche dalla root) — vedi [Autenticazione e utenti](./auth.md#creazione-degli-utenti) |
 
 - Le migrazioni stanno in `apps/api/migrations/` con lo snapshot dello schema (`.snapshot-*.json`, aggiornato solo da `migration:create`); vengono compilate in `dist/migrations/`.
-- Le migrazioni **non** girano all'avvio del container: le lancerà la pipeline di deploy.
+- Le migrazioni **non** girano all'avvio del container: le lancia la [pipeline di deploy](../../progetto/deploy.md#pipeline-dellapi), dall'immagine appena pubblicata.
 - `DatabaseSeeder` oggi non inserisce nulla: i tipi di pasto sono fissi nel codice e gli utenti si creano con `utente:crea`. Resta come posto per dati futuri.
 - `seed:demo` (`src/db/seeders/demo.seeder.ts`) riempie un utente già creato con `utente:crea` e **senza alimenti** (altrimenti rifiuta: non si mescola a dati veri) e non gira mai con `NODE_ENV=production`. Imposta fabbisogno 2000 e 50/30/20, crea 27 alimenti con porzioni e circa 5 settimane di diario da menu tipo: per lo più entro il fabbisogno, un macro oltre ogni qualche giorno, oltre il fabbisogno il sabato, due giorni vuoti, oggi solo colazione e pranzo. Il test `test/demo.test.ts` verifica che ogni menu tipo dia lo stato dichiarato.
 - La migrazione `diario` ha trasformato `pasto` da lista dei tipi di pasto per utente a pasti di un giorno, cancellando le righe esistenti (non avevano un giorno).
