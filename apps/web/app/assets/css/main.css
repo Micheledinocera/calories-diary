@@ -1,0 +1,78 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/* Tokens of the design system (Claude Design, "Calories Diary"): light on :root, dark on .dark. */
+@theme {
+  /* Resolved and self-hosted by @nuxt/fonts. */
+  --font-sans: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@theme inline {
+  --color-sfondo: var(--cd-sfondo);
+  --color-traccia: var(--cd-traccia);
+  --color-velo: var(--cd-velo);
+  --color-ok: var(--cd-ok);
+  --color-ok-tenue: var(--cd-ok-tenue);
+  --color-attenzione: var(--cd-attenzione);
+  --color-attenzione-tenue: var(--cd-attenzione-tenue);
+  --color-oltre: var(--cd-oltre);
+  --color-oltre-tenue: var(--cd-oltre-tenue);
+  --color-carboidrati: var(--cd-carboidrati);
+  --color-proteine: var(--cd-proteine);
+  --color-grassi: var(--cd-grassi);
+  --shadow-card: var(--cd-ombra-card);
+}
+
+:root {
+  --cd-sfondo: #f1f5f9;
+  --cd-traccia: #e2e8f0;
+  --cd-velo: rgb(15 23 42 / 0.45);
+  /* State marks (dots, ring lap); text uses --ui-success / --ui-warning / --ui-error. */
+  --cd-ok: #16a34a;
+  --cd-ok-tenue: #dcfce7;
+  --cd-attenzione: #ea580c;
+  --cd-attenzione-tenue: #ffedd5;
+  --cd-oltre: #dc2626;
+  --cd-oltre-tenue: #fee2e2;
+  /* Cool hues: macros must never look like a day state. */
+  --cd-carboidrati: #0786a8;
+  --cd-proteine: #7c3aed;
+  --cd-grassi: #db2777;
+  --cd-ombra-card: 0 1px 2px rgb(15 23 42 / 0.06), 0 1px 3px rgb(15 23 42 / 0.04);
+
+  --ui-primary: var(--ui-color-primary-700);
+  --ui-success: var(--ui-color-success-700);
+  --ui-warning: var(--ui-color-warning-700);
+  --ui-error: var(--ui-color-error-700);
+  --ui-text-muted: #526075;
+  --ui-bg-elevated: #f8fafc;
+  --ui-radius: 0.5rem;
+}
+
+.dark {
+  --cd-sfondo: #0f172a;
+  --cd-traccia: #334155;
+  --cd-velo: rgb(2 6 23 / 0.7);
+  --cd-ok: #4ade80;
+  --cd-ok-tenue: #0b3a1f;
+  --cd-attenzione: #fb923c;
+  --cd-attenzione-tenue: #43200b;
+  --cd-oltre: #f87171;
+  --cd-oltre-tenue: #4a1414;
+  --cd-carboidrati: #22d3ee;
+  --cd-proteine: #a78bfa;
+  --cd-grassi: #f472b6;
+  --cd-ombra-card: none;
+
+  --ui-primary: var(--ui-color-primary-400);
+  --ui-success: var(--ui-color-success-400);
+  --ui-warning: var(--ui-color-warning-400);
+  --ui-error: var(--ui-color-error-400);
+  --ui-bg: var(--ui-color-neutral-800);
+  --ui-bg-elevated: #273449;
+  --ui-border: var(--ui-color-neutral-700);
+}
+
+body {
+  background-color: var(--cd-sfondo);
+}

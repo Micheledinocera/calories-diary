@@ -1,0 +1,12 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Dependencies allowed to run install scripts (pnpm blocks the others).
+allowBuilds:
+  esbuild: true
+  unrs-resolver: true
+  vue-demi: true
+
+# Versioni esatte in package.json: niente range, gli aggiornamenti si fanno a mano.
+savePrefix: ""

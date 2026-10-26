@@ -1,0 +1,5 @@
+{
+  "apps/{api,web}/**/*.{ts,vue}": "prettier --write",
+  "packages/**/*.ts": "prettier --write",
+  "*.{json,md,yml,yaml,css}": "prettier --write"
+}
