@@ -1,0 +1,40 @@
+# Nightly dump of the production database, encrypted with age and kept as an artifact for 90 days.
+# Artifacts of a public repo can be downloaded by any GitHub user: the dump never leaves the runner unencrypted.
+# Restore: docs/wiki (deploy page).
+name: Backup database
+
+on:
+  schedule:
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    name: Dump, encrypt, upload
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Install age
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq age
+
+      # pg_dump from the official image: its major version must be >= the server's.
+      - name: Dump and encrypt
+        env:
+          DATABASE_URL_DIRECT: ${{ secrets.DATABASE_URL_DIRECT }}
+          BACKUP_AGE_RECIPIENT: ${{ vars.BACKUP_AGE_RECIPIENT }}
+        run: |
+          set -o pipefail
+          docker run --rm -e DATABASE_URL_DIRECT postgres:18-alpine \
+            sh -c 'pg_dump --format=custom --no-owner --no-privileges "$DATABASE_URL_DIRECT"' \
+            | age -r "$BACKUP_AGE_RECIPIENT" -o backup.dump.age
+          ls -l backup.dump.age
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: backup-${{ github.run_id }}
+          path: backup.dump.age
+          retention-days: 90
+          if-no-files-found: error
