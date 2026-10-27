@@ -3,7 +3,6 @@ import { obiettiviSchema, ripartizionePredefinita, type Obiettivi } from "@calor
 import type { FormSubmitEvent } from "@nuxt/ui";
 import type { ChiaveMacro } from "~/utils/diario";
 
-const { sessione } = useSessione();
 const diario = useDiario();
 const toast = useToast();
 
@@ -59,8 +58,8 @@ const erroreCaricamento = computed(() => (error.value ? normalizzaErrore(error.v
 <template>
   <UContainer class="py-6 max-w-xl space-y-4">
     <div>
-      <h1 class="text-2xl font-bold text-highlighted">Profilo</h1>
-      <p class="text-sm text-muted">{{ sessione?.utente.email }}</p>
+      <h1 class="text-2xl font-bold text-highlighted">Obiettivi</h1>
+      <p class="text-sm text-muted">Valgono per ogni giorno del diario, anche quelli passati.</p>
     </div>
 
     <UAlert
@@ -148,11 +147,6 @@ const erroreCaricamento = computed(() => (error.value ? normalizzaErrore(error.v
             Valori consigliati
           </UButton>
         </div>
-      </UCard>
-
-      <UCard :ui="{ body: 'space-y-3 sm:p-4' }">
-        <h2 class="font-semibold text-highlighted">Tema</h2>
-        <SelettoreTema />
       </UCard>
 
       <UButton type="submit" size="xl" block :loading="inCorso">Salva</UButton>

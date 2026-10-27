@@ -12,6 +12,17 @@ const route = useRoute();
 const attiva = (to: string) => (to === "/" ? route.path === "/" : route.path.startsWith(to));
 
 const menu = ref(false);
+const vociAccount = computed(() => [
+  { label: "Obiettivi", icon: "i-lucide-target", to: "/obiettivi" },
+  { label: "Profilo", icon: "i-lucide-user-cog", to: "/profilo" },
+  ...(sessione.value?.utente.ruolo === "admin"
+    ? [{ label: "Gestione utenti", icon: "i-lucide-users", to: "/utenti" }]
+    : []),
+]);
+const inAccount = computed(() => vociAccount.value.some((v) => route.path.startsWith(v.to)));
+
+// Web app version and commit (nuxt.config.ts): tells whether the PWA has updated.
+const { versione } = useRuntimeConfig().public;
 
 async function logout() {
   menu.value = false;
@@ -45,20 +56,22 @@ async function logout() {
             variant="ghost"
             color="neutral"
             aria-label="Account"
-            :class="route.path === '/profilo' && 'bg-primary/10 text-primary'"
+            :class="inAccount && 'bg-primary/10 text-primary'"
           />
           <template #content>
             <div class="w-72 p-2 flex flex-col gap-0.5">
               <p class="px-2.5 pt-2 pb-1.5 text-[13px] text-muted truncate">
-                {{ sessione?.utente.email }}
+                {{ sessione?.utente.username }}
               </p>
               <NuxtLink
-                to="/profilo"
+                v-for="v in vociAccount"
+                :key="v.to"
+                :to="v.to"
                 class="flex items-center gap-2.5 h-10 px-2.5 rounded-md text-[15px] hover:bg-elevated"
                 @click="menu = false"
               >
-                <UIcon name="i-lucide-target" class="size-4" />
-                Profilo e obiettivi
+                <UIcon :name="v.icon" class="size-4" />
+                {{ v.label }}
               </NuxtLink>
               <div class="flex flex-col gap-2 px-2.5 pt-2.5 pb-3 my-1 border-y border-default">
                 <span class="text-xs font-semibold tracking-wide uppercase text-muted">Tema</span>
@@ -80,5 +93,6 @@ async function logout() {
     <main class="flex-1">
       <slot />
     </main>
+    <footer class="py-4 text-center text-xs text-dimmed">Calories Diary {{ versione }}</footer>
   </div>
 </template>

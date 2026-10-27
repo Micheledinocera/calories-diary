@@ -7,6 +7,8 @@ export default defineAppConfig({
       warning: "yellow",
       error: "red",
     },
+    // The default 75% is too close to an enabled button.
+    button: { slots: { base: "disabled:opacity-50 aria-disabled:opacity-50" } },
     // The "velo" token behind sheets and modals.
     drawer: { slots: { overlay: "bg-velo" } },
     modal: { slots: { overlay: "bg-velo" } },
