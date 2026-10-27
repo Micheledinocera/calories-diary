@@ -1,10 +1,12 @@
 ---
 tipo: info
-aggiornato: 2026-10-25
+aggiornato: 2026-10-27
 fonti:
   - raw/compiled/pre-deploy/2026-10-25-tasks.md
   - raw/compiled/pre-deploy/2026-10-25-design.md
   - raw/compiled/pre-deploy/2026-10-25-implementazione.md
+  - raw/compiled/ui-tweaks/2026-10-27-task.md
+  - raw/compiled/ui-tweaks/2026-10-27-task2.md
 ---
 
 # Design
@@ -20,7 +22,7 @@ Interfaccia pulita e silenziosa, ispirata a Yazio ma con meno decorazione: card 
 
 ## Regole principali
 
-- **Un colore, un significato.** Il blu (primario, sky) vuol dire "puoi toccare qui": pulsanti, link, tab attiva, oggi nel calendario. Verde, arancione e rosso dicono solo com'è andata la giornata (regola in [Prodotto](../business/prodotto.md)). Il primario era verde: è diventato blu perché si confondeva con il verde di stato.
+- **Un colore, un significato.** Il blu (primario, sky) vuol dire "puoi toccare qui": pulsanti, link, tab attiva, oggi nel calendario. Verde, giallo e rosso dicono solo com'è andata la giornata (regola in [Prodotto](../business/prodotto.md)). Il primario era verde: è diventato blu perché si confondeva con il verde di stato. Lo stato intermedio era arancione: è diventato giallo perché nel calendario si confondeva con il rosso.
 - **Lo stato si legge anche senza colore**: c'è sempre una parola o un'icona accanto.
 - **Macro in tinte fredde**: carboidrati ciano, proteine viola, grassi rosa, sempre in quest'ordine, così non sembrano mai uno stato.
 - **Anello dei macro**: la lunghezza colorata è la quota di fabbisogno già mangiata, divisa in spicchi per kcal di ciascun macro. Oltre il fabbisogno l'anello è pieno e un giro esterno sottile rosso mostra l'eccesso.
@@ -33,3 +35,4 @@ Interfaccia pulita e silenziosa, ispirata a Yazio ma con meno decorazione: card 
 
 - **Export**: la schermata va ripensata (l'utente vuole vedere il dettaglio di cosa si è mangiato a ogni pasto); per ora resta com'era.
 - **Torcia** nella scansione: proposta nel design, non fatta perché non tutti i browser la supportano.
+- **Testo muted** nel tema chiaro: schiarito a `#8290a3` per scelta dell'utente. Su bianco ha un contrasto di circa 3,2:1 (meno di 3:1 sullo sfondo della pagina), sotto il 4,5:1 di WCAG AA per il testo piccolo; un compromesso sarebbe `#64748b` (circa 4,8:1). Da decidere se tenerlo.

@@ -1,6 +1,6 @@
 ---
 tipo: info
-aggiornato: 2026-10-26
+aggiornato: 2026-10-27
 fonti:
   - raw/compiled/first-develop/analisi-iniziale-calorie-tracker.md
   - raw/compiled/first-develop/2026-10-25-decisioni-e-piano.md
@@ -15,6 +15,7 @@ fonti:
   - raw/compiled/export/2026-10-25-decisioni-utente.md
   - raw/compiled/pre-deploy/2026-10-25-tasks.md
   - raw/compiled/pre-deploy/2026-10-25-design.md
+  - raw/compiled/ui-tweaks/2026-10-27-task.md
 ---
 
 # Prodotto
@@ -49,7 +50,7 @@ Applicazione **personale** per tracciare ogni giorno calorie e macronutrienti. �
 - **Obiettivo in grammi** di ogni macro: fabbisogno × quota ÷ kcal per grammo (4 per carboidrati e proteine, 9 per i grassi). Con 2000 kcal e 50/30/20: 250 g di carboidrati, 100 g di proteine, 67 g di grassi.
 - **Stato della giornata**, uguale nella giornata e nel calendario, sempre con colore e parola:
   - **verde** (entro il fabbisogno): kcal ≤ fabbisogno e ogni macro entro il suo obiettivo in grammi;
-  - **arancione** (macro oltre l'obiettivo): kcal ≤ fabbisogno, ma almeno un macro oltre il suo obiettivo;
+  - **giallo** (macro oltre l'obiettivo): kcal ≤ fabbisogno, ma almeno un macro oltre il suo obiettivo;
   - **rosso** (oltre il fabbisogno): kcal > fabbisogno.
   Senza fabbisogno impostato non c'è stato.
 - **Pasto più pesante**: solo quando la giornata è oltre il fabbisogno, l'app segnala il pasto con più kcal (a parità, il primo della giornata), con la sua quota sul totale.
