@@ -1,14 +1,15 @@
 ---
 tipo: info
-aggiornato: 2026-10-25
+aggiornato: 2026-10-27
 fonti:
   - raw/compiled/food-catalog/2026-10-25-obiettivo.md
   - raw/compiled/food-catalog/2026-10-25-open-food-facts-e-perimetro.md
+  - raw/compiled/ui-tweaks/2026-10-27-decisioni.md
 ---
 
 # Catalogo e lookup per barcode
 
-Modulo `src/modules/catalogo/`. Il catalogo è il primo dei due livelli di dati degli alimenti (vedi [Dati degli alimenti](../../business/dati-alimenti.md#catalogo-e-alimenti-dellutente)): i prodotti importati dal provider, **condivisi tra tutti gli utenti** come cache comune. Il secondo livello sono gli [alimenti dell'utente](./alimenti.md).
+Modulo `src/modules/catalogo/`. Il catalogo è il primo dei due livelli di dati degli alimenti (vedi [Dati degli alimenti](../../business/dati-alimenti.md#catalogo-e-alimenti)): i prodotti importati dal provider, **condivisi tra tutti gli utenti** come cache comune. Il secondo livello sono gli [alimenti](./alimenti.md), anch'essi condivisi.
 
 ## Entità `ProdottoCatalogo`
 

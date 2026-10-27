@@ -5,15 +5,17 @@ const route = useRoute();
 const id = route.params.id as string;
 const { trova, modifica, elimina } = useAlimenti();
 
-const stato = ref<StatoFormAlimento>(statoVuoto());
 const { data: alimento, error } = useAsyncData(`alimento-${id}`, () => trova(id));
-watch(
-  alimento,
-  (a) => {
-    if (a) stato.value = statoDaAlimento(a);
-  },
-  { immediate: true },
-);
+
+// Read only by default: the form opens with "Modifica", from the saved values.
+const inModifica = ref(false);
+const stato = ref<StatoFormAlimento>(statoVuoto());
+function apriModifica() {
+  if (!alimento.value) return;
+  stato.value = statoDaAlimento(alimento.value);
+  errore.value = null;
+  inModifica.value = true;
+}
 
 const inCorso = ref(false);
 const errore = ref<ErroreNormalizzato | null>(null);
@@ -38,6 +40,7 @@ const aggiorna = (a: Alimento) => {
 function salva({ barcode: _, ...dati }: NuovoAlimento) {
   return esegui(async () => {
     aggiorna(await modifica(id, dati));
+    inModifica.value = false;
     toast.add({ title: "Alimento salvato", color: "success", icon: "i-lucide-check" });
   });
 }
@@ -142,19 +145,64 @@ const erroreCaricamento = computed(() => (error.value ? normalizzaErrore(error.v
         </div>
       </UCard>
 
-      <AlimentoForm v-model="stato" :avvisi="alimento.avvisi" :in-corso="inCorso" @salva="salva">
-        <template #errori>
-          <UAlert
-            v-if="errore"
-            color="error"
-            variant="subtle"
-            icon="i-lucide-circle-alert"
-            :title="errore.messaggio"
-          />
-        </template>
-      </AlimentoForm>
+      <template v-if="inModifica">
+        <AlimentoForm v-model="stato" :avvisi="alimento.avvisi" :in-corso="inCorso" @salva="salva">
+          <template #errori>
+            <UAlert
+              v-if="errore"
+              color="error"
+              variant="subtle"
+              icon="i-lucide-circle-alert"
+              :title="errore.messaggio"
+            />
+          </template>
+        </AlimentoForm>
+        <UButton
+          color="neutral"
+          variant="ghost"
+          size="xl"
+          block
+          :disabled="inCorso"
+          @click="inModifica = false"
+        >
+          Annulla
+        </UButton>
+      </template>
 
-      <div class="flex flex-col gap-2 pt-2 border-t border-default">
+      <template v-else>
+        <UAlert
+          v-for="avviso in alimento.avvisi"
+          :key="avviso"
+          color="warning"
+          variant="subtle"
+          icon="i-lucide-triangle-alert"
+          :title="messaggiAvvisi[avviso] ?? avviso"
+        />
+
+        <UCard :ui="{ body: 'sm:p-4' }">
+          <h2 class="text-sm font-semibold text-highlighted mb-2">Porzioni</h2>
+          <ul v-if="alimento.porzioni.length" class="divide-y divide-default">
+            <li
+              v-for="p in alimento.porzioni"
+              :key="p.id"
+              class="flex items-center justify-between gap-2 py-2"
+            >
+              <span class="min-w-0 truncate">{{ p.nome }}</span>
+              <span class="flex items-center gap-2 shrink-0 text-muted tabular-nums">
+                <UBadge v-if="p.predefinita" variant="soft" size="sm">Predefinita</UBadge>
+                {{ formattaValore(p.quantita) }} {{ alimento.unitaBase }}
+              </span>
+            </li>
+          </ul>
+          <p v-else class="text-sm text-muted">
+            Nessuna porzione: nel diario si inserisce la quantità in {{ alimento.unitaBase }}.
+          </p>
+        </UCard>
+
+        <UButton icon="i-lucide-pencil" size="xl" block @click="apriModifica">Modifica</UButton>
+      </template>
+
+      <div v-if="!inModifica" class="flex flex-col gap-2 pt-2 border-t border-default">
         <UButton
           :icon="alimento.archiviato ? 'i-lucide-archive-restore' : 'i-lucide-archive'"
           color="neutral"
@@ -167,7 +215,7 @@ const erroreCaricamento = computed(() => (error.value ? normalizzaErrore(error.v
           {{ alimento.archiviato ? "Ripristina" : "Archivia" }}
         </UButton>
         <UButton
-          v-if="alimento.utilizzi === 0"
+          v-if="alimento.eliminabile"
           icon="i-lucide-trash-2"
           color="error"
           variant="ghost"
@@ -178,9 +226,15 @@ const erroreCaricamento = computed(() => (error.value ? normalizzaErrore(error.v
         >
           Elimina
         </UButton>
-        <p v-else-if="!alimento.archiviato" class="text-sm text-muted text-center">
-          Usato nel diario: puoi archiviarlo, non eliminarlo. Archiviato non compare più nella
-          ricerca.
+        <p class="text-sm text-muted text-center">
+          {{
+            alimento.archiviato
+              ? "Archiviato: non compare nella tua ricerca. Gli altri lo vedono ancora."
+              : "Archiviarlo lo nasconde solo dalla tua ricerca: gli altri lo vedono ancora."
+          }}
+          <template v-if="!alimento.eliminabile">
+            Lo elimina solo chi l'ha creato, finché nessun diario lo usa.
+          </template>
         </p>
       </div>
     </template>

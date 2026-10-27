@@ -27,7 +27,10 @@ export const porzioneSchema = z.object({
 
 export type Porzione = z.infer<typeof porzioneSchema>;
 
-/** The user's own copy of a food: corrected and used in the diary. */
+/**
+ * A food of the shared pool: every user sees it, uses it and can correct it. `archiviato`,
+ * `ultimoUso` and `utilizzi` are the current user's.
+ */
 export const alimentoSchema = z.object({
   id: z.uuid(),
   nome: z.string().min(1),
@@ -41,6 +44,8 @@ export const alimentoSchema = z.object({
   archiviato: z.boolean(),
   ultimoUso: z.iso.datetime().nullable(),
   utilizzi: z.int().nonnegative(),
+  /** Only its author can delete a food, and only while no diary uses it. */
+  eliminabile: z.boolean(),
   /** Only KCAL_INCOERENTI can apply: the four values are always present. */
   avvisi: z.array(avvisoCatalogoSchema),
   importatoIl: z.iso.datetime().nullable(),
@@ -96,7 +101,10 @@ export const nuovoAlimentoSchema = z.object({
 
 export type NuovoAlimento = z.input<typeof nuovoAlimentoSchema>;
 
-/** Body of `PATCH /alimenti/:id`: every field is optional; `porzioni` replaces the whole list. */
+/**
+ * Body of `PATCH /alimenti/:id`: every field is optional; `porzioni` replaces the whole list.
+ * `archiviato` hides the food only for the current user.
+ */
 export const modificaAlimentoSchema = z
   .object({
     nome: z.string().trim().min(1).max(255),

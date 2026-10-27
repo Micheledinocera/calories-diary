@@ -1,6 +1,6 @@
 ---
 tipo: info
-aggiornato: 2026-10-26
+aggiornato: 2026-10-27
 fonti:
   - raw/compiled/first-develop/setup-progetto.md
   - raw/compiled/first-develop/2026-10-25-decisioni-e-piano.md
@@ -8,6 +8,7 @@ fonti:
   - raw/compiled/auth/2026-10-25-bun-dev-ctrlc.md
   - raw/compiled/barcode-scan/2026-10-25-sviluppo-da-telefono.md
   - raw/compiled/deploy/2026-10-26-roadmap.md
+  - raw/compiled/ui-tweaks/2026-10-27-decisioni.md
 ---
 
 # Sviluppo, CI e ambienti
@@ -40,10 +41,10 @@ Hosting interamente gratuito (senza carta di credito né crediti a scadenza); co
 | Ambiente | Branch | Web | API | DB | Redis |
 |---|---|---|---|---|---|
 | Locale | — | localhost:3000 (anche dalla rete locale) | localhost:3001 (dal web: `/api`) | Docker | Docker |
-| Preview | PR | Vercel preview | API di produzione | — | — |
 | Production | `main` | Vercel | Render (immagine da GHCR) | Neon | Upstash |
 
 - Staging facoltativo (branch `develop`, secondo servizio Render, branch Neon dedicato): predisposto nel workflow di deploy, spento.
+- Niente preview: Vercel fa il deploy solo da `main` (vedi [Deploy](./deploy.md#configurazione)); feature e PR si provano in locale.
 - Pipeline di deploy dell'API, configurazione e backup: [Deploy](./deploy.md).
 - Le migrazioni non girano mai all'avvio del container: le lancia la pipeline di deploy.
 
