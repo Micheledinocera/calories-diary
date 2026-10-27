@@ -4,7 +4,7 @@ export default defineAppConfig({
       primary: "sky",
       neutral: "slate",
       success: "green",
-      warning: "orange",
+      warning: "yellow",
       error: "red",
     },
     // The "velo" token behind sheets and modals.
