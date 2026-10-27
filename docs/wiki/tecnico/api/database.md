@@ -8,6 +8,7 @@ fonti:
   - raw/compiled/diary/2026-10-25-decisioni-diario.md
   - raw/compiled/pre-deploy/2026-10-25-implementazione.md
   - raw/compiled/ui-tweaks/2026-10-27-decisioni.md
+  - raw/compiled/user-login/2026-10-27-implementazione.md
 ---
 
 # Database, migrazioni e seed
@@ -32,8 +33,9 @@ Si usa uno script nostro, `src/db/cli.ts`, non la CLI di MikroORM: lo stesso com
 | `pnpm migration:up` | Applica le migrazioni pendenti (anche `pnpm db:migrate` dalla root) |
 | `pnpm migration:down` | Annulla l'ultima migrazione |
 | `pnpm seed` | Lancia `DatabaseSeeder` (anche `pnpm db:seed` dalla root) |
-| `pnpm seed:demo <email>` | Dati finti per i test di usabilità (anche `pnpm db:seed:demo` dalla root) |
-| `pnpm utente:crea <email>` | Crea un utente (anche dalla root) — vedi [Autenticazione e utenti](./auth.md#creazione-degli-utenti) |
+| `pnpm seed:demo <username>` | Dati finti per i test di usabilità (anche `pnpm db:seed:demo` dalla root) |
+| `pnpm utente:crea <username> [--admin]` | Crea un utente, o un admin (anche dalla root) — vedi [Autenticazione e utenti](./auth.md#creazione-degli-utenti) |
+| `pnpm utente:admin <username>` | Rende admin un utente esistente (anche dalla root) |
 
 - Le migrazioni stanno in `apps/api/migrations/` con lo snapshot dello schema (`.snapshot-*.json`, aggiornato solo da `migration:create`); vengono compilate in `dist/migrations/`.
 - Le migrazioni **non** girano all'avvio del container: le lancia la [pipeline di deploy](../../progetto/deploy.md#pipeline-dellapi), dall'immagine appena pubblicata.

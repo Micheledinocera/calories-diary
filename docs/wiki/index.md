@@ -13,4 +13,3 @@ PWA personale per il tracciamento giornaliero di calorie e macronutrienti. Si pa
 Decisioni `aperta` o `in analisi`.
 
 - [Cache offline in sola lettura](./progetto/decisione-cache-offline.md) · in analisi
-- [Gestione delle utenze in app](./progetto/decisione-gestione-utenze.md) · aperta
