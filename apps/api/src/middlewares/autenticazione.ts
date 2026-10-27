@@ -10,17 +10,17 @@ export const nonAutenticato = () =>
   new ErroreApp(401, "NON_AUTENTICATO", "Accesso richiesto o sessione scaduta");
 
 /**
- * Requires `Authorization: Bearer <token>` with a valid token of an existing user.
- * The user goes to `res.locals.utente`; read it with `utenteCorrente`.
+ * Requires `Authorization: Bearer <token>` with a valid token of an existing user, issued after
+ * the last password change. The user goes to `res.locals.utente`; read it with `utenteCorrente`.
  */
 export function richiediAutenticazione(em: EntityManager, gestore: GestoreToken): RequestHandler {
   return async (req, res, next) => {
     const [schema, token] = req.headers.authorization?.split(" ") ?? [];
     if (schema !== "Bearer" || !token) throw nonAutenticato();
-    const id = await gestore.verifica(token);
-    // A deleted user loses access even with a token not yet expired.
-    const utente = id && (await em.findOne(Utente, { id }));
-    if (!utente) throw nonAutenticato();
+    const dati = await gestore.verifica(token);
+    // A deleted user, or one whose password changed, loses access even with a token not yet expired.
+    const utente = dati && (await em.findOne(Utente, { id: dati.utenteId }));
+    if (!utente || utente.versioneSessione !== dati.versione) throw nonAutenticato();
     res.locals.utente = versoDtoUtente(utente);
     next();
   };
@@ -29,3 +29,11 @@ export function richiediAutenticazione(em: EntityManager, gestore: GestoreToken)
 export function utenteCorrente(res: Response): UtenteDto {
   return res.locals.utente as UtenteDto;
 }
+
+/** Mounted after `richiediAutenticazione`: only admins pass. The role is read from the database. */
+export const richiediAdmin: RequestHandler = (_req, res, next) => {
+  if (utenteCorrente(res).ruolo !== "admin") {
+    throw new ErroreApp(403, "NON_AUTORIZZATO", "Operazione riservata agli amministratori");
+  }
+  next();
+};

@@ -46,25 +46,25 @@ describe("giornate demo", () => {
 
 describe("seedDemo", () => {
   let orm: MikroORM;
-  const email = "demo@esempio.it";
+  const username = "demo";
 
   beforeAll(async () => {
     orm = await MikroORM.init(creaConfigOrm(caricaEnv()));
-    await creaUtentiService(orm.em.fork()).crea(email, "password-della-demo");
+    await creaUtentiService(orm.em.fork()).crea(username, "password-della-demo");
   });
 
   afterAll(() => orm.close(true));
 
   it("riempie il diario di un utente senza alimenti, una volta sola", async () => {
-    const risultato = await seedDemo(orm.em.fork(), email);
+    const risultato = await seedDemo(orm.em.fork(), username);
     expect(risultato.alimenti).toBe(Object.keys(alimentiDemo).length);
     expect(risultato.giorni).toBeGreaterThan(25);
-    expect(await orm.em.fork().count(Pasto, { utente: { email } })).toBeGreaterThan(100);
+    expect(await orm.em.fork().count(Pasto, { utente: { username } })).toBeGreaterThan(100);
 
-    await expect(seedDemo(orm.em.fork(), email)).rejects.toBeInstanceOf(ErroreDemo);
+    await expect(seedDemo(orm.em.fork(), username)).rejects.toBeInstanceOf(ErroreDemo);
   });
 
   it("rifiuta un utente che non esiste", async () => {
-    await expect(seedDemo(orm.em.fork(), "nessuno@esempio.it")).rejects.toBeInstanceOf(ErroreDemo);
+    await expect(seedDemo(orm.em.fork(), "nessuno")).rejects.toBeInstanceOf(ErroreDemo);
   });
 });

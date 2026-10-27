@@ -59,18 +59,18 @@ describe("/auth", () => {
   it("il login restituisce una sessione di una settimana", async () => {
     const res = await request(app)
       .post("/auth/login")
-      .send({ ...utenteTest, email: " IO@esempio.it " })
+      .send({ ...utenteTest, username: " IO.Test " })
       .expect(200);
     const sessione = sessioneSchema.parse(res.body);
-    expect(sessione.utente.email).toBe(utenteTest.email);
+    expect(sessione.utente).toMatchObject({ username: utenteTest.username, ruolo: "utente" });
     const giorni = (Date.parse(sessione.scadeIl) - Date.now()) / 86_400_000;
     expect(giorni).toBeCloseTo(7, 1);
   });
 
-  it("risponde 401 con password errata o email sconosciuta", async () => {
+  it("risponde 401 con password errata o username sconosciuto", async () => {
     for (const credenziali of [
       { ...utenteTest, password: "sbagliata" },
-      { email: "nessuno@esempio.it", password: "qualsiasi" },
+      { username: "nessuno", password: "qualsiasi" },
     ]) {
       const res = await request(app).post("/auth/login").send(credenziali).expect(401);
       expect(res.body.errore.codice).toBe("CREDENZIALI_ERRATE");
@@ -78,12 +78,12 @@ describe("/auth", () => {
   });
 
   it("risponde 400 se le credenziali non sono valide", async () => {
-    const res = await request(app).post("/auth/login").send({ email: "io" }).expect(400);
+    const res = await request(app).post("/auth/login").send({ username: "io" }).expect(400);
     expect(res.body.errore.codice).toBe("VALIDAZIONE");
   });
 
-  it("blocca con 429 dopo 5 tentativi sulla stessa email", async () => {
-    const credenziali = { email: "bersaglio@esempio.it", password: "tentativo" };
+  it("blocca con 429 dopo 5 tentativi sullo stesso username", async () => {
+    const credenziali = { username: "bersaglio", password: "tentativo" };
     for (let i = 0; i < 5; i++) {
       await request(app).post("/auth/login").send(credenziali).expect(401);
     }
@@ -101,8 +101,9 @@ describe("/auth", () => {
   });
 
   it("risponde 401 senza token, con token non valido o di un utente inesistente", async () => {
-    const orfano = await creaGestoreToken(caricaEnv().JWT_SECRET).firma(randomUUID());
-    const altroSegreto = await creaGestoreToken("x".repeat(32)).firma(randomUUID());
+    const dati = { utenteId: randomUUID(), versione: 0 };
+    const orfano = await creaGestoreToken(caricaEnv().JWT_SECRET).firma(dati);
+    const altroSegreto = await creaGestoreToken("x".repeat(32)).firma(dati);
     for (const headers of [{}, bearer("abc"), bearer(orfano.token), bearer(altroSegreto.token)]) {
       const res = await request(app).get("/auth/io").set(headers).expect(401);
       expect(res.body.errore.codice).toBe("NON_AUTENTICATO");

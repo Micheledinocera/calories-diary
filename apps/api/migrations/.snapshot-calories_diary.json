@@ -1174,6 +1174,23 @@
           "enumItems": [],
           "mappedType": "datetime"
         },
+        "chiave_username": {
+          "name": "chiave_username",
+          "type": "varchar(254)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": true,
+          "length": 254,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
         "creato_il": {
           "name": "creato_il",
           "type": "timestamptz(6)",
@@ -1197,7 +1214,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "unique": true,
           "length": 254,
           "precision": null,
@@ -1309,9 +1326,68 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "integer"
+        },
+        "ruolo": {
+          "name": "ruolo",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'utente'",
+          "comment": null,
+          "collation": null,
+          "enumItems": ["admin", "utente"],
+          "mappedType": "enum"
+        },
+        "username": {
+          "name": "username",
+          "type": "varchar(254)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 254,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "versione_sessione": {
+          "name": "versione_sessione",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "0",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
         }
       },
       "indexes": [
+        {
+          "columnNames": ["chiave_username"],
+          "composite": false,
+          "constraint": true,
+          "keyName": "utente_chiave_username_unique",
+          "primary": false,
+          "unique": true
+        },
         {
           "columnNames": ["email"],
           "composite": false,
@@ -1329,7 +1405,14 @@
           "unique": true
         }
       ],
-      "checks": [],
+      "checks": [
+        {
+          "name": "utente_ruolo_check",
+          "expression": "\"ruolo\" in ('admin', 'utente')",
+          "definition": "check (\"ruolo\" in ('admin', 'utente'))",
+          "columnName": "ruolo"
+        }
+      ],
       "triggers": [],
       "foreignKeys": {},
       "comment": null
