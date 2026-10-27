@@ -14,6 +14,7 @@ import {
 } from "@calories-diary/shared";
 import { ErroreApp, nonTrovato } from "../../lib/errori.js";
 import { Alimento } from "../alimenti/alimento.entity.js";
+import { usoDi, usoPer } from "../alimenti/uso.js";
 import { Pasto } from "./pasto.entity.js";
 import { Voce } from "./voce.entity.js";
 
@@ -38,13 +39,16 @@ const valoriVoce = (a: Alimento, quantita: number): Valori => ({
   grassi: (a.grassi * quantita) / 100,
 });
 
-const versoDtoVoce = (a: Alimento, quantita: number): VoceSuggerita => ({
+/** Archived for `utenteId`, the only one who sees the entry. `a.usi` must be populated. */
+const archiviatoPer = (a: Alimento, utenteId: string) => usoDi(a, utenteId)?.archiviato ?? false;
+
+const versoDtoVoce = (a: Alimento, quantita: number, utenteId: string): VoceSuggerita => ({
   alimento: {
     id: a.id,
     nome: a.nome,
     marca: a.marca ?? null,
     unitaBase: a.unitaBase,
-    archiviato: a.archiviato,
+    archiviato: archiviatoPer(a, utenteId),
   },
   quantita,
   valori: valoriVoce(a, quantita),
@@ -70,7 +74,7 @@ export function creaDiarioService(em: EntityManager) {
     em.find(
       Pasto,
       { utente: utenteId, giorno },
-      { populate: ["voci.alimento"], orderBy: { ordine: "asc", creatoIl: "asc" } },
+      { populate: ["voci.alimento.usi"], orderBy: { ordine: "asc", creatoIl: "asc" } },
     );
 
   /** The day as the client shows it: main meals not yet saved are added empty, in their place. */
@@ -79,7 +83,7 @@ export function creaDiarioService(em: EntityManager) {
     const pasti: PastoDto[] = salvati.map((pasto) => {
       const voci: VoceDto[] = pasto.voci
         .getItems()
-        .map((v) => ({ id: v.id, ...versoDtoVoce(v.alimento, v.quantita) }));
+        .map((v) => ({ id: v.id, ...versoDtoVoce(v.alimento, v.quantita, utenteId) }));
       return {
         id: pasto.id,
         tipo: pasto.tipo,
@@ -103,39 +107,41 @@ export function creaDiarioService(em: EntityManager) {
       for (const pasto of vuoti) {
         const stesso = ieri.find((p) => p.tipo === pasto.tipo);
         pasto.suggerite = (stesso?.voci.getItems() ?? [])
-          .filter((v) => !v.alimento.archiviato)
-          .map((v) => versoDtoVoce(v.alimento, v.quantita));
+          .filter((v) => !archiviatoPer(v.alimento, utenteId))
+          .map((v) => versoDtoVoce(v.alimento, v.quantita, utenteId));
       }
     }
 
     return { giorno, pasti, totali: somma(pasti.map((p) => p.totali)) };
   }
 
-  /** Foods of the user, by id: a missing or foreign one is "not found". */
-  async function alimentiDellUtente(utenteId: string, voci: NuovaVoce[]) {
+  /** Foods of the shared pool, by id, with their uses: a missing one is "not found". */
+  async function alimentiDaId(voci: NuovaVoce[]) {
     const ids = [...new Set(voci.map((v) => v.alimento))];
     if (!ids.length) return new Map<string, Alimento>();
-    const alimenti = await em.find(Alimento, { id: { $in: ids }, utente: utenteId });
+    const alimenti = await em.find(Alimento, { id: { $in: ids } }, { populate: ["usi"] });
     if (alimenti.length !== ids.length) throw nonTrovato("Alimento non trovato");
     return new Map(alimenti.map((a) => [a.id, a]));
   }
 
   /** Adds the entries and updates "Recenti" and "Più usati" of their foods (flush is up to the caller). */
   async function aggiungiVoci(utenteId: string, pasto: Pasto, voci: NuovaVoce[]) {
-    const alimenti = await alimentiDellUtente(utenteId, voci);
+    const alimenti = await alimentiDaId(voci);
     const adesso = new Date();
     voci.forEach(({ alimento: id, quantita }, i) => {
       const alimento = alimenti.get(id)!;
       // Entries are listed by creation time: 1 ms apart, those added together keep their order.
       em.create(Voce, { pasto, alimento, quantita, creatoIl: new Date(adesso.getTime() + i) });
-      alimento.utilizzi += 1;
-      alimento.ultimoUso = adesso;
+      const uso = usoPer(em, alimento, utenteId);
+      uso.utilizzi += 1;
+      uso.ultimoUso = adesso;
     });
   }
 
-  /** The use count goes back down, so a food no longer in the diary can be deleted again. */
-  function togliUtilizzo(alimento: Alimento) {
-    alimento.utilizzi = Math.max(0, alimento.utilizzi - 1);
+  /** The use count goes back down, so a food no longer in any diary can be deleted again. */
+  function togliUtilizzo(utenteId: string, alimento: Alimento) {
+    const uso = usoDi(alimento, utenteId);
+    if (uso) uso.utilizzi = Math.max(0, uso.utilizzi - 1);
   }
 
   /** Two concurrent first writes of the same day would both create the main meals. */
@@ -152,7 +158,7 @@ export function creaDiarioService(em: EntityManager) {
     const pasto = await em.findOne(
       Pasto,
       { id, utente: utenteId },
-      { populate: ["voci.alimento"] },
+      { populate: ["voci.alimento.usi"] },
     );
     // Another user's meal is "not found", to avoid revealing that it exists.
     if (!pasto) throw pastoNonTrovato();
@@ -163,7 +169,7 @@ export function creaDiarioService(em: EntityManager) {
     const voce = await em.findOne(
       Voce,
       { id, pasto: { utente: utenteId } },
-      { populate: ["pasto", "alimento"] },
+      { populate: ["pasto", "alimento.usi"] },
     );
     if (!voce) throw voceNonTrovata();
     return voce;
@@ -224,7 +230,7 @@ export function creaDiarioService(em: EntityManager) {
       if (principale(pasto.tipo)) {
         throw new ErroreApp(409, "PASTO_NON_ELIMINABILE", "Si possono eliminare solo gli spuntini");
       }
-      pasto.voci.getItems().forEach((v) => togliUtilizzo(v.alimento));
+      pasto.voci.getItems().forEach((v) => togliUtilizzo(utenteId, v.alimento));
       em.remove(pasto);
       await em.flush();
       em.clear();
@@ -272,7 +278,7 @@ export function creaDiarioService(em: EntityManager) {
 
     async eliminaVoce(utenteId: string, id: string): Promise<Giornata> {
       const voce = await caricaVoce(utenteId, id);
-      togliUtilizzo(voce.alimento);
+      togliUtilizzo(utenteId, voce.alimento);
       em.remove(voce);
       await em.flush();
       em.clear();

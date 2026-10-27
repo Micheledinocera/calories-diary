@@ -14,6 +14,8 @@ import { normalizzaBarcode } from "../catalogo/barcode.js";
 import { ProdottoCatalogo } from "../catalogo/prodotto-catalogo.entity.js";
 import { Alimento } from "./alimento.entity.js";
 import { Porzione } from "./porzione.entity.js";
+import { inUso, usoDi, usoPer } from "./uso.js";
+import type { UsoAlimento } from "./uso-alimento.entity.js";
 
 type DatiNuovoAlimento = z.output<typeof nuovoAlimentoSchema>;
 type DatiModifica = z.output<typeof modificaAlimentoSchema>;
@@ -21,7 +23,9 @@ type Filtri = z.output<typeof filtriAlimentiSchema>;
 
 const alimentoNonTrovato = () => nonTrovato("Alimento non trovato");
 
-const versoDto = (a: Alimento): AlimentoDto => {
+/** The food as `utenteId` sees it: archive and use are theirs. `usi` must be populated. */
+const versoDto = (a: Alimento, utenteId: string): AlimentoDto => {
+  const uso = usoDi(a, utenteId);
   const valoriPer100 = {
     kcal: a.kcal,
     proteine: a.proteine,
@@ -40,32 +44,38 @@ const versoDto = (a: Alimento): AlimentoDto => {
       .getItems()
       .map(({ id, nome, quantita, predefinita }) => ({ id, nome, quantita, predefinita })),
     verificato: a.verificato,
-    archiviato: a.archiviato,
-    ultimoUso: a.ultimoUso?.toISOString() ?? null,
-    utilizzi: a.utilizzi,
+    archiviato: uso?.archiviato ?? false,
+    ultimoUso: uso?.ultimoUso?.toISOString() ?? null,
+    utilizzi: uso?.utilizzi ?? 0,
+    eliminabile: a.autore?.id === utenteId && !inUso(a),
     avvisi: kcalIncoerenti(valoriPer100) ? ["KCAL_INCOERENTI"] : [],
     importatoIl: a.importatoIl?.toISOString() ?? null,
     aggiornatoIl: a.aggiornatoIl.toISOString(),
   };
 };
 
-const ordinamenti: Record<OrdineAlimenti, Record<string, "asc" | "desc" | "desc nulls last">> = {
-  uso: { utilizzi: "desc", ultimoUso: "desc nulls last", nome: "asc" },
-  recenti: { ultimoUso: "desc nulls last", nome: "asc" },
-  nome: { nome: "asc" },
+interface Riga {
+  alimento: Alimento;
+  uso: UsoAlimento | undefined;
+}
+
+const perNome = (x: Riga, y: Riga) => x.alimento.nome.localeCompare(y.alimento.nome, "it");
+// Never used sorts last; two unused foods give NaN, which `||` skips like a tie.
+const tempo = (r: Riga) => r.uso?.ultimoUso?.getTime() ?? -Infinity;
+
+const ordinamenti: Record<OrdineAlimenti, (x: Riga, y: Riga) => number> = {
+  uso: (x, y) =>
+    (y.uso?.utilizzi ?? 0) - (x.uso?.utilizzi ?? 0) || tempo(y) - tempo(x) || perNome(x, y),
+  recenti: (x, y) => tempo(y) - tempo(x) || perNome(x, y),
+  nome: perNome,
 };
 
 /** `%` and `_` typed by the user are literal characters in the search. */
 const escapeLike = (testo: string) => testo.replace(/[\\%_]/g, (c) => `\\${c}`);
 
 export function creaAlimentiService(em: EntityManager) {
-  async function carica(utenteId: string, id: string): Promise<Alimento> {
-    const alimento = await em.findOne(
-      Alimento,
-      { id, utente: utenteId },
-      { populate: ["porzioni"] },
-    );
-    // Another user's food is "not found", to avoid revealing that it exists.
+  async function carica(id: string): Promise<Alimento> {
+    const alimento = await em.findOne(Alimento, { id }, { populate: ["porzioni", "usi"] });
     if (!alimento) throw alimentoNonTrovato();
     return alimento;
   }
@@ -74,47 +84,47 @@ export function creaAlimentiService(em: EntityManager) {
     alimento.porzioni.set(porzioni.map((dati) => em.create(Porzione, { ...dati, alimento })));
   }
 
-  /** The barcode is unique per user: a second food with the same code is a 409 with its id. */
-  async function salva(utenteId: string, alimento: Alimento) {
+  /** The barcode is unique in the pool: a second food with the same code is a 409 with its id. */
+  async function salva(alimento: Alimento) {
     try {
       await em.flush();
     } catch (err) {
       if (!(err instanceof UniqueConstraintViolationException)) throw err;
       em.clear();
-      const esistente = await em.findOne(Alimento, {
-        utente: utenteId,
-        barcode: alimento.barcode,
-      });
+      const esistente = await em.findOne(Alimento, { barcode: alimento.barcode });
       throw new ErroreApp(
         409,
         "ALIMENTO_ESISTENTE",
-        "Hai già un alimento con questo codice a barre",
-        {
-          id: esistente?.id,
-        },
+        "Esiste già un alimento con questo codice a barre",
+        { id: esistente?.id },
       );
     }
   }
 
   return {
+    /**
+     * Archive and use are per user, so they are filtered and sorted here, not in SQL:
+     * the pool holds one household's foods, a few hundred at most.
+     */
     async elenca(utenteId: string, { q, ordine, archiviati, limite }: Filtri) {
-      const filtro: FilterQuery<Alimento> = { utente: utenteId, archiviato: archiviati };
+      const filtro: FilterQuery<Alimento> = {};
       if (q) {
         const testo = `%${escapeLike(q)}%`;
         filtro.$or = [{ nome: { $ilike: testo } }, { marca: { $ilike: testo } }];
         if (/^\d{1,20}$/.test(q)) filtro.$or.push({ barcode: normalizzaBarcode(q) });
       }
-      if (ordine === "recenti") filtro.ultimoUso = { $ne: null };
-      const alimenti = await em.find(Alimento, filtro, {
-        populate: ["porzioni"],
-        orderBy: ordinamenti[ordine],
-        limit: limite,
-      });
-      return alimenti.map(versoDto);
+      const alimenti = await em.find(Alimento, filtro, { populate: ["porzioni", "usi"] });
+      return alimenti
+        .map((alimento): Riga => ({ alimento, uso: usoDi(alimento, utenteId) }))
+        .filter(({ uso }) => (uso?.archiviato ?? false) === archiviati)
+        .filter(({ uso }) => ordine !== "recenti" || uso?.ultimoUso)
+        .sort(ordinamenti[ordine])
+        .slice(0, limite)
+        .map(({ alimento }) => versoDto(alimento, utenteId));
     },
 
     async trova(utenteId: string, id: string): Promise<AlimentoDto> {
-      return versoDto(await carica(utenteId, id));
+      return versoDto(await carica(id), utenteId);
     },
 
     /** A barcode found in the catalog links the food to that product (fonte "off"). */
@@ -129,33 +139,41 @@ export function creaAlimentiService(em: EntityManager) {
       const alimento = em.create(Alimento, {
         ...dati,
         ...valoriPer100,
-        utente: utenteId,
+        autore: utenteId,
         barcode: normalizzato,
         fonte: prodotto ? "off" : "manuale",
         prodottoCatalogo: prodotto,
         importatoIl: prodotto ? new Date() : null,
       });
       impostaPorzioni(alimento, porzioni);
-      await salva(utenteId, alimento);
-      return versoDto(alimento);
+      await salva(alimento);
+      return versoDto(alimento, utenteId);
     },
 
+    /** Any user can correct a food, for everyone; `archiviato` hides it only for `utenteId`. */
     async modifica(
       utenteId: string,
       id: string,
-      { valoriPer100, porzioni, ...dati }: DatiModifica,
+      { valoriPer100, porzioni, archiviato, ...dati }: DatiModifica,
     ): Promise<AlimentoDto> {
-      const alimento = await carica(utenteId, id);
+      const alimento = await carica(id);
       em.assign(alimento, { ...dati, ...valoriPer100 });
       if (porzioni) impostaPorzioni(alimento, porzioni);
-      await salva(utenteId, alimento);
-      return versoDto(alimento);
+      if (archiviato !== undefined) usoPer(em, alimento, utenteId).archiviato = archiviato;
+      await salva(alimento);
+      return versoDto(alimento, utenteId);
     },
 
-    /** Foods used in the diary are archived, not deleted: their history must stay. */
+    /**
+     * Only the author deletes a food. A food used in any diary is archived instead:
+     * the history must stay.
+     */
     async elimina(utenteId: string, id: string): Promise<void> {
-      const alimento = await carica(utenteId, id);
-      if (alimento.utilizzi > 0) {
+      const alimento = await carica(id);
+      if (alimento.autore?.id !== utenteId) {
+        throw new ErroreApp(403, "ALIMENTO_NON_TUO", "Solo chi l'ha creato può eliminarlo");
+      }
+      if (inUso(alimento)) {
         throw new ErroreApp(409, "ALIMENTO_IN_USO", "Alimento già usato nel diario: archivialo");
       }
       await em.remove(alimento).flush();

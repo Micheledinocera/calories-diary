@@ -12,7 +12,7 @@ import { creaAlimentiService } from "./alimenti.service.js";
 
 const parametriAlimento = z.object({ id: z.uuid() });
 
-/** Mounted behind `richiediAutenticazione`: every route works on the current user's foods. */
+/** Mounted behind `richiediAutenticazione`: the pool is shared, archive and use are per user. */
 export function alimentiRouter(em: EntityManager): Router {
   const service = creaAlimentiService(em);
   const router = Router();
