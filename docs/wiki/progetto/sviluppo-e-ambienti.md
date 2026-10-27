@@ -9,6 +9,7 @@ fonti:
   - raw/compiled/barcode-scan/2026-10-25-sviluppo-da-telefono.md
   - raw/compiled/deploy/2026-10-26-roadmap.md
   - raw/compiled/ui-tweaks/2026-10-27-decisioni.md
+  - raw/compiled/user-login/2026-10-27-implementazione.md
 ---
 
 # Sviluppo, CI e ambienti
@@ -26,7 +27,7 @@ Ogni funzionalità si realizza e si verifica prima in locale con Docker. Il depl
 - Prima di partire chiude i processi di sviluppo del repo rimasti vivi (`scripts/ferma-dev.mjs`, anche da solo con `pnpm dev:stop`): un terminale chiuso senza Ctrl+C lascia vivi turbo, nuxt, tsx e tsc, che tengono occupate le porte.
 - Va lanciato con pnpm: con un altro gestore (es. `bun dev`) lo script si ferma subito (`scripts/solo-pnpm.mjs`), perché sotto Git Bash bun non esce con Ctrl+C e lascia il terminale bloccato.
 - **Da telefono** (stessa rete): il web ascolta su `0.0.0.0`, quindi si apre `http://<ip-del-pc>:3000`; l'API passa dal proxy di Nuxt (vedi [App web](../tecnico/web/app.md)). La fotocamera richiede HTTPS: `pnpm dev:https` (task turbo `@calories-diary/web#dev:https`, con API e shared via `with`) usa un certificato autofirmato da accettare sul telefono. Il dev server è raggiungibile da chiunque sia sulla stessa rete: va bene a casa, non su reti pubbliche.
-- Gli utenti si creano con `pnpm utente:crea <email>`; l'API richiede `JWT_SECRET` nel `.env` (vedi `apps/api/.env.example`).
+- Gli utenti si creano con `pnpm utente:crea <username> [--admin]` (o dall'app, da un admin); l'API richiede `JWT_SECRET` nel `.env` (vedi `apps/api/.env.example`).
 
 ## Test e CI
 

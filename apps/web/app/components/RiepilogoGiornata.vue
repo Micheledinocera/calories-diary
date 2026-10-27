@@ -51,7 +51,7 @@ const quotaPesante = computed(() =>
 <template>
   <UCard :ui="{ body: 'space-y-3 sm:p-4' }">
     <div class="flex items-center justify-between gap-2 min-h-6">
-      <NuxtLink v-if="!fabbisogno" to="/profilo" class="text-sm text-primary font-medium">
+      <NuxtLink v-if="!fabbisogno" to="/obiettivi" class="text-sm text-primary font-medium">
         Imposta il fabbisogno
       </NuxtLink>
       <span v-else-if="stato?.tipo === 'oltre'" class="text-sm text-muted"

@@ -111,7 +111,7 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
 
     <p class="text-sm text-muted">
       Tocca un giorno per vederlo.
-      <NuxtLink v-if="!obiettivi?.fabbisogno" to="/profilo" class="text-primary font-medium">
+      <NuxtLink v-if="!obiettivi?.fabbisogno" to="/obiettivi" class="text-primary font-medium">
         Imposta il fabbisogno per vedere com'è andata ogni giornata.
       </NuxtLink>
     </p>

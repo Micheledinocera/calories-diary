@@ -5,7 +5,7 @@ import type { Redis } from "ioredis";
 import type { Logger } from "pino";
 import { pinoHttp } from "pino-http";
 import type { Env } from "./config/env.js";
-import { richiediAutenticazione } from "./middlewares/autenticazione.js";
+import { richiediAdmin, richiediAutenticazione } from "./middlewares/autenticazione.js";
 import { corsConOrigini } from "./middlewares/cors.js";
 import { gestoreErrori, rottaNonTrovata } from "./middlewares/errori.js";
 import { alimentiRouter } from "./modules/alimenti/alimenti.routes.js";
@@ -16,6 +16,7 @@ import type { ProviderAlimenti } from "./modules/catalogo/provider.js";
 import { diarioRouter } from "./modules/diario/diario.routes.js";
 import { healthRouter } from "./modules/health/health.routes.js";
 import { obiettiviRouter } from "./modules/obiettivi/obiettivi.routes.js";
+import { utentiRouter } from "./modules/utenti/utenti.routes.js";
 
 export interface DipendenzeApp {
   env: Env;
@@ -48,6 +49,7 @@ export function creaApp({ env, orm, redis, logger, provider }: DipendenzeApp): E
   app.use("/obiettivi", autenticazione, obiettiviRouter(orm.em));
   app.use("/alimenti", autenticazione, alimentiRouter(orm.em));
   app.use("/catalogo", autenticazione, catalogoRouter({ em: orm.em, redis, logger, provider }));
+  app.use("/utenti", autenticazione, richiediAdmin, utentiRouter(orm.em));
 
   app.use(rottaNonTrovata);
   app.use(gestoreErrori);

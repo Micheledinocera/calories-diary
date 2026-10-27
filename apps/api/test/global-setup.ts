@@ -4,7 +4,7 @@ import { caricaEnv } from "../src/config/env.js";
 import { creaConfigOrm } from "../src/db/mikro-orm.config.js";
 import { DatabaseSeeder } from "../src/db/seeders/database.seeder.js";
 import { creaUtentiService } from "../src/modules/utenti/utenti.service.js";
-import { altroUtenteTest, utenteTest } from "./utenti-test.js";
+import { adminTest, altroUtenteTest, utenteTest } from "./utenti-test.js";
 
 /** Rebuilds the test database from the migrations, creates the test users, then seeds it. */
 export default async function setup() {
@@ -14,9 +14,10 @@ export default async function setup() {
     await orm.schema.drop({ dropMigrationsTable: true });
     await orm.migrator.up();
     const utenti = creaUtentiService(orm.em.fork());
-    for (const { email, password } of [utenteTest, altroUtenteTest]) {
-      await utenti.crea(email, password);
+    for (const { username, password } of [utenteTest, altroUtenteTest]) {
+      await utenti.crea(username, password);
     }
+    await utenti.crea(adminTest.username, adminTest.password, "admin");
     await orm.seeder.seed(DatabaseSeeder);
   } finally {
     await orm.close(true);
@@ -32,7 +33,7 @@ async function azzeraChiaviRedis(url: string, prefisso: string) {
   // No keyPrefix: SCAN returns full keys, which DEL must receive unchanged.
   const redis = new Redis(url);
   try {
-    for (const gruppo of ["login", "provider", "catalogo"]) {
+    for (const gruppo of ["login", "password", "provider", "catalogo"]) {
       let cursore = "0";
       do {
         const [prossimo, chiavi] = await redis.scan(cursore, "MATCH", `${prefisso}${gruppo}:*`);

@@ -1,6 +1,6 @@
 ---
 tipo: info
-aggiornato: 2026-10-25
+aggiornato: 2026-10-27
 fonti:
   - raw/compiled/first-develop/2026-10-25-ruolo-monorepo.md
   - raw/compiled/first-develop/2026-10-25-scaffolding.md
@@ -9,6 +9,7 @@ fonti:
   - raw/compiled/foods/2026-10-25-note-ui-ux.md
   - raw/compiled/foods/2026-10-25-implementazione.md
   - raw/compiled/diary/2026-10-25-decisioni-diario.md
+  - raw/compiled/user-login/2026-10-27-implementazione.md
 ---
 
 # Contratti condivisi
@@ -23,7 +24,8 @@ fonti:
 | `src/diario.ts` | `tipiPasto`, `tipiPastoPrincipali`, `tipoPastoSchema`, `giornoSchema`, `valoriSchema`, `voceSchema`, `pastoSchema`, `giornataSchema`, `intervalloGiorniSchema`, `riepilogoGiornoSchema`, `nuovaVoceSchema`, `nuovoPastoSchema`, `modificaVoceSchema`, `ordinePastiSchema` e tipi | DTO e body di `/diario` (vedi [Diario](../api/diario.md)); i tipi di pasto fissi stanno qui |
 | `src/obiettivi.ts` | `ripartizioneMacroSchema`, `ripartizionePredefinita` (50/30/20), `obiettiviSchema` e tipi | Body e risposta di `/obiettivi` (vedi [Obiettivi](../api/obiettivi.md)) |
 | `src/errori.ts` | `erroreApiSchema`, `ErroreApi` | Corpo di ogni risposta di errore |
-| `src/auth.ts` | `credenzialiSchema`, `utenteSchema`, `sessioneSchema` e tipi | Body del login (email normalizzata: trim e minuscole), utente corrente, risposta di login e rinnovo |
+| `src/auth.ts` | `LUNGHEZZA_MINIMA_PASSWORD` (12), `usernameSchema`, `nuovaPasswordSchema`, `credenzialiSchema`, `ruoli`, `ruoloSchema`, `utenteSchema`, `sessioneSchema`, `modificaProfiloSchema`, `cambioPasswordSchema` e tipi | Username di un utente nuovo o rinominato (trim, 3–32 caratteri, maiuscole conservate), password nuova, body del login (username con trim, qualsiasi lunghezza per gli utenti migrati), utente (`id`, `username`, `ruolo`), risposta di login e rinnovo, body di `PATCH /auth/io` e `PUT /auth/password` |
+| `src/utenti.ts` | `listaUtentiSchema`, `nuovoUtenteSchema`, `modificaUtenteSchema` e tipi | Risposta e body di `/utenti` (admin); la modifica vuole almeno username o password |
 | `src/catalogo.ts` | `valoriPer100Schema`, `unitaBaseSchema`, `prodottoCatalogoSchema`, `avvisoCatalogoSchema`, `lookupBarcodeSchema` e tipi | Risposta di `GET /catalogo/barcode/:codice` (vedi [Catalogo](../api/catalogo.md)) |
 | `src/alimenti.ts` | `valoriAlimentoSchema`, `porzioneSchema`, `alimentoSchema`, `listaAlimentiSchema`, `nuovoAlimentoSchema`, `modificaAlimentoSchema`, `ordineAlimentiSchema`, `filtriAlimentiSchema` e tipi | DTO e body di `/alimenti` (vedi [Alimenti](../api/alimenti.md)). I body normalizzano i testi (trim, vuoto → `null`) e applicano i default; `NuovoAlimento` e `ModificaAlimento` sono i tipi di input (`z.input`), `FiltriAlimenti` i filtri come li manda il client |
 

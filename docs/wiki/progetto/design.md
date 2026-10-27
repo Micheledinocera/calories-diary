@@ -7,6 +7,7 @@ fonti:
   - raw/compiled/pre-deploy/2026-10-25-implementazione.md
   - raw/compiled/ui-tweaks/2026-10-27-task.md
   - raw/compiled/ui-tweaks/2026-10-27-task2.md
+  - raw/compiled/user-login/2026-10-27-implementazione.md
 ---
 
 # Design
@@ -27,7 +28,7 @@ Interfaccia pulita e silenziosa, ispirata a Yazio ma con meno decorazione: card 
 - **Macro in tinte fredde**: carboidrati ciano, proteine viola, grassi rosa, sempre in quest'ordine, così non sembrano mai uno stato.
 - **Anello dei macro**: la lunghezza colorata è la quota di fabbisogno già mangiata, divisa in spicchi per kcal di ciascun macro. Oltre il fabbisogno l'anello è pieno e un giro esterno sottile rosso mostra l'eccesso.
 - **Font** Figtree, una sola famiglia; cifre tabellari dove i numeri si allineano.
-- **Tema** chiaro, scuro o come il sistema (predefinito), scelto sul dispositivo dal menu account o dal Profilo.
+- **Tema** chiaro, scuro o come il sistema (predefinito), scelto sul dispositivo dal menu account o dalla pagina Profilo.
 - **Aggiungere un alimento** è l'azione più frequente: foglio dal basso, ricerca con scansione, porzioni come scorciatoie, anteprima prima di confermare.
 - Testi in italiano, seconda persona, frasi brevi, niente emoji.
 

@@ -7,6 +7,7 @@ fonti:
   - raw/compiled/deploy/2026-10-26-checklist-manuale.md
   - raw/compiled/ui-tweaks/2026-10-27-decisioni.md
   - raw/compiled/ui-tweaks/2026-10-27-task.md
+  - raw/compiled/user-login/2026-10-27-implementazione.md
 ---
 
 # Deploy
@@ -48,7 +49,7 @@ Nomi delle variabili; i valori stanno solo nei pannelli dei servizi e nei secret
 
 ## Primo utente
 
-Render Free non ha una shell: gli utenti si creano dal PC verso Neon con la connessione diretta, `DATABASE_URL='<diretta>' pnpm utente:crea <email>`. Le altre variabili arrivano dal `apps/api/.env` locale.
+Render Free non ha una shell: i comandi utente si lanciano dal PC verso Neon con la connessione diretta, `DATABASE_URL='<diretta>' pnpm utente:crea <username> --admin` (o `utente:admin <username>`). Le altre variabili arrivano dal `apps/api/.env` locale. Gli utenti normali li crea l'admin dall'app.
 
 ## Backup del database
 

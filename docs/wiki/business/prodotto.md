@@ -16,6 +16,7 @@ fonti:
   - raw/compiled/pre-deploy/2026-10-25-tasks.md
   - raw/compiled/pre-deploy/2026-10-25-design.md
   - raw/compiled/ui-tweaks/2026-10-27-task.md
+  - raw/compiled/user-login/2026-10-27-implementazione.md
 ---
 
 # Prodotto
@@ -45,7 +46,7 @@ Applicazione **personale** per tracciare ogni giorno calorie e macronutrienti. �
 - Navigazione tra i giorni.
 
 **Obiettivi ed equilibrio** (in `diary`)
-- **Fabbisogno calorico giornaliero** dell'utente, inserito a mano nella **schermata utente** (Profilo), confrontato con quanto consumato nella giornata. È un valore unico, che vale per tutti i giorni; in futuro forse uno storico.
+- **Fabbisogno calorico giornaliero** dell'utente, inserito a mano nella schermata **Obiettivi**, confrontato con quanto consumato nella giornata. È un valore unico, che vale per tutti i giorni; in futuro forse uno storico.
 - **Rapporto carboidrati/grassi/proteine**: l'app propone il valore indicativo **50/30/20**, modificabile a mano, e mostra il rapporto della giornata per far capire se la dieta è equilibrata.
 - **Obiettivo in grammi** di ogni macro: fabbisogno × quota ÷ kcal per grammo (4 per carboidrati e proteine, 9 per i grassi). Con 2000 kcal e 50/30/20: 250 g di carboidrati, 100 g di proteine, 67 g di grassi.
 - **Stato della giornata**, uguale nella giornata e nel calendario, sempre con colore e parola:

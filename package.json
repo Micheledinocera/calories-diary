@@ -20,7 +20,8 @@
     "db:migrate": "pnpm --filter @calories-diary/api migration:up",
     "db:seed": "pnpm --filter @calories-diary/api seed",
     "db:seed:demo": "pnpm --filter @calories-diary/api seed:demo",
-    "utente:crea": "pnpm --filter @calories-diary/api utente:crea"
+    "utente:crea": "pnpm --filter @calories-diary/api utente:crea",
+    "utente:admin": "pnpm --filter @calories-diary/api utente:admin"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.4",

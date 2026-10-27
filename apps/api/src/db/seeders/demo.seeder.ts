@@ -4,10 +4,10 @@ import { Porzione } from "../../modules/alimenti/porzione.entity.js";
 import { UsoAlimento } from "../../modules/alimenti/uso-alimento.entity.js";
 import { Pasto } from "../../modules/diario/pasto.entity.js";
 import { Voce } from "../../modules/diario/voce.entity.js";
-import { Utente } from "../../modules/utenti/utente.entity.js";
+import { chiaveUsername, Utente } from "../../modules/utenti/utente.entity.js";
 
 /**
- * Fake data for usability tests (`pnpm db:seed:demo <email>`): foods with portions and about five
+ * Fake data for usability tests (`pnpm db:seed:demo <username>`): foods with portions and about five
  * weeks of diary for an existing user, with days within the need, with a macro over its target
  * and over the need. Never in production, and only for a user without a diary: it must not mix
  * with real data. Its foods join the shared pool.
@@ -259,12 +259,12 @@ export class ErroreDemo extends Error {}
 
 export async function seedDemo(
   em: EntityManager,
-  email: string,
+  username: string,
 ): Promise<{ alimenti: number; giorni: number }> {
-  const utente = await em.findOne(Utente, { email: email.toLowerCase() });
-  if (!utente) throw new ErroreDemo(`Utente ${email} non trovato: crealo con pnpm utente:crea`);
+  const utente = await em.findOne(Utente, { chiaveUsername: chiaveUsername(username) });
+  if (!utente) throw new ErroreDemo(`Utente ${username} non trovato: crealo con pnpm utente:crea`);
   if (await em.count(Pasto, { utente })) {
-    throw new ErroreDemo(`${email} ha già un diario: il seed demo serve per un utente nuovo`);
+    throw new ErroreDemo(`${username} ha già un diario: il seed demo serve per un utente nuovo`);
   }
 
   utente.fabbisogno = 2000;

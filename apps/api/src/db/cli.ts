@@ -1,8 +1,9 @@
 // DB commands, run with tsx in development (`pnpm migration:up`) and with node from dist in production
 // (`node dist/src/db/cli.js migration:up`). Migrations never run at container start.
-// Users are created here too (`pnpm utente:crea <email>`): there is no public sign-up.
-// `seed:demo <email>` fills a new user with fake data for usability tests (never in production).
-import { credenzialiSchema } from "@calories-diary/shared";
+// Admins are created here only (`pnpm utente:crea <username> --admin`, or `utente:admin <username>`
+// to promote an existing user); normal users also from the admin page of the app.
+// `seed:demo <username>` fills a new user with fake data for usability tests (never in production).
+import { nuovoUtenteSchema, usernameSchema } from "@calories-diary/shared";
 import { MikroORM } from "@mikro-orm/postgresql";
 import { z, ZodError } from "zod";
 import { caricaEnv } from "../config/env.js";
@@ -20,16 +21,16 @@ const comandi = [
   "seed",
   "seed:demo",
   "utente:crea",
+  "utente:admin",
 ] as const;
-const LUNGHEZZA_MINIMA_PASSWORD = 12;
 type Comando = (typeof comandi)[number];
 
 class ErroreCli extends Error {}
 
-// nome: migration name for migration:create, email for utente:crea.
-const [comando, nome] = process.argv.slice(2);
+// nome: migration name for migration:create, username for the user commands.
+const [comando, nome, ...opzioni] = process.argv.slice(2);
 if (!comandi.includes(comando as Comando)) {
-  console.error(`Uso: cli.ts <${comandi.join("|")}> [nome migrazione | email]`);
+  console.error(`Uso: cli.ts <${comandi.join("|")}> [nome migrazione | username] [--admin]`);
   process.exit(1);
 }
 
@@ -59,27 +60,32 @@ try {
     case "seed:demo": {
       if (env.NODE_ENV === "production")
         throw new ErroreCli("Il seed demo non va mai in produzione");
-      if (!nome) throw new ErroreCli("Uso: cli.ts seed:demo <email>");
+      if (!nome) throw new ErroreCli("Uso: cli.ts seed:demo <username>");
       const { alimenti, giorni } = await seedDemo(orm.em.fork(), nome);
       console.log(`Dati demo per ${nome}: ${alimenti} alimenti, ${giorni} giorni di diario`);
       break;
     }
     case "utente:crea": {
+      const username = usernameSchema.parse(nome);
       const password = await chiediPassword("Password: ");
-      if (password.length < LUNGHEZZA_MINIMA_PASSWORD) {
-        throw new ErroreCli(`La password deve avere almeno ${LUNGHEZZA_MINIMA_PASSWORD} caratteri`);
-      }
       if (process.stdin.isTTY && (await chiediPassword("Ripeti la password: ")) !== password) {
         throw new ErroreCli("Le password non coincidono");
       }
-      const credenziali = credenzialiSchema.parse({ email: nome, password });
-      const utente = await creaUtentiService(orm.em.fork()).crea(credenziali.email, password);
-      console.log(`Creato l'utente ${utente.email} (${utente.id})`);
+      const dati = nuovoUtenteSchema.parse({ username, password });
+      const ruolo = opzioni.includes("--admin") ? "admin" : "utente";
+      const utente = await creaUtentiService(orm.em.fork()).crea(dati.username, password, ruolo);
+      console.log(`Creato l'utente ${utente.username} (${utente.ruolo}, ${utente.id})`);
+      break;
+    }
+    case "utente:admin": {
+      if (!nome) throw new ErroreCli("Uso: cli.ts utente:admin <username>");
+      const utente = await creaUtentiService(orm.em.fork()).promuoviAdmin(nome.trim());
+      console.log(`${utente.username} ora è admin`);
       break;
     }
   }
 } catch (err) {
-  // Expected errors (validation, email in use) need no stack trace.
+  // Expected errors (validation, username in use) need no stack trace.
   if (!(
     err instanceof ErroreApp ||
     err instanceof ZodError ||

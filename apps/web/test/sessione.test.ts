@@ -7,7 +7,7 @@ const ora = Date.parse("2026-10-25T12:00:00Z");
 const sessione = (scadeTraGiorni: number) => ({
   token: "t",
   scadeIl: new Date(ora + scadeTraGiorni * GIORNO_MS).toISOString(),
-  utente: { id: "0b0f6f8e-6a4b-4c1e-9d55-3f1e2a7b9c10", email: "io@esempio.it" },
+  utente: { id: "0b0f6f8e-6a4b-4c1e-9d55-3f1e2a7b9c10", username: "io", ruolo: "utente" },
 });
 
 describe("leggiSessioneSalvata", () => {
@@ -19,6 +19,14 @@ describe("leggiSessioneSalvata", () => {
     expect(leggiSessioneSalvata(null)).toBeNull();
     expect(leggiSessioneSalvata("{non json")).toBeNull();
     expect(leggiSessioneSalvata(JSON.stringify({ token: "t" }))).toBeNull();
+  });
+
+  it("scarta le sessioni salvate prima degli username: si rifà il login", () => {
+    const vecchia = {
+      ...sessione(7),
+      utente: { id: sessione(7).utente.id, email: "io@esempio.it" },
+    };
+    expect(leggiSessioneSalvata(JSON.stringify(vecchia))).toBeNull();
   });
 });
 
