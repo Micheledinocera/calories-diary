@@ -29,11 +29,12 @@ async function logout() {
             v-for="v in voci"
             :key="v.to"
             :to="v.to"
-            class="inline-flex items-center gap-1.5 h-[34px] px-3 rounded-full text-sm font-medium text-muted"
+            class="inline-flex items-center gap-1.5 h-[34px] px-2.5 min-[380px]:px-3 rounded-full text-sm font-medium text-muted"
             :class="attiva(v.to) && 'bg-primary/10 text-primary font-semibold'"
             :aria-current="attiva(v.to) ? 'page' : undefined"
           >
-            <UIcon :name="v.icon" class="size-4" />
+            <!-- Below 380px (small phones) labels and account fit only without the icons. -->
+            <UIcon :name="v.icon" class="size-4 max-[379px]:hidden" />
             {{ v.label }}
           </NuxtLink>
         </nav>
