@@ -19,4 +19,7 @@ Si riparte dalla decisione aperta [Gestione delle utenze in app](../../wiki/prog
 
 ## Modifiche dell'utente
 
-<!-- Aggiungi qui le tue decisioni e richieste -->
+- Solo un admin può creare le utenze nuove, quindi va previsto un ruolo sugli utenti e una schermata per la gestione utenti.
+- Inoltre la username non deve essere per forza una mail e aggiungiamo il campo mail agli utenti (facoltativa)
+- L'admin può modificare nome utente e password di qualunque utente, crearne di nuovi o cancellarli
+- L'utente può solo modificarsi lo username, la mail per adesso è prevista solo a DB poi vediamo se aggiungerla anche al fe modificabile
