@@ -59,18 +59,18 @@ describe("/auth", () => {
   it("il login restituisce una sessione di una settimana", async () => {
     const res = await request(app)
       .post("/auth/login")
-      .send({ ...utenteTest, email: " IO@esempio.it " })
+      .send({ ...utenteTest, username: " IO.Test " })
       .expect(200);
     const sessione = sessioneSchema.parse(res.body);
-    expect(sessione.utente.email).toBe(utenteTest.email);
+    expect(sessione.utente).toMatchObject({ username: utenteTest.username, ruolo: "utente" });
     const giorni = (Date.parse(sessione.scadeIl) - Date.now()) / 86_400_000;
     expect(giorni).toBeCloseTo(7, 1);
   });
 
-  it("risponde 401 con password errata o email sconosciuta", async () => {
+  it("risponde 401 con password errata o username sconosciuto", async () => {
     for (const credenziali of [
       { ...utenteTest, password: "sbagliata" },
-      { email: "nessuno@esempio.it", password: "qualsiasi" },
+      { username: "nessuno", password: "qualsiasi" },
     ]) {
       const res = await request(app).post("/auth/login").send(credenziali).expect(401);
       expect(res.body.errore.codice).toBe("CREDENZIALI_ERRATE");
@@ -78,12 +78,12 @@ describe("/auth", () => {
   });
 
   it("risponde 400 se le credenziali non sono valide", async () => {
-    const res = await request(app).post("/auth/login").send({ email: "io" }).expect(400);
+    const res = await request(app).post("/auth/login").send({ username: "io" }).expect(400);
     expect(res.body.errore.codice).toBe("VALIDAZIONE");
   });
 
-  it("blocca con 429 dopo 5 tentativi sulla stessa email", async () => {
-    const credenziali = { email: "bersaglio@esempio.it", password: "tentativo" };
+  it("blocca con 429 dopo 5 tentativi sullo stesso username", async () => {
+    const credenziali = { username: "bersaglio", password: "tentativo" };
     for (let i = 0; i < 5; i++) {
       await request(app).post("/auth/login").send(credenziali).expect(401);
     }
@@ -101,8 +101,9 @@ describe("/auth", () => {
   });
 
   it("risponde 401 senza token, con token non valido o di un utente inesistente", async () => {
-    const orfano = await creaGestoreToken(caricaEnv().JWT_SECRET).firma(randomUUID());
-    const altroSegreto = await creaGestoreToken("x".repeat(32)).firma(randomUUID());
+    const dati = { utenteId: randomUUID(), versione: 0 };
+    const orfano = await creaGestoreToken(caricaEnv().JWT_SECRET).firma(dati);
+    const altroSegreto = await creaGestoreToken("x".repeat(32)).firma(dati);
     for (const headers of [{}, bearer("abc"), bearer(orfano.token), bearer(altroSegreto.token)]) {
       const res = await request(app).get("/auth/io").set(headers).expect(401);
       expect(res.body.errore.codice).toBe("NON_AUTENTICATO");
@@ -211,6 +212,7 @@ describe("/alimenti", () => {
       archiviato: false,
       utilizzi: 0,
       ultimoUso: null,
+      eliminabile: true,
       importatoIl: null,
       avvisi: [],
       porzioni: [{ nome: "1 vasetto", quantita: 170, predefinita: true }],
@@ -229,13 +231,14 @@ describe("/alimenti", () => {
     expect(res.body).toMatchObject({ fonte: "off", barcode: "8076809513753" });
     expect(res.body.importatoIl).not.toBeNull();
 
-    // Same barcode for the same user: 409 with the existing food; another user can have it.
-    const doppio = await crea({ ...yogurt, barcode: "8076809513753" }).expect(409);
-    expect(doppio.body.errore).toMatchObject({
-      codice: "ALIMENTO_ESISTENTE",
-      dettagli: { id: res.body.id },
-    });
-    await crea({ ...yogurt, barcode: "8076809513753" }, altro).expect(201);
+    // The barcode is unique in the shared pool: 409 with the existing food, for any user.
+    for (const headers of [auth, altro]) {
+      const doppio = await crea({ ...yogurt, barcode: "8076809513753" }, headers).expect(409);
+      expect(doppio.body.errore).toMatchObject({
+        codice: "ALIMENTO_ESISTENTE",
+        dettagli: { id: res.body.id },
+      });
+    }
   });
 
   it("segnala le kcal incoerenti", async () => {
@@ -293,12 +296,16 @@ describe("/alimenti", () => {
   });
 
   it("cerca per nome, marca o barcode", async () => {
+    // The pool is shared with the demo test, which may run alongside: check only these foods.
     const cerca = async (q: string) =>
-      (await request(app).get("/alimenti").query({ q, ordine: "nome" }).set(auth).expect(200))
-        .body as { nome: string }[];
-    expect((await cerca("greco")).map((a) => a.nome)).toEqual(["Yogurt greco"]);
-    expect((await cerca("FAGE")).map((a) => a.nome)).toEqual(["Yogurt greco"]);
-    expect((await cerca("8076809513753")).map((a) => a.nome)).toEqual(["Pesto alla genovese"]);
+      (
+        (await request(app).get("/alimenti").query({ q, ordine: "nome" }).set(auth).expect(200))
+          .body as { nome: string }[]
+      ).map((a) => a.nome);
+    expect(await cerca("greco")).toContain("Yogurt greco");
+    expect(await cerca("FAGE")).toContain("Yogurt greco");
+    expect(await cerca("FAGE")).not.toContain("Pesto alla genovese");
+    expect(await cerca("8076809513753")).toEqual(["Pesto alla genovese"]);
     expect(await cerca("100%")).toEqual([]);
   });
 
@@ -307,18 +314,41 @@ describe("/alimenti", () => {
     expect(res.body).toEqual([]);
   });
 
-  it("non mostra né modifica gli alimenti di un altro utente", async () => {
-    const { id } = (await crea({ ...yogurt, nome: "Privato" }).expect(201)).body;
-    for (const req of [
-      request(app).get(`/alimenti/${id}`),
-      request(app).patch(`/alimenti/${id}`).send({ nome: "Mio" }),
-      request(app).delete(`/alimenti/${id}`),
-    ]) {
-      const res = await req.set(altro).expect(404);
-      expect(res.body.errore.codice).toBe("NON_TROVATO");
-    }
-    const suoi = await request(app).get("/alimenti").set(altro).expect(200);
-    expect(suoi.body.map((a: { id: string }) => a.id)).not.toContain(id);
+  it("condivide gli alimenti: tutti li vedono e li correggono, solo l'autore li elimina", async () => {
+    const { id } = (await crea({ ...yogurt, nome: "Condiviso" }).expect(201)).body;
+    const visti = await request(app).get("/alimenti").set(altro).expect(200);
+    expect(visti.body.map((a: { id: string }) => a.id)).toContain(id);
+
+    const corretto = await request(app)
+      .patch(`/alimenti/${id}`)
+      .set(altro)
+      .send({ nome: "Condiviso e corretto" })
+      .expect(200);
+    expect(corretto.body).toMatchObject({ nome: "Condiviso e corretto", eliminabile: false });
+    const letto = await request(app).get(`/alimenti/${id}`).set(auth).expect(200);
+    expect(letto.body).toMatchObject({ nome: "Condiviso e corretto", eliminabile: true });
+
+    const res = await request(app).delete(`/alimenti/${id}`).set(altro).expect(403);
+    expect(res.body.errore.codice).toBe("ALIMENTO_NON_TUO");
+  });
+
+  it("archivia solo per chi lo chiede", async () => {
+    const { id } = (await crea({ ...yogurt, nome: "Nascosto a me" }).expect(201)).body;
+    const res = await request(app)
+      .patch(`/alimenti/${id}`)
+      .set(auth)
+      .send({ archiviato: true })
+      .expect(200);
+    expect(res.body.archiviato).toBe(true);
+
+    const ids = async (headers: ReturnType<typeof bearer>) =>
+      ((await request(app).get("/alimenti").set(headers).expect(200)).body as { id: string }[]).map(
+        (a) => a.id,
+      );
+    expect(await ids(auth)).not.toContain(id);
+    expect(await ids(altro)).toContain(id);
+    const suo = await request(app).get(`/alimenti/${id}`).set(altro).expect(200);
+    expect(suo.body.archiviato).toBe(false);
   });
 
   it("elimina un alimento mai usato", async () => {
@@ -532,13 +562,48 @@ describe("/diario", () => {
     }
     expect((await giornata("2026-01-10", altro)).pasti.every((p) => p.id === null)).toBe(true);
 
-    // Nor can another user's food go into one's own diary.
+    // A food that does not exist cannot go into the diary.
     const res = await aggiungiPasto(
       "2026-01-10",
-      { tipo: "cena", voci: [{ alimento: pane, quantita: 10 }] },
+      { tipo: "cena", voci: [{ alimento: randomUUID(), quantita: 10 }] },
       altro,
     ).expect(404);
     expect(res.body.errore.codice).toBe("NON_TROVATO");
+  });
+
+  it("un alimento condiviso tiene recenti e più usati per utente", async () => {
+    const latte = (
+      await request(app)
+        .post("/alimenti")
+        .set(auth)
+        .send({
+          nome: "Latte condiviso",
+          unitaBase: "ml",
+          valoriPer100: { kcal: 46, proteine: 3.3, carboidrati: 4.9, grassi: 1.5 },
+        })
+        .expect(201)
+    ).body.id as string;
+    const g = (
+      await aggiungiPasto(
+        "2026-02-01",
+        { tipo: "colazione", voci: [{ alimento: latte, quantita: 200 }] },
+        altro,
+      ).expect(200)
+    ).body as { pasti: { voci: { id: string }[] }[] };
+
+    const uso = async (headers: ReturnType<typeof bearer>) =>
+      (await request(app).get(`/alimenti/${latte}`).set(headers).expect(200)).body;
+    expect(await uso(altro)).toMatchObject({ utilizzi: 1, eliminabile: false });
+    expect(await uso(auth)).toMatchObject({ utilizzi: 0, ultimoUso: null, eliminabile: false });
+
+    // Used only by the other user, the author still cannot delete it.
+    const res = await request(app).delete(`/alimenti/${latte}`).set(auth).expect(409);
+    expect(res.body.errore.codice).toBe("ALIMENTO_IN_USO");
+
+    // Removed from that diary, the author can delete it again.
+    const voce = g.pasti.flatMap((p) => p.voci)[0]!;
+    await request(app).delete(`/diario/voci/${voce.id}`).set(altro).expect(200);
+    expect(await uso(auth)).toMatchObject({ eliminabile: true });
   });
 
   it("risponde 400 con un giorno o una voce non validi", async () => {

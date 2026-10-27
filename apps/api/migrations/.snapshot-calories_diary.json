@@ -23,22 +23,22 @@
           "enumItems": [],
           "mappedType": "datetime"
         },
-        "archiviato": {
-          "name": "archiviato",
-          "type": "boolean",
+        "autore_id": {
+          "name": "autore_id",
+          "type": "uuid",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "unique": false,
           "length": null,
           "precision": null,
           "scale": null,
-          "default": "false",
+          "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "boolean"
+          "mappedType": "uuid"
         },
         "barcode": {
           "name": "barcode",
@@ -47,7 +47,7 @@
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "unique": false,
+          "unique": true,
           "length": 14,
           "precision": null,
           "scale": null,
@@ -244,23 +244,6 @@
           "enumItems": [],
           "mappedType": "decimal"
         },
-        "ultimo_uso": {
-          "name": "ultimo_uso",
-          "type": "timestamptz(6)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "unique": false,
-          "length": 6,
-          "precision": null,
-          "scale": null,
-          "default": null,
-          "comment": null,
-          "collation": null,
-          "enumItems": [],
-          "mappedType": "datetime"
-        },
         "unita_base": {
           "name": "unita_base",
           "type": "text",
@@ -277,40 +260,6 @@
           "collation": null,
           "enumItems": ["g", "ml"],
           "mappedType": "enum"
-        },
-        "utente_id": {
-          "name": "utente_id",
-          "type": "uuid",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "unique": true,
-          "length": null,
-          "precision": null,
-          "scale": null,
-          "default": null,
-          "comment": null,
-          "collation": null,
-          "enumItems": [],
-          "mappedType": "uuid"
-        },
-        "utilizzi": {
-          "name": "utilizzi",
-          "type": "int",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "unique": false,
-          "length": null,
-          "precision": null,
-          "scale": null,
-          "default": "0",
-          "comment": null,
-          "collation": null,
-          "enumItems": [],
-          "mappedType": "integer"
         },
         "verificato": {
           "name": "verificato",
@@ -332,19 +281,19 @@
       },
       "indexes": [
         {
+          "columnNames": ["barcode"],
+          "composite": false,
+          "constraint": true,
+          "keyName": "alimento_barcode_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
           "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "alimento_pkey",
           "primary": true,
-          "unique": true
-        },
-        {
-          "columnNames": ["utente_id", "barcode"],
-          "composite": true,
-          "constraint": true,
-          "keyName": "alimento_utente_id_barcode_unique",
-          "primary": false,
           "unique": true
         }
       ],
@@ -364,6 +313,14 @@
       ],
       "triggers": [],
       "foreignKeys": {
+        "alimento_autore_id_foreign": {
+          "columnNames": ["autore_id"],
+          "constraintName": "alimento_autore_id_foreign",
+          "localTableName": "public.alimento",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.utente",
+          "deleteRule": "set null"
+        },
         "alimento_prodotto_catalogo_id_foreign": {
           "columnNames": ["prodotto_catalogo_id"],
           "constraintName": "alimento_prodotto_catalogo_id_foreign",
@@ -371,14 +328,6 @@
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.prodotto_catalogo",
           "deleteRule": "set null"
-        },
-        "alimento_utente_id_foreign": {
-          "columnNames": ["utente_id"],
-          "constraintName": "alimento_utente_id_foreign",
-          "localTableName": "public.alimento",
-          "referencedColumnNames": ["id"],
-          "referencedTableName": "public.utente",
-          "deleteRule": "cascade"
         }
       },
       "comment": null
@@ -1050,6 +999,161 @@
       "comment": null
     },
     {
+      "name": "uso_alimento",
+      "schema": "public",
+      "columns": {
+        "alimento_id": {
+          "name": "alimento_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "archiviato": {
+          "name": "archiviato",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "false",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "boolean"
+        },
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "ultimo_uso": {
+          "name": "ultimo_uso",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "utente_id": {
+          "name": "utente_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": true,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "utilizzi": {
+          "name": "utilizzi",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "0",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": ["alimento_id"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "uso_alimento_alimento_id_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "keyName": "uso_alimento_pkey",
+          "primary": true,
+          "unique": true
+        },
+        {
+          "columnNames": ["utente_id", "alimento_id"],
+          "composite": true,
+          "constraint": true,
+          "keyName": "uso_alimento_utente_id_alimento_id_unique",
+          "primary": false,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "triggers": [],
+      "foreignKeys": {
+        "uso_alimento_alimento_id_foreign": {
+          "columnNames": ["alimento_id"],
+          "constraintName": "uso_alimento_alimento_id_foreign",
+          "localTableName": "public.uso_alimento",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.alimento",
+          "deleteRule": "cascade"
+        },
+        "uso_alimento_utente_id_foreign": {
+          "columnNames": ["utente_id"],
+          "constraintName": "uso_alimento_utente_id_foreign",
+          "localTableName": "public.uso_alimento",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.utente",
+          "deleteRule": "cascade"
+        }
+      },
+      "comment": null
+    },
+    {
       "name": "utente",
       "schema": "public",
       "columns": {
@@ -1069,6 +1173,23 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "datetime"
+        },
+        "chiave_username": {
+          "name": "chiave_username",
+          "type": "varchar(254)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": true,
+          "length": 254,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
         },
         "creato_il": {
           "name": "creato_il",
@@ -1093,7 +1214,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "unique": true,
           "length": 254,
           "precision": null,
@@ -1205,9 +1326,68 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "integer"
+        },
+        "ruolo": {
+          "name": "ruolo",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'utente'",
+          "comment": null,
+          "collation": null,
+          "enumItems": ["admin", "utente"],
+          "mappedType": "enum"
+        },
+        "username": {
+          "name": "username",
+          "type": "varchar(254)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 254,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "versione_sessione": {
+          "name": "versione_sessione",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "0",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
         }
       },
       "indexes": [
+        {
+          "columnNames": ["chiave_username"],
+          "composite": false,
+          "constraint": true,
+          "keyName": "utente_chiave_username_unique",
+          "primary": false,
+          "unique": true
+        },
         {
           "columnNames": ["email"],
           "composite": false,
@@ -1225,7 +1405,14 @@
           "unique": true
         }
       ],
-      "checks": [],
+      "checks": [
+        {
+          "name": "utente_ruolo_check",
+          "expression": "\"ruolo\" in ('admin', 'utente')",
+          "definition": "check (\"ruolo\" in ('admin', 'utente'))",
+          "columnName": "ruolo"
+        }
+      ],
       "triggers": [],
       "foreignKeys": {},
       "comment": null

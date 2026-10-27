@@ -8,9 +8,10 @@ const { accedi } = useSessione();
 
 const campi: AuthFormField[] = [
   {
-    name: "email",
-    type: "email",
-    label: "Email",
+    name: "username",
+    type: "text",
+    label: "Username",
+    // The keyboard may capitalize the first letter: the username is lowercased anyway.
     autocomplete: "username",
     required: true,
     size: "xl",

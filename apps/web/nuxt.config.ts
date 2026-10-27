@@ -1,4 +1,25 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { execSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+
+/**
+ * "v<package version> · <short commit>", fixed at build time and shown in the footer:
+ * the version changes only with a release, the commit with every deploy.
+ * Vercel has no .git in the build: it gives the commit in VERCEL_GIT_COMMIT_SHA.
+ */
+function versioneApp(): string {
+  const { version } = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8"));
+  let commit = process.env.VERCEL_GIT_COMMIT_SHA;
+  if (!commit) {
+    try {
+      commit = execSync("git rev-parse HEAD", { encoding: "utf8" }).trim();
+    } catch {
+      commit = undefined;
+    }
+  }
+  return commit ? `v${version} · ${commit.slice(0, 7)}` : `v${version}`;
+}
+
 export default defineNuxtConfig({
   compatibilityDate: "2026-10-25",
   // Private, offline-first app: SPA served as static files, no SSR.
@@ -18,6 +39,7 @@ export default defineNuxtConfig({
     public: {
       // Overridden by NUXT_PUBLIC_API_BASE.
       apiBase: "http://localhost:3001",
+      versione: versioneApp(),
     },
   },
 

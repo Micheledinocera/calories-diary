@@ -16,7 +16,7 @@ defineProps<{
       v-for="o in opzioni"
       :key="o.valore"
       type="button"
-      class="flex flex-1 items-center justify-center gap-1.5 h-8 px-3 rounded-[7px] text-[13px] font-medium text-muted whitespace-nowrap"
+      class="flex flex-1 items-center justify-center gap-1 h-8 px-2 rounded-[7px] text-xs font-medium text-muted whitespace-nowrap"
       :class="
         valore === o.valore &&
         'bg-default text-highlighted font-semibold shadow-card dark:ring-1 dark:ring-default'
@@ -24,7 +24,7 @@ defineProps<{
       :aria-pressed="valore === o.valore"
       @click="valore = o.valore"
     >
-      <UIcon v-if="o.icona" :name="o.icona" class="size-4" />
+      <UIcon v-if="o.icona" :name="o.icona" class="size-3.5 shrink-0" />
       {{ o.etichetta }}
     </button>
   </div>

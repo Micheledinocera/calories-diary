@@ -76,7 +76,7 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
       >
         <template #day="{ day }">
           <span
-            class="flex flex-col items-center gap-[3px] leading-tight tabular-nums"
+            class="flex flex-col items-center gap-1 leading-tight tabular-nums"
             :aria-label="
               stato(day.toString())
                 ? `${day.day}, ${descrizioni[stato(day.toString())!.tipo]}`
@@ -85,7 +85,7 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
           >
             <span>{{ day.day }}</span>
             <span
-              class="size-1.5 rounded-full"
+              class="size-3 rounded-full"
               :class="
                 stato(day.toString()) ? pallini[stato(day.toString())!.tipo] : 'bg-transparent'
               "
@@ -103,7 +103,7 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
           :key="tipo"
           class="inline-flex items-center gap-1.5"
         >
-          <span class="size-1.5 rounded-full" :class="pallini[tipo]" />
+          <span class="size-3 rounded-full" :class="pallini[tipo]" />
           <span class="first-letter:uppercase">{{ descrizione }}</span>
         </span>
       </div>
@@ -111,7 +111,7 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
 
     <p class="text-sm text-muted">
       Tocca un giorno per vederlo.
-      <NuxtLink v-if="!obiettivi?.fabbisogno" to="/profilo" class="text-primary font-medium">
+      <NuxtLink v-if="!obiettivi?.fabbisogno" to="/obiettivi" class="text-primary font-medium">
         Imposta il fabbisogno per vedere com'è andata ogni giornata.
       </NuxtLink>
     </p>

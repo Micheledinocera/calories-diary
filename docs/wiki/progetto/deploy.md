@@ -1,10 +1,13 @@
 ---
 tipo: info
-aggiornato: 2026-10-26
+aggiornato: 2026-10-27
 fonti:
   - raw/compiled/deploy/2026-10-26-obiettivo.md
   - raw/compiled/deploy/2026-10-26-roadmap.md
   - raw/compiled/deploy/2026-10-26-checklist-manuale.md
+  - raw/compiled/ui-tweaks/2026-10-27-decisioni.md
+  - raw/compiled/ui-tweaks/2026-10-27-task.md
+  - raw/compiled/user-login/2026-10-27-implementazione.md
 ---
 
 # Deploy
@@ -17,13 +20,13 @@ Tutto su piani gratuiti, in Europa e nella stessa zona (Francoforte), così l'AP
 
 | Pezzo | Dove | Come arriva lì |
 |---|---|---|
-| Web (PWA statica, `nuxt generate`) | Vercel Hobby, root `apps/web`, dominio `*.vercel.app` | Integrazione git di Vercel: `main` → produzione, ogni PR → preview |
+| Web (PWA statica, `nuxt generate`) | Vercel Hobby, root `apps/web`, dominio `*.vercel.app` | Integrazione git di Vercel, **solo da `main`** (`apps/web/vercel.json`) |
 | API (immagine Docker) | Render, web service Free da immagine esistente, Frankfurt, health check `/health` | Workflow `deploy-api.yml` |
 | Immagine dell'API | GHCR, `ghcr.io/micheledinocera/calories-diary-api`, pacchetto **pubblico** | Push dal workflow con `GITHUB_TOKEN` |
 | PostgreSQL | Neon Free, `aws-eu-central-1` | Connessione **pooled** per l'API, **diretta** per migrazioni e backup |
 | Redis | Upstash Free, `eu-central-1` | URL `rediss://` (TLS), prefisso `calories-diary:prod:` |
 
-Il web chiama l'API direttamente (dominio diverso, CORS con `CORS_ORIGINS`, wildcard per le preview Vercel). L'indirizzo dell'API entra nel bundle alla build (`NUXT_PUBLIC_API_BASE`): se cambia, va rifatta la build su Vercel.
+Il web chiama l'API direttamente (dominio diverso, CORS con `CORS_ORIGINS`; la wildcard per le preview Vercel resta possibile, ma le preview sono spente). L'indirizzo dell'API entra nel bundle alla build (`NUXT_PUBLIC_API_BASE`): se cambia, va rifatta la build su Vercel.
 
 ## Pipeline dell'API
 
@@ -42,11 +45,11 @@ Nomi delle variabili; i valori stanno solo nei pannelli dei servizi e nei secret
 
 - **GitHub**, environment `production` (branch ammessi `main` e `develop`: il backup schedulato gira sul branch di default): secret `DATABASE_URL_DIRECT`, `RENDER_DEPLOY_HOOK`; variabili `API_URL`, `BACKUP_AGE_RECIPIENT`.
 - **Render**: `NODE_ENV`, `DATABASE_URL` (pooled), `REDIS_URL`, `REDIS_PREFIX`, `CORS_ORIGINS`, `JWT_SECRET`, `LOG_LEVEL`, `OFF_BASE_URL`, `OFF_CONTATTO`. `PORT` la imposta Render, `APP_VERSION` è nell'immagine. Significato in [Struttura dell'API](../tecnico/api/struttura.md).
-- **Vercel** (Production e Preview): `NUXT_PUBLIC_API_BASE`, `ENABLE_EXPERIMENTAL_COREPACK=1` (usa il pnpm del campo `packageManager`; senza, Vercel sceglie la versione dal lockfile e potrebbe prenderne una che non conosce `allowBuilds`). Build command `pnpm build`; branch di produzione `main` (di default Vercel prende `develop`, il branch di default del repo).
+- **Vercel** (Production; le variabili di Preview restano ma non servono finché le preview sono spente): `NUXT_PUBLIC_API_BASE`, `ENABLE_EXPERIMENTAL_COREPACK=1` (usa il pnpm del campo `packageManager`; senza, Vercel sceglie la versione dal lockfile e potrebbe prenderne una che non conosce `allowBuilds`). Build command `pnpm build`; branch di produzione `main` (di default Vercel prende `develop`, il branch di default del repo). In `apps/web/vercel.json`, `git.deploymentEnabled` spegne il deploy automatico su ogni branch (`"**": false`) tranne `main` (`"main": true`; se un branch combacia con più regole basta un `true`): niente build e niente mail di errore da `develop`, feature o PR, che si provano in locale. Vale per i commit che contengono il file.
 
 ## Primo utente
 
-Render Free non ha una shell: gli utenti si creano dal PC verso Neon con la connessione diretta, `DATABASE_URL='<diretta>' pnpm utente:crea <email>`. Le altre variabili arrivano dal `apps/api/.env` locale.
+Render Free non ha una shell: i comandi utente si lanciano dal PC verso Neon con la connessione diretta, `DATABASE_URL='<diretta>' pnpm utente:crea <username> --admin` (o `utente:admin <username>`). Le altre variabili arrivano dal `apps/api/.env` locale. Gli utenti normali li crea l'admin dall'app.
 
 ## Backup del database
 
@@ -80,6 +83,6 @@ Verificati sulla documentazione dei provider il 2026-10-26.
 
 ## Domande aperte
 
-- Al 2026-10-26 la pipeline non è ancora stata provata fino in fondo: cifratura age, push su GHCR, deploy hook e smoke test si vedono al primo deploy.
+- Il ripristino di un backup reale (decifrare l'artifact con la chiave age e leggerlo con `pg_restore`) non è ancora stato provato; il resto della pipeline ha funzionato al deploy della `v0.1.1`. L'utente lo considera non prioritario.
 - Costo di `/health`: ogni chiamata fa una query su Neon e un `PING` su Redis. Se l'health check di Render è frequente consuma comandi Upstash e tiene sveglio Neon. Da misurare; se serve, un `/health` leggero per Render e quello completo per lo smoke test.
 - MCP ufficiali dei provider (Render, Neon, Vercel; per Upstash non ne risulta uno ufficiale): utili per log e stato, non aggiunti a `.mcp.json`. Da decidere.

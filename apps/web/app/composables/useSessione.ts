@@ -1,4 +1,4 @@
-import type { Credenziali, Sessione } from "@calories-diary/shared";
+import type { CambioPassword, Credenziali, Sessione, Utente } from "@calories-diary/shared";
 
 const CHIAVE = "calories-diary:sessione";
 
@@ -48,9 +48,27 @@ export function useSessione() {
     }
   }
 
+  /** The user changes their own username; the session keeps the token. */
+  async function cambiaUsername(username: string) {
+    const utente = await api<Utente>("/auth/io", { method: "PATCH", body: { username }, retry: 0 });
+    if (sessione.value) imposta({ ...sessione.value, utente });
+  }
+
+  /** The API logs out the other devices and returns a new session for this one. */
+  async function cambiaPassword(dati: CambioPassword) {
+    imposta(await api<Sessione>("/auth/password", { method: "PUT", body: dati, retry: 0 }));
+  }
+
   function esci() {
     imposta(null);
   }
 
-  return { sessione: readonly(sessione), accedi, rinnova, esci };
+  return {
+    sessione: readonly(sessione),
+    accedi,
+    rinnova,
+    cambiaUsername,
+    cambiaPassword,
+    esci,
+  };
 }

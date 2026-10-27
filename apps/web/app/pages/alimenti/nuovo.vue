@@ -53,6 +53,14 @@ onMounted(() => {
   }
 });
 
+// Back to where the form was opened from (Alimenti, or the diary's food picker).
+const router = useRouter();
+function tornaIndietro() {
+  if (router.options.history.state.back) router.back();
+  else navigateTo("/alimenti", { replace: true });
+}
+
+const toast = useToast();
 const inCorso = ref(false);
 const errore = ref<ErroreNormalizzato | null>(null);
 const esistente = computed(() =>
@@ -65,8 +73,9 @@ async function salva(dati: NuovoAlimento) {
   inCorso.value = true;
   errore.value = null;
   try {
-    const alimento = await crea(dati);
-    await navigateTo(`/alimenti/${alimento.id}`, { replace: true });
+    await crea(dati);
+    toast.add({ title: "Alimento salvato", color: "success", icon: "i-lucide-check" });
+    tornaIndietro();
   } catch (err) {
     errore.value = err as ErroreNormalizzato;
   } finally {
@@ -82,8 +91,8 @@ async function salva(dati: NuovoAlimento) {
         icon="i-lucide-arrow-left"
         variant="ghost"
         color="neutral"
-        to="/alimenti"
         aria-label="Indietro"
+        @click="tornaIndietro"
       />
       <h1 class="text-2xl font-bold text-highlighted">Nuovo alimento</h1>
     </div>

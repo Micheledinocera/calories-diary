@@ -1,6 +1,6 @@
 {
   "name": "@calories-diary/api",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "files": [
@@ -17,7 +17,8 @@
     "migration:down": "tsx --env-file-if-exists=.env src/db/cli.ts migration:down",
     "seed": "tsx --env-file-if-exists=.env src/db/cli.ts seed",
     "seed:demo": "tsx --env-file-if-exists=.env src/db/cli.ts seed:demo",
-    "utente:crea": "tsx --env-file-if-exists=.env src/db/cli.ts utente:crea"
+    "utente:crea": "tsx --env-file-if-exists=.env src/db/cli.ts utente:crea",
+    "utente:admin": "tsx --env-file-if-exists=.env src/db/cli.ts utente:admin"
   },
   "dependencies": {
     "@calories-diary/shared": "workspace:*",

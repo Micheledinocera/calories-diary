@@ -1,9 +1,11 @@
 ---
 tipo: decisione
 stato: presa
-aggiornato: 2026-10-26
+aggiornato: 2026-10-27
 fonti:
   - raw/compiled/deploy/2026-10-26-roadmap.md
+  - raw/compiled/ui-tweaks/2026-10-27-decisioni.md
+  - raw/compiled/ui-tweaks/2026-10-27-task.md
 ---
 
 # Scelte di deploy
@@ -16,7 +18,8 @@ Come è fatto il [deploy](./deploy.md). Confermate dall'utente il 2026-10-26.
 - **Domini gratuiti** (`*.vercel.app`, `*.onrender.com`), niente dominio custom per la `v0.1.0`.
 - **Backup**: dump notturno cifrato con age, artifact di GitHub Actions con retention di 90 giorni.
 - **Chiamate dirette dal web all'API**, con CORS, invece di un rewrite `/api` su Vercel.
-- **Staging spento**: predisposto nei workflow, le preview Vercel puntano all'API di produzione.
+- **Staging spento**: predisposto nei workflow.
+- **Deploy solo da `main`**, cioè quando si chiude una release o un hotfix: niente build Vercel su `develop`, feature e PR. Tutto il resto si prova in locale. (Prima le PR avevano una preview Vercel che puntava all'API di produzione; cambiato su richiesta dell'utente nella feature `ui-tweaks`.)
 
 ## Perché
 
@@ -24,6 +27,7 @@ Come è fatto il [deploy](./deploy.md). Confermate dall'utente il 2026-10-26.
 - Backup: il restore di Neon Free copre solo le ultime 6 ore. La cifratura è obbligatoria perché gli artifact di un repo pubblico sono scaricabili da qualunque account GitHub; la chiave privata resta solo al maintainer.
 - Chiamate dirette: il CORS era già pronto (con wildcard per le preview). Il rewrite eviterebbe il CORS ma aggiunge un passaggio, Vercel non dichiara il timeout verso l'origine esterna (rischio con il cold start di Render) e dai progetti creati da aprile 2026 mette in cache le risposte esterne con intestazioni di cache.
 - Staging spento: per un'app personale non serve ancora, e costerebbe un secondo servizio e un branch Neon.
+- Solo `main`: le build degli altri branch mandavano mail di errore a ogni push e non servivano, visto che si prova tutto in locale.
 
 ## Alternative scartate
 

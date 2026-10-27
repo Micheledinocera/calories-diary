@@ -51,7 +51,7 @@ const quotaPesante = computed(() =>
 <template>
   <UCard :ui="{ body: 'space-y-3 sm:p-4' }">
     <div class="flex items-center justify-between gap-2 min-h-6">
-      <NuxtLink v-if="!fabbisogno" to="/profilo" class="text-sm text-primary font-medium">
+      <NuxtLink v-if="!fabbisogno" to="/obiettivi" class="text-sm text-primary font-medium">
         Imposta il fabbisogno
       </NuxtLink>
       <span v-else-if="stato?.tipo === 'oltre'" class="text-sm text-muted"
@@ -67,7 +67,8 @@ const quotaPesante = computed(() =>
       <AnelloMacro :totali="totali" :fabbisogno="fabbisogno" />
       <div class="flex-1 min-w-0 space-y-3">
         <div v-for="m in legenda" :key="m.chiave" class="space-y-1">
-          <div class="flex items-baseline justify-between gap-2">
+          <!-- On narrow screens the value wraps under the label instead of overflowing. -->
+          <div class="flex flex-wrap items-baseline justify-between gap-x-2">
             <span class="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted">
               <span class="size-2 rounded-full" :class="m.colore" />
               {{ m.etichetta }}
