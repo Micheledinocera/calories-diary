@@ -403,6 +403,7 @@ describe("/diario", () => {
         voci: [],
         totali: vuoti,
         suggerite: [],
+        preferito: null,
       })),
       totali: vuoti,
     });

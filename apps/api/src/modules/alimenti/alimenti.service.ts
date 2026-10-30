@@ -9,6 +9,7 @@ import type {
 } from "@calories-diary/shared";
 import type { z } from "zod";
 import { ErroreApp, nonTrovato } from "../../lib/errori.js";
+import { escapeLike } from "../../lib/testo.js";
 import { kcalIncoerenti } from "../catalogo/avvisi.js";
 import { normalizzaBarcode } from "../catalogo/barcode.js";
 import { ProdottoCatalogo } from "../catalogo/prodotto-catalogo.entity.js";
@@ -22,6 +23,8 @@ type DatiModifica = z.output<typeof modificaAlimentoSchema>;
 type Filtri = z.output<typeof filtriAlimentiSchema>;
 
 const alimentoNonTrovato = () => nonTrovato("Alimento non trovato");
+
+const populate = ["porzioni", "usi", "vociPreferite"] as const;
 
 /** The food as `utenteId` sees it: archive and use are theirs. `usi` must be populated. */
 const versoDto = (a: Alimento, utenteId: string): AlimentoDto => {
@@ -70,12 +73,9 @@ const ordinamenti: Record<OrdineAlimenti, (x: Riga, y: Riga) => number> = {
   nome: perNome,
 };
 
-/** `%` and `_` typed by the user are literal characters in the search. */
-const escapeLike = (testo: string) => testo.replace(/[\\%_]/g, (c) => `\\${c}`);
-
 export function creaAlimentiService(em: EntityManager) {
   async function carica(id: string): Promise<Alimento> {
-    const alimento = await em.findOne(Alimento, { id }, { populate: ["porzioni", "usi"] });
+    const alimento = await em.findOne(Alimento, { id }, { populate });
     if (!alimento) throw alimentoNonTrovato();
     return alimento;
   }
@@ -113,7 +113,7 @@ export function creaAlimentiService(em: EntityManager) {
         filtro.$or = [{ nome: { $ilike: testo } }, { marca: { $ilike: testo } }];
         if (/^\d{1,20}$/.test(q)) filtro.$or.push({ barcode: normalizzaBarcode(q) });
       }
-      const alimenti = await em.find(Alimento, filtro, { populate: ["porzioni", "usi"] });
+      const alimenti = await em.find(Alimento, filtro, { populate });
       return alimenti
         .map((alimento): Riga => ({ alimento, uso: usoDi(alimento, utenteId) }))
         .filter(({ uso }) => (uso?.archiviato ?? false) === archiviati)
@@ -165,8 +165,8 @@ export function creaAlimentiService(em: EntityManager) {
     },
 
     /**
-     * Only the author deletes a food. A food used in any diary is archived instead:
-     * the history must stay.
+     * Only the author deletes a food. A food used in any diary or favorite meal is archived
+     * instead: the history must stay.
      */
     async elimina(utenteId: string, id: string): Promise<void> {
       const alimento = await carica(id);
@@ -174,7 +174,7 @@ export function creaAlimentiService(em: EntityManager) {
         throw new ErroreApp(403, "ALIMENTO_NON_TUO", "Solo chi l'ha creato può eliminarlo");
       }
       if (inUso(alimento)) {
-        throw new ErroreApp(409, "ALIMENTO_IN_USO", "Alimento già usato nel diario: archivialo");
+        throw new ErroreApp(409, "ALIMENTO_IN_USO", "Alimento già in uso: archivialo");
       }
       await em.remove(alimento).flush();
     },

@@ -17,6 +17,7 @@ import { condivisioniRouter, pubblicoRouter } from "./modules/condivisioni/condi
 import { diarioRouter } from "./modules/diario/diario.routes.js";
 import { healthRouter } from "./modules/health/health.routes.js";
 import { obiettiviRouter } from "./modules/obiettivi/obiettivi.routes.js";
+import { pastiPreferitiRouter } from "./modules/pasti-preferiti/pasti-preferiti.routes.js";
 import { utentiRouter } from "./modules/utenti/utenti.routes.js";
 
 export interface DipendenzeApp {
@@ -49,6 +50,7 @@ export function creaApp({ env, orm, redis, logger, provider }: DipendenzeApp): E
   app.use("/diario", autenticazione, diarioRouter(orm.em));
   app.use("/obiettivi", autenticazione, obiettiviRouter(orm.em));
   app.use("/alimenti", autenticazione, alimentiRouter(orm.em));
+  app.use("/pasti-preferiti", autenticazione, pastiPreferitiRouter(orm.em));
   app.use("/catalogo", autenticazione, catalogoRouter({ em: orm.em, redis, logger, provider }));
   app.use("/utenti", autenticazione, richiediAdmin, utentiRouter(orm.em));
   app.use("/condivisioni", autenticazione, condivisioniRouter(orm.em));

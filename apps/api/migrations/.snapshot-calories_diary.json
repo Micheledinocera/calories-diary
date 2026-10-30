@@ -602,6 +602,23 @@
           "enumItems": [],
           "mappedType": "integer"
         },
+        "preferito_id": {
+          "name": "preferito_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
         "tipo": {
           "name": "tipo",
           "type": "text",
@@ -665,10 +682,140 @@
       ],
       "triggers": [],
       "foreignKeys": {
+        "pasto_preferito_id_foreign": {
+          "columnNames": ["preferito_id"],
+          "constraintName": "pasto_preferito_id_foreign",
+          "localTableName": "public.pasto",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.pasto_preferito",
+          "deleteRule": "set null"
+        },
         "pasto_utente_id_foreign": {
           "columnNames": ["utente_id"],
           "constraintName": "pasto_utente_id_foreign",
           "localTableName": "public.pasto",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.utente",
+          "deleteRule": "cascade"
+        }
+      },
+      "comment": null
+    },
+    {
+      "name": "pasto_preferito",
+      "schema": "public",
+      "columns": {
+        "aggiornato_il": {
+          "name": "aggiornato_il",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "autore_id": {
+          "name": "autore_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "varchar(100)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 100,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": ["autore_id"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "pasto_preferito_autore_id_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "keyName": "pasto_preferito_pkey",
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "triggers": [],
+      "foreignKeys": {
+        "pasto_preferito_autore_id_foreign": {
+          "columnNames": ["autore_id"],
+          "constraintName": "pasto_preferito_autore_id_foreign",
+          "localTableName": "public.pasto_preferito",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.utente",
           "deleteRule": "cascade"
@@ -1747,6 +1894,143 @@
           "localTableName": "public.voce",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.pasto",
+          "deleteRule": "cascade"
+        }
+      },
+      "comment": null
+    },
+    {
+      "name": "voce_preferita",
+      "schema": "public",
+      "columns": {
+        "alimento_id": {
+          "name": "alimento_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "ordine": {
+          "name": "ordine",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "pasto_preferito_id": {
+          "name": "pasto_preferito_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "quantita": {
+          "name": "quantita",
+          "type": "numeric(10,3)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": 10,
+          "scale": 3,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "decimal"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": ["alimento_id"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "voce_preferita_alimento_id_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": ["pasto_preferito_id"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "voce_preferita_pasto_preferito_id_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "keyName": "voce_preferita_pkey",
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "triggers": [],
+      "foreignKeys": {
+        "voce_preferita_alimento_id_foreign": {
+          "columnNames": ["alimento_id"],
+          "constraintName": "voce_preferita_alimento_id_foreign",
+          "localTableName": "public.voce_preferita",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.alimento"
+        },
+        "voce_preferita_pasto_preferito_id_foreign": {
+          "columnNames": ["pasto_preferito_id"],
+          "constraintName": "voce_preferita_pasto_preferito_id_foreign",
+          "localTableName": "public.voce_preferita",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.pasto_preferito",
           "deleteRule": "cascade"
         }
       },
