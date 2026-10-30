@@ -20,6 +20,7 @@ const giornata = (giorno: string, kcal = 0): Giornata => {
         tipo: "colazione",
         totali: kcal ? valori : zero,
         suggerite: [],
+        preferito: null,
         voci: kcal
           ? [
               {
@@ -37,7 +38,7 @@ const giornata = (giorno: string, kcal = 0): Giornata => {
             ]
           : [],
       },
-      { id: null, tipo: "pranzo", totali: zero, suggerite: [], voci: [] },
+      { id: null, tipo: "pranzo", totali: zero, suggerite: [], preferito: null, voci: [] },
     ],
   };
 };

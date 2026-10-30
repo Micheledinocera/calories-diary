@@ -4,11 +4,11 @@ import type { Alimento, NuovaVoce, Valori } from "@calories-diary/shared";
 const aperto = defineModel<boolean>("open", { required: true });
 const props = defineProps<{
   nomePasto: string;
-  /** Day totals and need: the quantity step shows how the day changes. */
-  totaliGiorno: Valori;
-  fabbisogno: number | null;
+  /** Day totals and need: the quantity step shows how the day changes. Absent outside the diary. */
+  totaliGiorno?: Valori;
+  fabbisogno?: number | null;
 }>();
-const emit = defineEmits<{ scelta: [voce: NuovaVoce] }>();
+const emit = defineEmits<{ scelta: [voce: NuovaVoce, alimento: Alimento] }>();
 
 const { elenca } = useAlimenti();
 const toast = useToast();
@@ -85,7 +85,7 @@ const coloriMacro = {
 
 // How the day changes with this food.
 const dopo = computed(() => {
-  if (!valori.value || !props.fabbisogno) return null;
+  if (!valori.value || !props.fabbisogno || !props.totaliGiorno) return null;
   const kcal = props.totaliGiorno.kcal + valori.value.kcal;
   return {
     kcal,
@@ -97,7 +97,7 @@ const dopo = computed(() => {
 
 function conferma() {
   if (!scelto.value || !quantita.value || quantita.value <= 0) return;
-  emit("scelta", { alimento: scelto.value.id, quantita: quantita.value });
+  emit("scelta", { alimento: scelto.value.id, quantita: quantita.value }, scelto.value);
   aperto.value = false;
 }
 

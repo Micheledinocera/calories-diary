@@ -5,6 +5,7 @@ const voci = [
   { label: "Oggi", icon: "i-lucide-calendar-check", to: "/" },
   { label: "Calendario", icon: "i-lucide-calendar-days", to: "/diario" },
   { label: "Alimenti", icon: "i-lucide-apple", to: "/alimenti" },
+  { label: "Preferiti", icon: "i-lucide-star", to: "/pasti-preferiti" },
 ];
 
 const route = useRoute();
@@ -32,20 +33,23 @@ async function logout() {
 </script>
 
 <template>
-  <div class="min-h-dvh flex flex-col">
+  <div class="min-h-dvh flex flex-col max-sm:pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
     <header class="bg-default border-b border-default">
       <UContainer class="max-w-xl flex items-center justify-between gap-2 py-2">
-        <nav class="flex gap-0.5" aria-label="Principale">
+        <NuxtLink to="/" class="sm:hidden flex items-center gap-2 font-semibold text-highlighted">
+          <img src="/logo.svg" alt="" class="size-6" />
+          Calories Diary
+        </NuxtLink>
+        <nav class="hidden sm:flex gap-0.5" aria-label="Principale">
           <NuxtLink
             v-for="v in voci"
             :key="v.to"
             :to="v.to"
-            class="inline-flex items-center gap-1.5 h-[34px] px-2.5 min-[380px]:px-3 rounded-full text-sm font-medium text-muted"
+            class="inline-flex items-center gap-1.5 h-[34px] px-3 rounded-full text-sm font-medium text-muted"
             :class="attiva(v.to) && 'bg-primary/10 text-primary font-semibold'"
             :aria-current="attiva(v.to) ? 'page' : undefined"
           >
-            <!-- Below 380px (small phones) labels and account fit only without the icons. -->
-            <UIcon :name="v.icon" class="size-4 max-[379px]:hidden" />
+            <UIcon :name="v.icon" class="size-4" />
             {{ v.label }}
           </NuxtLink>
         </nav>
@@ -94,5 +98,23 @@ async function logout() {
       <slot />
     </main>
     <footer class="py-4 text-center text-xs text-dimmed">Calories Diary {{ versione }}</footer>
+
+    <!-- Phones: fixed bar within thumb reach, as the header no longer fits every section. -->
+    <nav
+      class="sm:hidden fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 bg-default border-t border-default pb-[env(safe-area-inset-bottom)]"
+      aria-label="Principale"
+    >
+      <NuxtLink
+        v-for="v in voci"
+        :key="v.to"
+        :to="v.to"
+        class="flex flex-col items-center gap-0.5 pt-2 pb-1.5 text-[11px] font-medium text-muted"
+        :class="attiva(v.to) && 'text-primary font-semibold'"
+        :aria-current="attiva(v.to) ? 'page' : undefined"
+      >
+        <UIcon :name="v.icon" class="size-5" />
+        {{ v.label }}
+      </NuxtLink>
+    </nav>
   </div>
 </template>
