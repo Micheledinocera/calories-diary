@@ -1,7 +1,9 @@
 ---
 tipo: info
-aggiornato: 2026-10-27
+aggiornato: 2026-10-30
 fonti:
+  - raw/compiled/export-rework/2026-10-30-decisioni-utente.md
+  - raw/compiled/export-rework/2026-10-30-vista-per-giorno.md
   - raw/compiled/first-develop/2026-10-25-scaffolding.md
   - raw/compiled/auth/2026-10-25-implementazione.md
   - raw/compiled/offline-cache/2026-10-25-cache-in-analisi.md
@@ -51,7 +53,7 @@ Linee guida e design system in [Design](../../progetto/design.md).
 
 - `app/composables/useApi.ts`: `api<T>(path, opzioni)` è `$fetch` con `baseURL` dell'API e il token della sessione come `Authorization: Bearer`, un retry, timeout di **90 s** finché il server non ha risposto almeno una volta nella sessione (avvio a freddo dell'hosting gratuito), poi 15 s. Espone `sveglia` (il server ha già risposto).
 - Un 401 `NON_AUTENTICATO` su una chiamata con token chiude la sessione e porta a `/login`.
-- `app/composables/useAlimenti.ts`: chiamate di `/alimenti` e del lookup per barcode. `app/composables/useDiario.ts`: chiamate di `/diario` e `/obiettivi`. Le scritture (POST, PATCH, DELETE) non fanno retry: una richiesta scaduta lato client potrebbe essere già stata applicata.
+- `app/composables/useAlimenti.ts`: chiamate di `/alimenti` e del lookup per barcode. `app/composables/useDiario.ts`: chiamate di `/diario` e `/obiettivi`. `app/composables/useCondivisioni.ts`: chiamate di `/condivisioni` e `/pubblico`, più `copiaLink`. Le scritture (POST, PATCH, DELETE) non fanno retry: una richiesta scaduta lato client potrebbe essere già stata applicata.
 - `app/utils/errori-api.ts`: `normalizzaErrore(err)` trasforma ogni errore in `{ codice, messaggio, status? }`: body di errore dell'API, `TIMEOUT`, `HTTP` o `RETE`.
 
 ## Sessione e login
@@ -60,7 +62,7 @@ Regole nelle decisioni [Autenticazione multiutente](../../progetto/decisione-aut
 
 - `app/composables/useSessione.ts`: `sessione`, `accedi(credenziali)`, `rinnova()`, `cambiaUsername(username)` (aggiorna l'utente della sessione, stesso token), `cambiaPassword(dati)` (salva la nuova sessione restituita dall'API), `esci()`. La sessione (`Sessione` di shared) sta in `localStorage` (`calories-diary:sessione`) e viene validata con `sessioneSchema` alla lettura (`app/utils/sessione.ts`): una sessione salvata col vecchio formato (utente con `email`) viene scartata e si rifà il login. Login e scritture non fanno retry: ogni tentativo conta nel rate limit.
 - `app/composables/useUtenti.ts`: chiamate di `/utenti` (admin): `elenca`, `crea`, `modifica`, `elimina`.
-- `app/middleware/autenticazione.global.ts`: senza sessione ogni pagina porta a `/login`; con sessione `/login` porta alla home; `/utenti` porta alla home chi non è admin (l'API lo verifica comunque). Un token scaduto localmente non blocca l'app (uso offline): se ne accorge l'API alla prima chiamata.
+- `app/middleware/autenticazione.global.ts`: senza sessione ogni pagina porta a `/login`, tranne quelle sotto `/condivisi/`, aperte a chiunque abbia il link; con sessione `/login` porta alla home; `/utenti` porta alla home chi non è admin (l'API lo verifica comunque). Un token scaduto localmente non blocca l'app (uso offline): se ne accorge l'API alla prima chiamata.
 - `app/plugins/rinnovo-sessione.client.ts`: rinnovo scorrevole. Chiama `POST /auth/rinnova` all'avvio, al ritorno online e quando l'app torna in primo piano, ma solo se il token ha più di un giorno (`daRinnovare`): resta sempre circa una settimana di margine offline senza chiamare l'API a ogni apertura. Gli errori di rete si ignorano.
 
 ## Pagine
@@ -70,7 +72,9 @@ Regole nelle decisioni [Autenticazione multiutente](../../progetto/decisione-aut
 - `pages/index.vue` ("Oggi"): `DiarioGiornata` del giorno locale, sempre modificabile; il giorno si aggiorna quando l'app torna in primo piano (aperta a cavallo della mezzanotte).
 - `pages/diario/index.vue`: calendario (`UCalendar`) in una card, con un pallino sui giorni con voci nel colore di `statoGiornata` (verde, giallo, rosso; 12 px, anche nella legenda) e la legenda; senza fabbisogno nessun pallino e un invito a impostarlo. Carica i riepiloghi del mese mostrato più le settimane vicine; un giorno apre `/diario/<giorno>` (oggi apre `/`). Il bottone "Esporta" apre `/diario/export`.
 - `pages/diario/[giorno].vue`: stessa `DiarioGiornata`, in sola lettura finché non si preme "Modifica"; frecce per il giorno prima e dopo.
-- `pages/diario/export.vue`: export di condivisione in markdown. `UCalendar` con `range`, `maximum-days` = `MAX_GIORNI_EXPORT` (7) e `max-value` oggi; parte dagli ultimi 7 giorni. "Genera" chiama in parallelo `GET /obiettivi` e `GET /diario/:giorno` per ogni giorno (nessun endpoint dedicato) e mostra l'anteprima; cambiare intervallo la svuota. Azioni: "Condividi" (Web Share API con il file, solo se `navigator.canShare` accetta file), "Scarica .md" (Blob e link `download`), "Copia" (appunti). File `diario-<da>_<a>.md` (`diario-<giorno>.md` per un giorno).
+- `pages/diario/export.vue`: export di condivisione in markdown. `UCalendar` con `range`, `maximum-days` = `MAX_GIORNI_EXPORT` (7) e `max-value` oggi; parte dagli ultimi 7 giorni. "Genera" chiama in parallelo `GET /obiettivi` e `GET /diario/:giorno` per ogni giorno (nessun endpoint dedicato) e mostra l'anteprima; cambiare intervallo la svuota. Azioni: "Condividi" (apre `ModaleCondivisione`), "Scarica .md" (Blob e link `download`), "Copia" (appunti). File `diario-<da>_<a>.md` (`diario-<giorno>.md` per un giorno). In fondo "Link attivi": ogni link con periodo e scadenza, copia e revoca.
+- `components/ModaleCondivisione.vue`: durata (`ControlloSegmentato`) e "Mostra il fabbisogno" (spento di default); creato il link mostra l'indirizzo, "Copia link" e, se c'è `navigator.share`, "Condividi".
+- `pages/condivisi/[token].vue`: pagina pubblica, senza layout e con `noindex`. La settimana è il selettore del giorno (si apre sul primo con voci, `giornoIniziale`); sotto, il giorno scelto con `StatoGiornata`, `AnelloMacro` nella variante `piccolo`, grammi e percentuale di ogni macro e i pasti con le voci. Senza `obiettivi` non mostra pallini né confronti. Non usa `useAsyncData`, che scarterebbe il codice dell'errore: `NON_TROVATO` mostra "Questo link non è più valido".
 - `app/utils/export.ts`: `markdownDiario(giornate, obiettivi)`, funzione pura. Titolo, periodo, obiettivi; tabella "Riepilogo" (kcal e macro per giorno) solo con più giorni; per ogni giorno, in ordine di data, kcal rispetto al fabbisogno e grammi e quota di ogni macro rispetto alla ripartizione, poi una tabella per pasto (alimento e marca, quantità, kcal, macro, totale). Pasti vuoti saltati, giorno vuoto con "Nessun alimento registrato.". Numeri con `formattaValore`; i caratteri markdown dei nomi sono escapati per non rompere le tabelle.
 - `pages/obiettivi.vue`: fabbisogno e ripartizione dei macro (validati con `obiettiviSchema`), con i grammi obiettivo sotto ogni quota, una barra della ripartizione, il totale delle quote e "Valori consigliati" (50/30/20). Qui portano gli inviti a impostare il fabbisogno.
 - `pages/profilo.vue`: username (salva solo se valido e diverso dall'attuale), cambio password (attuale, nuova, ripeti; il pulsante si attiva solo quando i tre campi sono validi) e tema.

@@ -1,7 +1,8 @@
 ---
 tipo: info
-aggiornato: 2026-10-27
+aggiornato: 2026-10-30
 fonti:
+  - raw/compiled/export-rework/2026-10-30-decisioni-utente.md
   - raw/compiled/first-develop/2026-10-25-scaffolding.md
   - raw/compiled/auth/2026-10-25-implementazione.md
   - raw/compiled/food-catalog/2026-10-25-open-food-facts-e-perimetro.md
@@ -41,7 +42,7 @@ Esempio: [Diario](./diario.md). Le rotte protette leggono l'utente con `utenteCo
 1. `helmet`; CORS limitato a `CORS_ORIGINS` (lista separata da virgole, `*` vale qualsiasi sequenza: es. `https://calories-diary-*.vercel.app`; le richieste senza `Origin` passano).
 2. `pino-http` (escluso `/health` dai log di accesso), `express.json` (max 1 MB).
 3. `GET /health`, fuori dal `RequestContext`.
-4. `RequestContext` di MikroORM, poi le rotte dei moduli: `/auth` e, dietro `richiediAutenticazione`, `/diario`, `/obiettivi`, `/alimenti`, `/catalogo` e (anche dietro `richiediAdmin`) `/utenti`.
+4. `RequestContext` di MikroORM, poi le rotte dei moduli: `/auth` e, dietro `richiediAutenticazione`, `/diario`, `/obiettivi`, `/alimenti`, `/catalogo`, `/condivisioni` e (anche dietro `richiediAdmin`) `/utenti`. `/pubblico/:token` è fuori dall'autenticazione: il token nel link è l'unica credenziale.
 5. 404 JSON per le rotte sconosciute, gestore centrale degli errori.
 
 ## Formato degli errori

@@ -1,7 +1,9 @@
 ---
 tipo: info
-aggiornato: 2026-10-27
+aggiornato: 2026-10-30
 fonti:
+  - raw/compiled/export-rework/2026-10-30-condividi.md
+  - raw/compiled/export-rework/2026-10-30-decisioni-utente.md
   - raw/compiled/first-develop/analisi-iniziale-calorie-tracker.md
   - raw/compiled/first-develop/2026-10-25-decisioni-e-piano.md
   - raw/compiled/auth/2026-10-25-decisioni-utente.md
@@ -69,6 +71,8 @@ Applicazione **personale** per tracciare ogni giorno calorie e macronutrienti. �
 
 **Export di condivisione** (in `export`): si sceglie un intervallo di giorni, **al massimo una settimana**, e si ottiene un file **markdown**, facile da mandare in giro o da convertire in PDF. Contiene gli obiettivi (fabbisogno e ripartizione dei macro), un riepilogo dei giorni e, per ogni giorno, i totali di consumo rispetto agli obiettivi e il dettaglio di cosa si è mangiato per pasto, con kcal e macro di ogni alimento. Lo genera il front-end dai dati del diario.
 
+**Link pubblico** (in `export-rework`): dall'export si crea un link a una copia fissa dei giorni scelti, che chiunque lo riceva vede senza login, un giorno per volta. Regole in [Link pubblici al diario](../progetto/decisione-link-pubblici.md).
+
 **Niente backup nell'app**: non c'è export/import dei dati in JSON o CSV. Il requisito veniva dall'analisi iniziale local-first, quando i dati stavano solo sul dispositivo; con il [server come fonte di verità](../progetto/decisione-server-fonte-di-verita.md) i dati stanno in PostgreSQL, e la protezione dai guasti è il [backup notturno del database](../progetto/deploy.md#backup-del-database) lato server.
 
 ## Requisiti non funzionali
@@ -92,3 +96,4 @@ Ordine delle feature dell'MVP: `first-develop` (scaffolding), `auth`, `food-cata
 ## Domande aperte
 
 - La UI dell'MVP è provvisoria: flussi ed esperienza si validano con un giro di design verso la fine dell'MVP.
+- I **non obiettivi** escludono la condivisione tra utenti ("ognuno vede solo i propri dati"), mentre il link pubblico mostra i dati di un utente a chiunque abbia il link: da chiarire se riformulare il non obiettivo (ad esempio escludendo solo le interazioni tra utenti dentro l'app).
