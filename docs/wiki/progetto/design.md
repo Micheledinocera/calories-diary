@@ -1,7 +1,11 @@
 ---
 tipo: info
-aggiornato: 2026-10-27
+aggiornato: 2026-10-30
 fonti:
+  - raw/compiled/meals/2026-10-30-pasti-preferiti.md
+  - raw/compiled/meals/2026-10-30-decisioni-utente.md
+  - raw/compiled/meals/2026-10-30-modifiche.md
+  - raw/compiled/export-rework/2026-10-30-condividi.md
   - raw/compiled/pre-deploy/2026-10-25-tasks.md
   - raw/compiled/pre-deploy/2026-10-25-design.md
   - raw/compiled/pre-deploy/2026-10-25-implementazione.md
@@ -30,10 +34,12 @@ Interfaccia pulita e silenziosa, ispirata a Yazio ma con meno decorazione: card 
 - **Font** Figtree, una sola famiglia; cifre tabellari dove i numeri si allineano.
 - **Tema** chiaro, scuro o come il sistema (predefinito), scelto sul dispositivo dal menu account o dalla pagina Profilo.
 - **Aggiungere un alimento** è l'azione più frequente: foglio dal basso, ricerca con scansione, porzioni come scorciatoie, anteprima prima di confermare.
+- **Navigazione**: su telefono barra fissa in basso con quattro voci, icona e nome intero (entrano anche a 320 px, niente nomi accorciati); dai 640 px tab in alto. Il pulsante account resta nell'header.
+- **Stella dei pasti preferiti**: una sola azione per volta. Il pasto vuoto propone "Aggiungi preferito", quello con alimenti ha la stella fissa, piena se è collegato a un preferito. La conferma per toglierlo è una modale dell'app.
 - Testi in italiano, seconda persona, frasi brevi, niente emoji.
 
 ## Domande aperte
 
-- **Export**: la schermata va ripensata (l'utente vuole vedere il dettaglio di cosa si è mangiato a ogni pasto); per ora resta com'era.
+- **Export**: la schermata va ripensata (l'utente vuole vedere il dettaglio di cosa si è mangiato a ogni pasto); per ora resta com'era. Nella nota del 30 ottobre (`export-rework`) l'utente scrive invece che in generale l'export va bene così: da chiarire se questo punto è ancora valido.
 - **Torcia** nella scansione: proposta nel design, non fatta perché non tutti i browser la supportano.
 - **Testo muted** nel tema chiaro: schiarito a `#8290a3` per scelta dell'utente. Su bianco ha un contrasto di circa 3,2:1 (meno di 3:1 sullo sfondo della pagina), sotto il 4,5:1 di WCAG AA per il testo piccolo; un compromesso sarebbe `#64748b` (circa 4,8:1). Da decidere se tenerlo.

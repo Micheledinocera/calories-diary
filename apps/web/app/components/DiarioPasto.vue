@@ -15,12 +15,25 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   aggiungi: [voci: NuovaVoce[]];
+  aggiungiPreferito: [id: string];
+  salvaPreferito: [nome: string];
+  togliPreferito: [];
   modificaVoce: [id: string, quantita: number];
   eliminaVoce: [id: string];
   elimina: [];
 }>();
 
 const scelta = ref(false);
+const sceltaPreferito = ref(false);
+const salvaPreferito = ref(false);
+const togliPreferito = ref(false);
+
+/** The star: saves the meal; on, it deletes the user's own favorite (after asking) or unlinks. */
+function tocca() {
+  if (!props.pasto.preferito) salvaPreferito.value = true;
+  else if (props.pasto.preferito.mio) togliPreferito.value = true;
+  else emit("togliPreferito");
+}
 
 // Quantity of an entry, edited in a modal.
 const inModifica = ref<Voce | null>(null);
@@ -70,7 +83,9 @@ const spuntino = computed(() => props.pasto.tipo === "spuntino");
           class="maniglia text-muted cursor-grab touch-none size-5"
           aria-label="Trascina per spostare"
         />
-        <h2 class="font-semibold flex-1 text-highlighted">{{ nomiPasti[pasto.tipo] }}</h2>
+        <h2 class="font-semibold flex-1 min-w-0 truncate text-highlighted">
+          {{ nomiPasti[pasto.tipo] }}
+        </h2>
         <span
           v-if="piuPesante"
           class="inline-flex items-center gap-1 rounded-full bg-oltre-tenue px-2 text-xs leading-5 font-semibold text-error"
@@ -83,6 +98,31 @@ const spuntino = computed(() => props.pasto.tipo === "spuntino");
           :class="piuPesante ? 'text-error' : 'text-highlighted'"
         >
           {{ formattaValore(Math.round(pasto.totali.kcal)) }} kcal
+        </span>
+        <UButton
+          v-if="modificabile && pasto.voci.length"
+          variant="ghost"
+          :color="pasto.preferito ? 'primary' : 'neutral'"
+          size="sm"
+          :aria-label="
+            pasto.preferito
+              ? `Nei pasti preferiti come ${pasto.preferito.nome}: togli`
+              : 'Salva tra i pasti preferiti'
+          "
+          :aria-pressed="!!pasto.preferito"
+          :disabled="inCorso"
+          @click="tocca"
+        >
+          <StellaPreferito :piena="!!pasto.preferito" />
+        </UButton>
+        <span
+          v-else-if="pasto.preferito"
+          class="text-primary"
+          role="img"
+          :aria-label="`Nei pasti preferiti come ${pasto.preferito.nome}`"
+          :title="pasto.preferito.nome"
+        >
+          <StellaPreferito piena />
         </span>
         <UButton
           v-if="spuntino && modificabile"
@@ -157,24 +197,49 @@ const spuntino = computed(() => props.pasto.tipo === "spuntino");
       </UButton>
     </div>
 
-    <UButton
-      v-if="modificabile"
-      icon="i-lucide-plus"
-      variant="ghost"
-      size="sm"
-      class="mt-1"
-      :disabled="inCorso"
-      @click="scelta = true"
-    >
-      Aggiungi alimento
-    </UButton>
+    <div v-if="modificabile" class="flex flex-wrap items-center gap-1 mt-1">
+      <UButton
+        icon="i-lucide-plus"
+        variant="ghost"
+        size="sm"
+        :disabled="inCorso"
+        @click="scelta = true"
+      >
+        Aggiungi alimento
+      </UButton>
+      <UButton
+        v-if="!pasto.voci.length"
+        icon="i-lucide-star"
+        variant="ghost"
+        size="sm"
+        :disabled="inCorso"
+        @click="sceltaPreferito = true"
+      >
+        Aggiungi preferito
+      </UButton>
+    </div>
 
     <SceltaAlimento
       v-model:open="scelta"
       :nome-pasto="nomiPasti[pasto.tipo]"
       :totali-giorno="totaliGiorno"
       :fabbisogno="fabbisogno"
-      @scelta="emit('aggiungi', [$event])"
+      @scelta="(voce) => emit('aggiungi', [voce])"
+    />
+    <SceltaPastoPreferito
+      v-model:open="sceltaPreferito"
+      :nome-pasto="nomiPasti[pasto.tipo]"
+      @scelta="emit('aggiungiPreferito', $event)"
+    />
+    <ModaleSalvaPreferito
+      v-model:open="salvaPreferito"
+      :pasto="pasto"
+      @salva="emit('salvaPreferito', $event)"
+    />
+    <ModaleTogliPreferito
+      v-model:open="togliPreferito"
+      :nome="pasto.preferito?.nome ?? ''"
+      @conferma="emit('togliPreferito')"
     />
 
     <UModal v-model:open="modificaAperta" :title="inModifica?.alimento.nome">
@@ -185,6 +250,7 @@ const spuntino = computed(() => props.pasto.tipo === "spuntino");
               v-model="quantita"
               :min="0"
               :step="10"
+              :step-snapping="false"
               :format-options="{ maximumFractionDigits: 1 }"
               locale="it-IT"
               class="w-full"

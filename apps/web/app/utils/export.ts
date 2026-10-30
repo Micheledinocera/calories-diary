@@ -2,9 +2,6 @@ import type { Giornata, Obiettivi, Valori } from "@calories-diary/shared";
 import { formattaValore } from "./alimenti";
 import { formattaGiorno, nomiPasti, ripartizioneGiorno } from "./diario";
 
-/** Longest range of days that can be exported at once. */
-export const MAX_GIORNI_EXPORT = 7;
-
 const macro = [
   { chiave: "carboidrati", etichetta: "Carboidrati" },
   { chiave: "grassi", etichetta: "Grassi" },

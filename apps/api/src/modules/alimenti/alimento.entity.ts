@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { defineEntity, p } from "@mikro-orm/core";
 import { ProdottoCatalogo } from "../catalogo/prodotto-catalogo.entity.js";
+import { VocePreferita } from "../pasti-preferiti/voce-preferita.entity.js";
 import { Utente } from "../utenti/utente.entity.js";
 import { Porzione } from "./porzione.entity.js";
 import { UsoAlimento } from "./uso-alimento.entity.js";
@@ -33,6 +34,7 @@ export const AlimentoSchema = defineEntity({
     porzioni: () =>
       p.oneToMany(Porzione).mappedBy("alimento").orphanRemoval().orderBy({ nome: "asc" }),
     usi: () => p.oneToMany(UsoAlimento).mappedBy("alimento"),
+    vociPreferite: () => p.oneToMany(VocePreferita).mappedBy("alimento"),
     verificato: p.boolean().default(false),
     importatoIl: p.datetime().nullable(),
     creatoIl: p.datetime().onCreate(() => new Date()),

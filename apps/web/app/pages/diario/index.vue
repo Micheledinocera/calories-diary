@@ -28,13 +28,6 @@ const totaliPerGiorno = computed(
 );
 
 // Same rule as the day (statoGiornata): a dot per day with entries, none without a need.
-const pallini = { ok: "bg-ok", attenzione: "bg-attenzione", oltre: "bg-oltre" } as const;
-const descrizioni = {
-  ok: "entro il fabbisogno",
-  attenzione: "macro oltre l'obiettivo",
-  oltre: "oltre il fabbisogno",
-} as const;
-
 function stato(giorno: string) {
   const totali = totaliPerGiorno.value.get(giorno);
   return totali && obiettivi.value ? statoGiornata(totali, obiettivi.value) : null;
@@ -71,21 +64,21 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
         :year-controls="false"
         class="w-full"
         size="lg"
-        :ui="{ headCell: 'text-muted text-xs font-semibold' }"
+        :ui="{ headCell: 'text-muted text-xs font-semibold', gridRow: 'pb-3' }"
         @update:model-value="apri($event as DateValue | undefined)"
       >
         <template #day="{ day }">
           <span
-            class="flex flex-col items-center gap-1 leading-tight tabular-nums"
+            class="leading-tight tabular-nums"
             :aria-label="
               stato(day.toString())
-                ? `${day.day}, ${descrizioni[stato(day.toString())!.tipo]}`
+                ? `${day.day}, ${descrizioniStato[stato(day.toString())!.tipo]}`
                 : undefined
             "
           >
             <span>{{ day.day }}</span>
             <span
-              class="size-3 rounded-full"
+              class="absolute top-full left-1/2 -translate-x-1/2 size-3 rounded-full"
               :class="
                 stato(day.toString()) ? pallini[stato(day.toString())!.tipo] : 'bg-transparent'
               "
@@ -99,7 +92,7 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
         class="flex flex-wrap gap-x-4 gap-y-2 mt-3 text-[13px] text-muted"
       >
         <span
-          v-for="(descrizione, tipo) in descrizioni"
+          v-for="(descrizione, tipo) in descrizioniStato"
           :key="tipo"
           class="inline-flex items-center gap-1.5"
         >

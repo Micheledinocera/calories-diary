@@ -16,6 +16,7 @@ const pasto = (id: string, tipo: Pasto["tipo"]): Pasto => ({
   voci: [],
   totali: { kcal: 0, proteine: 0, carboidrati: 0, grassi: 0 },
   suggerite: [],
+  preferito: null,
 });
 
 describe("spostaGiorno", () => {

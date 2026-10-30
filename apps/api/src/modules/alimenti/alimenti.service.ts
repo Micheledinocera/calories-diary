@@ -9,6 +9,8 @@ import type {
 } from "@calories-diary/shared";
 import type { z } from "zod";
 import { ErroreApp, nonTrovato } from "../../lib/errori.js";
+import { paginata } from "../../lib/paginazione.js";
+import { escapeLike } from "../../lib/testo.js";
 import { kcalIncoerenti } from "../catalogo/avvisi.js";
 import { normalizzaBarcode } from "../catalogo/barcode.js";
 import { ProdottoCatalogo } from "../catalogo/prodotto-catalogo.entity.js";
@@ -22,6 +24,8 @@ type DatiModifica = z.output<typeof modificaAlimentoSchema>;
 type Filtri = z.output<typeof filtriAlimentiSchema>;
 
 const alimentoNonTrovato = () => nonTrovato("Alimento non trovato");
+
+const populate = ["porzioni", "usi", "vociPreferite"] as const;
 
 /** The food as `utenteId` sees it: archive and use are theirs. `usi` must be populated. */
 const versoDto = (a: Alimento, utenteId: string): AlimentoDto => {
@@ -68,14 +72,12 @@ const ordinamenti: Record<OrdineAlimenti, (x: Riga, y: Riga) => number> = {
     (y.uso?.utilizzi ?? 0) - (x.uso?.utilizzi ?? 0) || tempo(y) - tempo(x) || perNome(x, y),
   recenti: (x, y) => tempo(y) - tempo(x) || perNome(x, y),
   nome: perNome,
+  nomeDesc: (x, y) => perNome(y, x),
 };
-
-/** `%` and `_` typed by the user are literal characters in the search. */
-const escapeLike = (testo: string) => testo.replace(/[\\%_]/g, (c) => `\\${c}`);
 
 export function creaAlimentiService(em: EntityManager) {
   async function carica(id: string): Promise<Alimento> {
-    const alimento = await em.findOne(Alimento, { id }, { populate: ["porzioni", "usi"] });
+    const alimento = await em.findOne(Alimento, { id }, { populate });
     if (!alimento) throw alimentoNonTrovato();
     return alimento;
   }
@@ -106,21 +108,19 @@ export function creaAlimentiService(em: EntityManager) {
      * Archive and use are per user, so they are filtered and sorted here, not in SQL:
      * the pool holds one household's foods, a few hundred at most.
      */
-    async elenca(utenteId: string, { q, ordine, archiviati, limite }: Filtri) {
+    async elenca(utenteId: string, { q, ordine, archiviati, ...paginazione }: Filtri) {
       const filtro: FilterQuery<Alimento> = {};
       if (q) {
         const testo = `%${escapeLike(q)}%`;
         filtro.$or = [{ nome: { $ilike: testo } }, { marca: { $ilike: testo } }];
         if (/^\d{1,20}$/.test(q)) filtro.$or.push({ barcode: normalizzaBarcode(q) });
       }
-      const alimenti = await em.find(Alimento, filtro, { populate: ["porzioni", "usi"] });
-      return alimenti
+      const alimenti = await em.find(Alimento, filtro, { populate });
+      const righe = alimenti
         .map((alimento): Riga => ({ alimento, uso: usoDi(alimento, utenteId) }))
         .filter(({ uso }) => (uso?.archiviato ?? false) === archiviati)
-        .filter(({ uso }) => ordine !== "recenti" || uso?.ultimoUso)
-        .sort(ordinamenti[ordine])
-        .slice(0, limite)
-        .map(({ alimento }) => versoDto(alimento, utenteId));
+        .sort(ordinamenti[ordine]);
+      return paginata(righe, paginazione, ({ alimento }) => versoDto(alimento, utenteId));
     },
 
     async trova(utenteId: string, id: string): Promise<AlimentoDto> {
@@ -165,8 +165,8 @@ export function creaAlimentiService(em: EntityManager) {
     },
 
     /**
-     * Only the author deletes a food. A food used in any diary is archived instead:
-     * the history must stay.
+     * Only the author deletes a food. A food used in any diary or favorite meal is archived
+     * instead: the history must stay.
      */
     async elimina(utenteId: string, id: string): Promise<void> {
       const alimento = await carica(id);
@@ -174,7 +174,7 @@ export function creaAlimentiService(em: EntityManager) {
         throw new ErroreApp(403, "ALIMENTO_NON_TUO", "Solo chi l'ha creato può eliminarlo");
       }
       if (inUso(alimento)) {
-        throw new ErroreApp(409, "ALIMENTO_IN_USO", "Alimento già usato nel diario: archivialo");
+        throw new ErroreApp(409, "ALIMENTO_IN_USO", "Alimento già in uso: archivialo");
       }
       await em.remove(alimento).flush();
     },

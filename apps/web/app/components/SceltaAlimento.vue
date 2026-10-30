@@ -4,11 +4,11 @@ import type { Alimento, NuovaVoce, Valori } from "@calories-diary/shared";
 const aperto = defineModel<boolean>("open", { required: true });
 const props = defineProps<{
   nomePasto: string;
-  /** Day totals and need: the quantity step shows how the day changes. */
-  totaliGiorno: Valori;
-  fabbisogno: number | null;
+  /** Day totals and need: the quantity step shows how the day changes. Absent outside the diary. */
+  totaliGiorno?: Valori;
+  fabbisogno?: number | null;
 }>();
-const emit = defineEmits<{ scelta: [voce: NuovaVoce] }>();
+const emit = defineEmits<{ scelta: [voce: NuovaVoce, alimento: Alimento] }>();
 
 const { elenca } = useAlimenti();
 const toast = useToast();
@@ -27,9 +27,10 @@ onBeforeUnmount(() => clearTimeout(timer));
 // a key of its own, and nothing loaded until it is opened.
 const { data, status, error, refresh } = useAsyncData(
   `scelta-alimento-${useId()}`,
-  () => {
+  async () => {
     const q = testo.value.trim() || undefined;
-    return elenca(q ? { q, ordine: "nome", limite: 50 } : { ordine: "uso", limite: 50 });
+    const ordine = q ? "nome" : "uso";
+    return (await elenca({ q, ordine, limite: 50 })).elementi;
   },
   { watch: [testo], immediate: false },
 );
@@ -85,7 +86,7 @@ const coloriMacro = {
 
 // How the day changes with this food.
 const dopo = computed(() => {
-  if (!valori.value || !props.fabbisogno) return null;
+  if (!valori.value || !props.fabbisogno || !props.totaliGiorno) return null;
   const kcal = props.totaliGiorno.kcal + valori.value.kcal;
   return {
     kcal,
@@ -97,7 +98,7 @@ const dopo = computed(() => {
 
 function conferma() {
   if (!scelto.value || !quantita.value || quantita.value <= 0) return;
-  emit("scelta", { alimento: scelto.value.id, quantita: quantita.value });
+  emit("scelta", { alimento: scelto.value.id, quantita: quantita.value }, scelto.value);
   aperto.value = false;
 }
 
@@ -106,7 +107,7 @@ function conferma() {
 const scansione = ref(false);
 async function letto(codice: string) {
   try {
-    const trovati = await elenca({ q: codice, ordine: "nome", limite: 5 });
+    const { elementi: trovati } = await elenca({ q: codice, ordine: "nome", limite: 5 });
     const alimento = trovati.find((a) => a.barcode === codice);
     if (alimento) return scegli(alimento);
     aperto.value = false;
@@ -183,6 +184,7 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
             v-model="quantita"
             :min="0"
             :step="10"
+            :step-snapping="false"
             :format-options="{ maximumFractionDigits: 1 }"
             locale="it-IT"
             size="xl"

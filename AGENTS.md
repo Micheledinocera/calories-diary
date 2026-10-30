@@ -16,7 +16,7 @@ Monorepo pnpm: `apps/api` (Express + MikroORM + PostgreSQL + Redis), `apps/web` 
 - **Conventions** (branches, commits, PRs, check commands): `CONTRIBUTING.md`.
 - **Project wiki** (business rules, decisions, custom code): `docs/wiki/`, starting from `docs/wiki/index.md`. Rules for reading and writing it: `docs/CLAUDE.md`.
 - **Order of sources when coding**: this file and the `CLAUDE.md` of the folder you work in (framework docs), then `docs/wiki/tecnico/` for custom code, then the business and decision pages before implementing a business rule. If a rule is missing, ask instead of inventing it.
-- **Task workflow**: `/start <name>` opens a feature, notes go in `docs/raw/<name>/`, `/report <topic>` writes a dated document for people in `docs/output/`, `/close` updates the wiki (`/ingest`), runs the checks and opens the PR toward `develop`. Analysis-only features are named `study-<topic>`.
+- **Task workflow**: `/start <name>` opens a feature, notes go in `docs/raw/<name>/`, `/report <topic>` writes a dated document for people in `docs/output/`, `/close` updates the wiki (`/ingest`), runs the checks and opens the PR toward `develop`. Analysis-only features are named `study-<topic>`. `/release` publishes `develop` (or a hotfix) to production: only the user starts it.
 - **Study features touch no code**: on a `feature/study-*` branch, change only `docs/`, `.claude/` and `*.md` files. If asked to implement something, don't: propose to close the study (`/close`) and open a new feature (`/start <name>`).
 
 ## Framework docs

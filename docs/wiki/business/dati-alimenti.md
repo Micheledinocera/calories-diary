@@ -1,7 +1,10 @@
 ---
 tipo: info
-aggiornato: 2026-10-27
+aggiornato: 2026-10-30
 fonti:
+  - raw/compiled/minor-fixes/2026-10-30-obiettivo.md
+  - raw/compiled/meals/2026-10-30-pasti-preferiti.md
+  - raw/compiled/meals/2026-10-30-decisioni-collegamento.md
   - raw/compiled/first-develop/analisi-iniziale-calorie-tracker.md
   - raw/compiled/first-develop/2026-10-25-decisioni-e-piano.md
   - raw/compiled/food-catalog/2026-10-25-obiettivo.md
@@ -36,7 +39,7 @@ Chi può fare cosa su un alimento del pool:
 |---|---|---|
 | Modificare (valori, porzioni, verificato) | Chiunque | Per tutti, anche nei giorni passati dei loro diari |
 | Archiviare | Chiunque | **Solo per sé**: lo nasconde dalla propria ricerca ("nascondi per me") |
-| Eliminare | Solo l'autore | Solo se nessun diario, di nessun utente, lo usa |
+| Eliminare | Solo l'autore | Solo se nessun diario e nessun pasto preferito, di nessun utente, lo usa |
 
 "Recenti" e "Più usati" restano **per utente**: ognuno vede i propri.
 
@@ -63,7 +66,7 @@ Chi può fare cosa su un alimento del pool:
 - Il lookup restituisce, insieme al prodotto, gli avvisi su valori assenti, parziali (manca una tra kcal, proteine, carboidrati, grassi) o incoerenti.
 - Prima di salvare un prodotto del provider tra i propri alimenti: anteprima dei valori per 100 g, correggibili.
 - La copia salvata registra la fonte, il codice a barre e la data di import.
-- Flag **verificato**: l'utente conferma che i valori corrispondono all'etichetta.
+- Flag **verificato**: l'utente conferma che i valori corrispondono all'etichetta. Un prodotto trovato da barcode parte già verificato, anche con avvisi: l'utente può spegnerlo prima di salvare.
 - **Controllo di coerenza**: kcal stimate = 4 × proteine + 4 × carboidrati + 9 × grassi. Se lo scarto rispetto alle kcal dichiarate supera il **20%**, l'app mostra un avviso.
 - Ri-sincronizzazione manuale dal provider, con diff da confermare (fase 3).
 
@@ -84,6 +87,7 @@ Catalogo, alimenti e diario sono definiti (vedi [Catalogo](../tecnico/api/catalo
 - **porzione**: alimento, nome (es. "1 vasetto"), quantità nell'unità base dell'alimento, predefinita.
 - **pasto**: un pasto di un giorno dell'utente: giorno, tipo (colazione, pranzo, cena, spuntino), ordine nella giornata.
 - **voce**: pasto, alimento, quantità in g o ml. Niente valori salvati: si ricalcolano dall'alimento.
+- **pasto preferito** (condiviso): autore, nome, voci (alimento e quantità). Un pasto del giorno resta collegato al preferito finché è identico.
 - Fase 2: **ricetta** (nome, peso finale, esposta come alimento) e **ingrediente della ricetta** (alimento, grammi).
 
 ## Domande aperte

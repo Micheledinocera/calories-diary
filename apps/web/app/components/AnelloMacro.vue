@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Valori } from "@calories-diary/shared";
 
-const props = defineProps<{ totali: Valori; fabbisogno: number | null }>();
+const props = defineProps<{ totali: Valori; fabbisogno: number | null; piccolo?: boolean }>();
 
 const R = 56;
 const R_EXTRA = 65;
@@ -41,7 +41,12 @@ const etichetta = computed(() =>
 </script>
 
 <template>
-  <div class="relative size-34 shrink-0" role="img" :aria-label="etichetta">
+  <div
+    class="relative shrink-0"
+    :class="piccolo ? 'size-26' : 'size-34'"
+    role="img"
+    :aria-label="etichetta"
+  >
     <svg viewBox="0 0 136 136" class="size-full -rotate-90" aria-hidden="true">
       <circle cx="68" cy="68" :r="R" fill="none" stroke-width="14" class="stroke-traccia" />
       <circle
@@ -70,12 +75,15 @@ const etichetta = computed(() =>
     </svg>
     <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
       <span
-        class="text-[30px] leading-[34px] font-bold tracking-tight tabular-nums"
-        :class="oltre ? 'text-error' : 'text-highlighted'"
+        class="font-bold tracking-tight tabular-nums"
+        :class="[
+          oltre ? 'text-error' : 'text-highlighted',
+          piccolo ? 'text-xl leading-6' : 'text-[30px] leading-[34px]',
+        ]"
       >
         {{ formattaValore(Math.round(totali.kcal)) }}
       </span>
-      <span class="text-xs text-muted">
+      <span class="text-muted" :class="piccolo ? 'text-[10px] leading-3' : 'text-xs'">
         {{ fabbisogno ? `di ${formattaValore(fabbisogno)} kcal` : "kcal" }}
       </span>
     </div>
