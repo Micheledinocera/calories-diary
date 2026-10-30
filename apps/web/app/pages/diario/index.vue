@@ -64,12 +64,12 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
         :year-controls="false"
         class="w-full"
         size="lg"
-        :ui="{ headCell: 'text-muted text-xs font-semibold' }"
+        :ui="{ headCell: 'text-muted text-xs font-semibold', gridRow: 'pb-3' }"
         @update:model-value="apri($event as DateValue | undefined)"
       >
         <template #day="{ day }">
           <span
-            class="flex flex-col items-center gap-1 leading-tight tabular-nums"
+            class="leading-tight tabular-nums"
             :aria-label="
               stato(day.toString())
                 ? `${day.day}, ${descrizioniStato[stato(day.toString())!.tipo]}`
@@ -78,7 +78,7 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
           >
             <span>{{ day.day }}</span>
             <span
-              class="size-3 rounded-full"
+              class="absolute top-full left-1/2 -translate-x-1/2 size-3 rounded-full"
               :class="
                 stato(day.toString()) ? pallini[stato(day.toString())!.tipo] : 'bg-transparent'
               "
