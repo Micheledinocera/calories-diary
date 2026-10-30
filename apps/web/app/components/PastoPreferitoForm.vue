@@ -65,6 +65,7 @@ function salva() {
               :model-value="voce.quantita"
               :min="0"
               :step="10"
+              :step-snapping="false"
               :format-options="{ maximumFractionDigits: 1 }"
               locale="it-IT"
               class="w-32 shrink-0"

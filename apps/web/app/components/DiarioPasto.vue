@@ -250,6 +250,7 @@ const spuntino = computed(() => props.pasto.tipo === "spuntino");
               v-model="quantita"
               :min="0"
               :step="10"
+              :step-snapping="false"
               :format-options="{ maximumFractionDigits: 1 }"
               locale="it-IT"
               class="w-full"
