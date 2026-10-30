@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { MikroORM } from "@mikro-orm/postgresql";
 import {
   giornataSchema,
-  listaPastiPreferitiSchema,
+  paginaPastiPreferitiSchema,
   pastoPreferitoSchema,
   sessioneSchema,
 } from "@calories-diary/shared";
@@ -71,9 +71,9 @@ const crea = (nome: string, voci: { alimento: string; quantita: number }[], a: A
   request(app).post("/pasti-preferiti").set(a).send({ nome, voci });
 
 const elenca = async (query: Record<string, string>, a: Auth = auth) =>
-  listaPastiPreferitiSchema.parse(
+  paginaPastiPreferitiSchema.parse(
     (await request(app).get("/pasti-preferiti").query(query).set(a).expect(200)).body,
-  );
+  ).elementi;
 
 const aggiungi = (giorno: string, corpo: object, a: Auth = auth) =>
   request(app).post(`/diario/${giorno}/preferiti`).set(a).send(corpo);
@@ -137,6 +137,33 @@ describe("/pasti-preferiti", () => {
     expect((await elenca({ autore: "miei" }, altro)).some((p) => p.id === id)).toBe(false);
     expect((await elenca({ autore: "miei" })).some((p) => p.id === id)).toBe(true);
     expect(await elenca({ q: "100%_inesistente" })).toEqual([]);
+  });
+
+  it("ordina per nome e per data di inserimento", async () => {
+    const prefisso = `Ordine ${randomUUID().slice(0, 8)}`;
+    const voci = [{ alimento: pane, quantita: 100 }];
+    const primo = (await crea(`${prefisso} B`, voci).expect(201)).body.id as string;
+    const secondo = (await crea(`${prefisso} C`, voci).expect(201)).body.id as string;
+    const terzo = (await crea(`${prefisso} A`, voci).expect(201)).body.id as string;
+    const ordinati = async (ordine: string) =>
+      (await elenca({ q: prefisso, ordine })).map((p) => p.id);
+
+    expect(await ordinati("nome")).toEqual([terzo, primo, secondo]);
+    expect(await ordinati("nomeDesc")).toEqual([secondo, primo, terzo]);
+    expect(await ordinati("inseritiRecenti")).toEqual([terzo, secondo, primo]);
+    expect(await ordinati("inseritiLontani")).toEqual([primo, secondo, terzo]);
+
+    const seconda = paginaPastiPreferitiSchema.parse(
+      (
+        await request(app)
+          .get("/pasti-preferiti")
+          .query({ q: prefisso, ordine: "nome", pagina: 2, limite: 2 })
+          .set(auth)
+          .expect(200)
+      ).body,
+    );
+    expect(seconda).toMatchObject({ totale: 3, pagina: 2 });
+    expect(seconda.elementi.map((p) => p.id)).toEqual([secondo]);
   });
 
   it("lascia modificare ed eliminare solo all'autore", async () => {

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { OrdinePastiPreferiti } from "@calories-diary/shared";
+
 const { elenca } = usePastiPreferiti();
 
 const cerca = ref("");
@@ -13,12 +15,27 @@ onBeforeUnmount(() => clearTimeout(timer));
 
 // Every user's meals are here: the screen opens on the user's own.
 const autore = ref<"miei" | "tutti">("miei");
+const ordine = ref<OrdinePastiPreferiti>("nome");
 
-const { data, status, error, refresh } = useAsyncData(
-  "pasti-preferiti",
-  () => elenca({ q: testo.value.trim() || undefined, autore: autore.value }),
-  { watch: [testo, autore] },
-);
+const ordinamenti: { label: string; value: OrdinePastiPreferiti }[] = [
+  { label: "A-Z", value: "nome" },
+  { label: "Z-A", value: "nomeDesc" },
+  { label: "Più recenti", value: "inseritiRecenti" },
+  { label: "Meno recenti", value: "inseritiLontani" },
+];
+
+const { elementi, totale, caricata, pagina, perPagina, desktop, status, error, refresh } =
+  useListaPaginata(
+    "pasti-preferiti",
+    (paginazione) =>
+      elenca({
+        q: testo.value.trim() || undefined,
+        autore: autore.value,
+        ordine: ordine.value,
+        ...paginazione,
+      }),
+    [testo, autore, ordine],
+  );
 
 const errore = computed(() => (error.value ? normalizzaErrore(error.value) : null));
 </script>
@@ -39,7 +56,10 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
       :loading="status === 'pending'"
     />
 
-    <FiltroPastiPreferiti v-model="autore" />
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <FiltroPastiPreferiti v-model="autore" />
+      <SelettoreOrdine v-model="ordine" :opzioni="ordinamenti" />
+    </div>
 
     <UAlert
       v-if="errore"
@@ -50,20 +70,30 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
       :actions="[{ label: 'Riprova', onClick: () => refresh() }]"
     />
 
-    <div v-else-if="status === 'pending' && !data" class="space-y-3">
+    <div v-else-if="status === 'pending' && !elementi.length" class="space-y-3">
       <USkeleton v-for="i in 4" :key="i" class="h-14 w-full rounded-lg" />
     </div>
 
-    <UCard v-else-if="data?.length" :ui="{ body: 'py-0 sm:py-0 sm:px-4' }">
-      <div class="divide-y divide-default">
-        <PastoPreferitoRiga
-          v-for="p in data"
-          :key="p.id"
-          :pasto="p"
-          :to="`/pasti-preferiti/${p.id}`"
-        />
-      </div>
-    </UCard>
+    <template v-else-if="elementi.length">
+      <UCard :ui="{ body: 'py-0 sm:py-0 sm:px-4' }">
+        <div class="divide-y divide-default">
+          <PastoPreferitoRiga
+            v-for="p in elementi"
+            :key="p.id"
+            :pasto="p"
+            :to="`/pasti-preferiti/${p.id}`"
+          />
+        </div>
+      </UCard>
+      <PaginazioneLista
+        v-model:pagina="pagina"
+        :caricata="caricata"
+        :totale="totale"
+        :per-pagina="perPagina"
+        :desktop="desktop"
+        :in-corso="status === 'pending'"
+      />
+    </template>
 
     <UEmpty
       v-else

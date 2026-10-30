@@ -2,6 +2,7 @@
 tipo: info
 aggiornato: 2026-10-30
 fonti:
+  - raw/compiled/minor-fixes/2026-10-30-ordinamenti.md
   - raw/compiled/meals/2026-10-30-obiettivo.md
   - raw/compiled/meals/2026-10-30-pasti-preferiti.md
   - raw/compiled/meals/2026-10-30-decisioni-utente.md
@@ -29,7 +30,7 @@ Tutte dietro `richiediAutenticazione`. Contratti in [Contratti condivisi](../sha
 
 | Rotta | Risposta |
 |---|---|
-| `GET /pasti-preferiti` | Lista per nome. Query (`filtriPastiPreferitiSchema`): `q` (nome), `autore` (`miei` o `tutti`, default `tutti`) |
+| `GET /pasti-preferiti` | Pagina di pasti (`{ elementi, totale, pagina }`). Query (`filtriPastiPreferitiSchema`): `q` (nome), `autore` (`miei` o `tutti`, default `tutti`), `ordine` (`nome`, il default; `nomeDesc`; `inseritiRecenti` e `inseritiLontani`, per `creatoIl`), `pagina` (default 1), `limite` (default 100, max 200) |
 | `GET /pasti-preferiti/:id` | Un pasto preferito |
 | `POST /pasti-preferiti` | 201 con il pasto creato (`nuovoPastoPreferitoSchema`: nome e da 1 a 50 voci) |
 | `PUT /pasti-preferiti/:id` | Sostituisce nome e voci. Se cambiano le voci, i pasti del diario collegati perdono il collegamento; se cambia solo il nome, restano collegati |

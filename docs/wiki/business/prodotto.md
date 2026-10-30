@@ -2,6 +2,9 @@
 tipo: info
 aggiornato: 2026-10-30
 fonti:
+  - raw/compiled/minor-fixes/2026-10-30-obiettivo.md
+  - raw/compiled/minor-fixes/2026-10-30-ordinamenti.md
+  - raw/compiled/minor-fixes/2026-10-30-toast-pwa.md
   - raw/compiled/meals/2026-10-30-obiettivo.md
   - raw/compiled/meals/2026-10-30-pasti-preferiti.md
   - raw/compiled/meals/2026-10-30-decisioni-utente.md
@@ -67,16 +70,18 @@ Applicazione **personale** per tracciare ogni giorno calorie e macronutrienti. �
 - Vista a **calendario** per il colpo d'occhio (un pallino per giorno nel colore del suo stato), poi il dettaglio giorno per giorno: stessa identica visualizzazione della pagina "Oggi", in sola lettura, con un tasto "Modifica".
 
 **Ricerca e aggiunta alimenti**, in quest'ordine:
-1. alimenti locali, ordinati per frequenza e recenza d'uso, con sezioni "Recenti" e "Più usati" in evidenza;
+1. alimenti locali, ordinati per frequenza e recenza d'uso;
 2. codice a barre, con la **fotocamera** o inserito a mano: prima nel nostro DB, poi presso il provider esterno;
 3. ricerca testuale presso il provider (fase 2);
 4. creazione manuale.
+
+**Schermata Alimenti** (in `minor-fixes`): un solo elenco completo, con l'ordinamento scelto da una tendina: **Recenti** (predefinito), **Più usati**, **A-Z**, **Z-A**. Gli alimenti mai usati stanno in fondo a "Recenti", per nome.
 
 **Pasti preferiti** (in `meals`): composizioni di alimenti salvate per riusarle in altri giorni.
 - Un pasto con alimenti ha una **stella**: vuota lo salva tra i preferiti con un nome, piena dice che è identico a un preferito. Un pasto vuoto propone invece "Aggiungi preferito": un preferito si aggiunge **solo a un pasto vuoto**.
 - Il **collegamento** tra pasto e preferito si perde quando cambiano le voci del pasto, o quando l'autore cambia quelle del preferito. Cambiare solo il nome del preferito non lo toglie. Un preferito aggiunto saltando alimenti archiviati non collega il pasto, perché non è identico.
 - Toccare la stella piena elimina il preferito se è proprio, dopo una conferma: tutti i pasti collegati perdono il collegamento e il diario non cambia. Su un preferito di un altro utente toglie solo il collegamento di quel pasto.
-- Schermata **Pasti preferiti**, come Alimenti: ci sono i pasti di tutti gli utenti, filtrati di base su "I miei pasti". Tutti li vedono, con lo username dell'autore, e li aggiungono al diario; solo l'autore li modifica o li elimina.
+- Schermata **Pasti preferiti**, come Alimenti: ci sono i pasti di tutti gli utenti, filtrati di base su "I miei pasti". Tutti li vedono, con lo username dell'autore, e li aggiungono al diario; solo l'autore li modifica o li elimina. L'elenco si ordina per **A-Z** (predefinito), **Z-A**, **Più recenti** e **Meno recenti**, cioè per data di creazione del pasto.
 
 **Copia di una giornata** (in `meals`): si valorizza una giornata con i pasti di un'altra del proprio diario. Le voci si **aggiungono** a quelle presenti: ogni pasto principale riceve quelle del pasto corrispondente, gli spuntini vanno in fondo. Non si cancella nulla.
 
@@ -108,6 +113,7 @@ Ordine delle feature dell'MVP: `first-develop` (scaffolding), `auth`, `food-cata
 
 ## Domande aperte
 
+- **Da fare**: un toast che inviti a installare la PWA. Era previsto in `minor-fixes` ed è stato rimandato.
 - La UI dell'MVP è provvisoria: flussi ed esperienza si validano con un giro di design verso la fine dell'MVP.
 - I **non obiettivi** escludono la condivisione tra utenti ("ognuno vede solo i propri dati"), mentre il link pubblico mostra i dati di un utente a chiunque abbia il link: da chiarire se riformulare il non obiettivo (ad esempio escludendo solo le interazioni tra utenti dentro l'app).
 - Lo stesso non obiettivo si scontra con i **pasti preferiti** (`meals`), visibili a tutti gli utenti con lo username dell'autore: va riformulato insieme al punto precedente.

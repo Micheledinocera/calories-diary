@@ -1,6 +1,7 @@
 import type {
   FiltriPastiPreferiti,
   NuovoPastoPreferito,
+  Pagina,
   PastoPreferito,
 } from "@calories-diary/shared";
 
@@ -12,7 +13,7 @@ export function usePastiPreferiti() {
 
   return {
     elenca: (filtri: FiltriPastiPreferiti = {}) =>
-      api<PastoPreferito[]>("/pasti-preferiti", { query: filtri }),
+      api<Pagina<PastoPreferito>>("/pasti-preferiti", { query: filtri }),
     trova: (id: string) => api<PastoPreferito>(`/pasti-preferiti/${id}`),
     crea: (dati: NuovoPastoPreferito) =>
       api<PastoPreferito>("/pasti-preferiti", { method: "POST", body: dati, ...scrivi }),

@@ -41,6 +41,7 @@ describe("filtriAlimentiSchema", () => {
     expect(filtriAlimentiSchema.parse({ archiviati: "true", limite: "5" })).toEqual({
       ordine: "uso",
       archiviati: true,
+      pagina: 1,
       limite: 5,
     });
   });

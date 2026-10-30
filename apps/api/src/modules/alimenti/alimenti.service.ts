@@ -9,6 +9,7 @@ import type {
 } from "@calories-diary/shared";
 import type { z } from "zod";
 import { ErroreApp, nonTrovato } from "../../lib/errori.js";
+import { paginata } from "../../lib/paginazione.js";
 import { escapeLike } from "../../lib/testo.js";
 import { kcalIncoerenti } from "../catalogo/avvisi.js";
 import { normalizzaBarcode } from "../catalogo/barcode.js";
@@ -71,6 +72,7 @@ const ordinamenti: Record<OrdineAlimenti, (x: Riga, y: Riga) => number> = {
     (y.uso?.utilizzi ?? 0) - (x.uso?.utilizzi ?? 0) || tempo(y) - tempo(x) || perNome(x, y),
   recenti: (x, y) => tempo(y) - tempo(x) || perNome(x, y),
   nome: perNome,
+  nomeDesc: (x, y) => perNome(y, x),
 };
 
 export function creaAlimentiService(em: EntityManager) {
@@ -106,7 +108,7 @@ export function creaAlimentiService(em: EntityManager) {
      * Archive and use are per user, so they are filtered and sorted here, not in SQL:
      * the pool holds one household's foods, a few hundred at most.
      */
-    async elenca(utenteId: string, { q, ordine, archiviati, limite }: Filtri) {
+    async elenca(utenteId: string, { q, ordine, archiviati, ...paginazione }: Filtri) {
       const filtro: FilterQuery<Alimento> = {};
       if (q) {
         const testo = `%${escapeLike(q)}%`;
@@ -114,13 +116,11 @@ export function creaAlimentiService(em: EntityManager) {
         if (/^\d{1,20}$/.test(q)) filtro.$or.push({ barcode: normalizzaBarcode(q) });
       }
       const alimenti = await em.find(Alimento, filtro, { populate });
-      return alimenti
+      const righe = alimenti
         .map((alimento): Riga => ({ alimento, uso: usoDi(alimento, utenteId) }))
         .filter(({ uso }) => (uso?.archiviato ?? false) === archiviati)
-        .filter(({ uso }) => ordine !== "recenti" || uso?.ultimoUso)
-        .sort(ordinamenti[ordine])
-        .slice(0, limite)
-        .map(({ alimento }) => versoDto(alimento, utenteId));
+        .sort(ordinamenti[ordine]);
+      return paginata(righe, paginazione, ({ alimento }) => versoDto(alimento, utenteId));
     },
 
     async trova(utenteId: string, id: string): Promise<AlimentoDto> {

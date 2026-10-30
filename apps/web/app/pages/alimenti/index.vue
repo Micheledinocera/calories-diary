@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Alimento } from "@calories-diary/shared";
+import type { OrdineAlimenti } from "@calories-diary/shared";
 
 const { elenca } = useAlimenti();
 
@@ -13,43 +13,35 @@ watch(cerca, (valore) => {
 });
 onBeforeUnmount(() => clearTimeout(timer));
 const archiviati = ref(false);
+const ordine = ref<OrdineAlimenti>("recenti");
 
-// Without a search: "Recenti" and "Più usati" (only foods already used in the diary), then all.
-const { data, status, error, refresh } = useAsyncData(
-  "alimenti",
-  async () => {
-    const q = testo.value.trim() || undefined;
-    if (q || archiviati.value) {
-      return { tutti: await elenca({ q, archiviati: archiviati.value, ordine: "nome" }) };
-    }
-    const [recenti, usati, tutti] = await Promise.all([
-      elenca({ ordine: "recenti", limite: 5 }),
-      elenca({ ordine: "uso", limite: 5 }),
-      elenca({ ordine: "nome" }),
-    ]);
-    return { recenti, piuUsati: usati.filter((a) => a.utilizzi > 0), tutti };
-  },
-  { watch: [testo, archiviati] },
-);
+const ordinamenti: { label: string; value: OrdineAlimenti }[] = [
+  { label: "Recenti", value: "recenti" },
+  { label: "Più usati", value: "uso" },
+  { label: "A-Z", value: "nome" },
+  { label: "Z-A", value: "nomeDesc" },
+];
 
-const sezioni = computed(() => {
-  const d = data.value;
-  if (!d) return [];
-  return [
-    { titolo: "Recenti", alimenti: d.recenti ?? [] },
-    { titolo: "Più usati", alimenti: d.piuUsati ?? [] },
-    { titolo: archiviati.value ? "Archiviati" : "Tutti", alimenti: d.tutti },
-  ].filter((s): s is { titolo: string; alimenti: Alimento[] } => s.alimenti.length > 0);
-});
+const { elementi, totale, caricata, pagina, perPagina, desktop, status, error, refresh } =
+  useListaPaginata(
+    "alimenti",
+    (paginazione) =>
+      elenca({
+        q: testo.value.trim() || undefined,
+        archiviati: archiviati.value,
+        ordine: ordine.value,
+        ...paginazione,
+      }),
+    [testo, archiviati, ordine],
+  );
 
 // A scanned code opens the food if it is already saved, otherwise a new food with the code.
 const scansione = ref(false);
 const toast = useToast();
 async function letto(codice: string) {
   try {
-    const alimento = (await elenca({ q: codice, archiviati: archiviati.value })).find(
-      (a) => a.barcode === codice,
-    );
+    const { elementi: trovati } = await elenca({ q: codice, archiviati: archiviati.value });
+    const alimento = trovati.find((a) => a.barcode === codice);
     await navigateTo(
       alimento
         ? `/alimenti/${alimento.id}`
@@ -91,21 +83,24 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
     </UInput>
     <ScansioneBarcode v-model:open="scansione" @letto="letto" />
 
-    <div class="flex gap-2" role="group" aria-label="Filtro">
-      <UButton
-        v-for="f in [
-          { valore: false, etichetta: 'Attivi' },
-          { valore: true, etichetta: 'Archiviati' },
-        ]"
-        :key="f.etichetta"
-        :variant="archiviati === f.valore ? 'soft' : 'outline'"
-        :color="archiviati === f.valore ? 'primary' : 'neutral'"
-        class="rounded-full"
-        :aria-pressed="archiviati === f.valore"
-        @click="archiviati = f.valore"
-      >
-        {{ f.etichetta }}
-      </UButton>
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <div class="flex gap-2" role="group" aria-label="Filtro">
+        <UButton
+          v-for="f in [
+            { valore: false, etichetta: 'Attivi' },
+            { valore: true, etichetta: 'Archiviati' },
+          ]"
+          :key="f.etichetta"
+          :variant="archiviati === f.valore ? 'soft' : 'outline'"
+          :color="archiviati === f.valore ? 'primary' : 'neutral'"
+          class="rounded-full"
+          :aria-pressed="archiviati === f.valore"
+          @click="archiviati = f.valore"
+        >
+          {{ f.etichetta }}
+        </UButton>
+      </div>
+      <SelettoreOrdine v-model="ordine" :opzioni="ordinamenti" />
     </div>
 
     <UAlert
@@ -117,34 +112,32 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
       :actions="[{ label: 'Riprova', onClick: () => refresh() }]"
     />
 
-    <div v-else-if="status === 'pending' && !data" class="space-y-3">
+    <div v-else-if="status === 'pending' && !elementi.length" class="space-y-3">
       <USkeleton v-for="i in 4" :key="i" class="h-14 w-full rounded-lg" />
     </div>
 
-    <template v-else>
-      <section v-for="sezione in sezioni" :key="sezione.titolo" class="space-y-2 pt-2">
-        <h2 class="text-xs font-semibold tracking-wide uppercase text-muted">
-          {{ sezione.titolo }}
-        </h2>
-        <UCard :ui="{ body: 'py-0 sm:py-0 sm:px-4' }">
-          <div class="divide-y divide-default">
-            <AlimentoRiga
-              v-for="a in sezione.alimenti"
-              :key="a.id"
-              :alimento="a"
-              :to="`/alimenti/${a.id}`"
-            />
-          </div>
-        </UCard>
-      </section>
-
-      <UEmpty
-        v-if="!sezioni.length"
-        icon="i-lucide-apple"
-        :title="cerca || archiviati ? 'Nessun alimento trovato' : 'Ancora nessun alimento'"
-        description="Aggiungilo a mano o dal codice a barre."
-        :actions="[{ label: 'Nuovo alimento', icon: 'i-lucide-plus', to: '/alimenti/nuovo' }]"
+    <template v-else-if="elementi.length">
+      <UCard :ui="{ body: 'py-0 sm:py-0 sm:px-4' }">
+        <div class="divide-y divide-default">
+          <AlimentoRiga v-for="a in elementi" :key="a.id" :alimento="a" :to="`/alimenti/${a.id}`" />
+        </div>
+      </UCard>
+      <PaginazioneLista
+        v-model:pagina="pagina"
+        :caricata="caricata"
+        :totale="totale"
+        :per-pagina="perPagina"
+        :desktop="desktop"
+        :in-corso="status === 'pending'"
       />
     </template>
+
+    <UEmpty
+      v-else
+      icon="i-lucide-apple"
+      :title="cerca || archiviati ? 'Nessun alimento trovato' : 'Ancora nessun alimento'"
+      description="Aggiungilo a mano o dal codice a barre."
+      :actions="[{ label: 'Nuovo alimento', icon: 'i-lucide-plus', to: '/alimenti/nuovo' }]"
+    />
   </UContainer>
 </template>

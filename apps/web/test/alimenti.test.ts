@@ -1,6 +1,11 @@
 import type { ProdottoCatalogo } from "@calories-diary/shared";
 import { describe, expect, it } from "vitest";
-import { formattaValore, statoDaProdotto } from "../app/utils/alimenti";
+import {
+  formattaDecimale,
+  formattaValore,
+  leggiDecimale,
+  statoDaProdotto,
+} from "../app/utils/alimenti";
 
 const prodotto: ProdottoCatalogo = {
   barcode: "8076809513753",
@@ -32,7 +37,7 @@ describe("statoDaProdotto", () => {
       unitaBase: "g",
       valoriPer100: { kcal: 492, proteine: 4.7, carboidrati: 11, grassi: undefined },
       porzioni: [{ nome: "47.5 g", quantita: 47.5, predefinita: true }],
-      verificato: false,
+      verificato: true,
     });
   });
 
@@ -40,6 +45,34 @@ describe("statoDaProdotto", () => {
     const stato = statoDaProdotto({ ...prodotto, nome: null, porzione: null });
     expect(stato.nome).toBe("");
     expect(stato.porzioni).toEqual([]);
+  });
+});
+
+describe("leggiDecimale", () => {
+  it("accetta virgola e punto, anche a metà digitazione", () => {
+    expect(leggiDecimale("47,5")).toBe(47.5);
+    expect(leggiDecimale("47.5")).toBe(47.5);
+    expect(leggiDecimale("12,")).toBe(12);
+    expect(leggiDecimale(",5")).toBe(0.5);
+  });
+
+  it("tiene al massimo tre decimali", () => {
+    expect(leggiDecimale("1,23456")).toBe(1.235);
+  });
+
+  it("lascia vuoto ciò che non è un numero", () => {
+    expect(leggiDecimale("")).toBeUndefined();
+    expect(leggiDecimale(",")).toBeUndefined();
+    expect(leggiDecimale("12a")).toBeUndefined();
+    expect(leggiDecimale("-3")).toBeUndefined();
+    expect(leggiDecimale("1,2,3")).toBeUndefined();
+  });
+});
+
+describe("formattaDecimale", () => {
+  it("usa la virgola, senza separatore delle migliaia", () => {
+    expect(formattaDecimale(1250.5)).toBe("1250,5");
+    expect(formattaDecimale(undefined)).toBe("");
   });
 });
 

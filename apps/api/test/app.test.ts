@@ -3,7 +3,7 @@ import { MikroORM } from "@mikro-orm/postgresql";
 import {
   alimentoSchema,
   giornataSchema,
-  listaAlimentiSchema,
+  paginaAlimentiSchema,
   listaRiepiloghiSchema,
   obiettiviSchema,
   lookupBarcodeSchema,
@@ -287,12 +287,12 @@ describe("/alimenti", () => {
     });
 
     await request(app).patch(`/alimenti/${id}`).set(auth).send({ archiviato: true }).expect(200);
-    const attivi = listaAlimentiSchema.parse(
+    const attivi = paginaAlimentiSchema.parse(
       (await request(app).get("/alimenti").set(auth).expect(200)).body,
     );
-    expect(attivi.map((a) => a.id)).not.toContain(id);
+    expect(attivi.elementi.map((a) => a.id)).not.toContain(id);
     const archiviati = await request(app).get("/alimenti?archiviati=true").set(auth).expect(200);
-    expect(archiviati.body.map((a: { id: string }) => a.id)).toContain(id);
+    expect(archiviati.body.elementi.map((a: { id: string }) => a.id)).toContain(id);
   });
 
   it("cerca per nome, marca o barcode", async () => {
@@ -300,7 +300,7 @@ describe("/alimenti", () => {
     const cerca = async (q: string) =>
       (
         (await request(app).get("/alimenti").query({ q, ordine: "nome" }).set(auth).expect(200))
-          .body as { nome: string }[]
+          .body.elementi as { nome: string }[]
       ).map((a) => a.nome);
     expect(await cerca("greco")).toContain("Yogurt greco");
     expect(await cerca("FAGE")).toContain("Yogurt greco");
@@ -309,15 +309,51 @@ describe("/alimenti", () => {
     expect(await cerca("100%")).toEqual([]);
   });
 
-  it("i recenti contengono solo alimenti già usati", async () => {
-    const res = await request(app).get("/alimenti?ordine=recenti").set(auth).expect(200);
-    expect(res.body).toEqual([]);
+  it("ordina per nome e divide l'elenco in pagine", async () => {
+    // The pool is shared with the demo test: only these foods, found by their prefix.
+    const primo = (await crea({ ...yogurt, nome: "Ordine B" }).expect(201)).body.id as string;
+    const secondo = (await crea({ ...yogurt, nome: "Ordine C" }).expect(201)).body.id as string;
+    const terzo = (await crea({ ...yogurt, nome: "Ordine A" }).expect(201)).body.id as string;
+    const ordinati = async (ordine: string) =>
+      (
+        (await request(app).get("/alimenti").query({ q: "Ordine ", ordine }).set(auth).expect(200))
+          .body.elementi as { id: string }[]
+      ).map((a) => a.id);
+
+    expect(await ordinati("nome")).toEqual([terzo, primo, secondo]);
+    expect(await ordinati("nomeDesc")).toEqual([secondo, primo, terzo]);
+    await request(app).get("/alimenti?ordine=casuale").set(auth).expect(400);
+
+    const seconda = paginaAlimentiSchema.parse(
+      (
+        await request(app)
+          .get("/alimenti")
+          .query({ q: "Ordine ", ordine: "nome", pagina: 2, limite: 2 })
+          .set(auth)
+          .expect(200)
+      ).body,
+    );
+    expect(seconda).toMatchObject({ totale: 3, pagina: 2 });
+    expect(seconda.elementi.map((a) => a.id)).toEqual([secondo]);
+  });
+
+  it("i recenti mostrano anche gli alimenti mai usati, per nome", async () => {
+    const res = await request(app)
+      .get("/alimenti")
+      .query({ q: "Ordine ", ordine: "recenti" })
+      .set(auth)
+      .expect(200);
+    expect(res.body.elementi.map((a: { nome: string }) => a.nome)).toEqual([
+      "Ordine A",
+      "Ordine B",
+      "Ordine C",
+    ]);
   });
 
   it("condivide gli alimenti: tutti li vedono e li correggono, solo l'autore li elimina", async () => {
     const { id } = (await crea({ ...yogurt, nome: "Condiviso" }).expect(201)).body;
     const visti = await request(app).get("/alimenti").set(altro).expect(200);
-    expect(visti.body.map((a: { id: string }) => a.id)).toContain(id);
+    expect(visti.body.elementi.map((a: { id: string }) => a.id)).toContain(id);
 
     const corretto = await request(app)
       .patch(`/alimenti/${id}`)
@@ -342,9 +378,11 @@ describe("/alimenti", () => {
     expect(res.body.archiviato).toBe(true);
 
     const ids = async (headers: ReturnType<typeof bearer>) =>
-      ((await request(app).get("/alimenti").set(headers).expect(200)).body as { id: string }[]).map(
-        (a) => a.id,
-      );
+      (
+        (await request(app).get("/alimenti").set(headers).expect(200)).body.elementi as {
+          id: string;
+        }[]
+      ).map((a) => a.id);
     expect(await ids(auth)).not.toContain(id);
     expect(await ids(altro)).toContain(id);
     const suo = await request(app).get(`/alimenti/${id}`).set(altro).expect(200);

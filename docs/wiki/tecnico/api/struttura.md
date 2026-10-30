@@ -2,6 +2,7 @@
 tipo: info
 aggiornato: 2026-10-30
 fonti:
+  - raw/compiled/minor-fixes/2026-10-30-ordinamenti.md
   - raw/compiled/export-rework/2026-10-30-decisioni-utente.md
   - raw/compiled/first-develop/2026-10-25-scaffolding.md
   - raw/compiled/auth/2026-10-25-implementazione.md
@@ -23,7 +24,7 @@ fonti:
 | `src/config/env.ts` | `caricaEnv()`: variabili d'ambiente validate con zod; se mancano o non sono valide il processo termina con l'elenco degli errori |
 | `src/modules/<dominio>/` | Un modulo per dominio: `*.entity.ts`, `*.service.ts`, `*.routes.ts` |
 | `src/middlewares/` | `valida` (zod), `autenticazione` (Bearer), `errori` (404 e gestore centrale), `cors` |
-| `src/lib/` | `logger` (pino), `redis` (client unico), `errori` (`ErroreApp`), `password` (scrypt) |
+| `src/lib/` | `logger` (pino), `redis` (client unico), `errori` (`ErroreApp`), `password` (scrypt), `paginazione` (`paginata`: una pagina di una lista già filtrata e ordinata) |
 | `src/db/` | Configurazione ORM, elenco entità, CLI di migrazioni, seed e creazione utenti, seeder — vedi [Database](./database.md) |
 | `migrations/` | Migrazioni versionate |
 | `test/` | Test di integrazione con Supertest |
