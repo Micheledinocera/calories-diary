@@ -1,7 +1,11 @@
 import { z } from "zod";
 import { avvisoCatalogoSchema, unitaBaseSchema } from "./catalogo.js";
+import { paginaSchema, paginazioneSchema } from "./paginazione.js";
 
-const valore = z.number().nonnegative().max(10_000);
+const valore = z
+  .number("Inserisci un numero")
+  .nonnegative("Il valore non può essere negativo")
+  .max(10_000, "Massimo 10000");
 
 /** Values tracked for the user's foods (MVP): kcal and the three macros, per 100 g or 100 ml. */
 export const valoriAlimentoSchema = z.object({
@@ -54,11 +58,14 @@ export const alimentoSchema = z.object({
 
 export type Alimento = z.infer<typeof alimentoSchema>;
 
-export const listaAlimentiSchema = z.array(alimentoSchema);
+export const paginaAlimentiSchema = paginaSchema(alimentoSchema);
 
 const nuovaPorzioneSchema = z.object({
-  nome: z.string().trim().min(1).max(50),
-  quantita: z.number().positive().max(100_000),
+  nome: z.string().trim().min(1, "Inserisci il nome della porzione").max(50),
+  quantita: z
+    .number("Inserisci la quantità della porzione")
+    .positive("La quantità deve essere maggiore di zero")
+    .max(100_000, "Massimo 100000"),
   predefinita: z.boolean().default(false),
 });
 
@@ -86,7 +93,7 @@ const testoFacoltativo = (max: number) =>
  * product (fonte "off"); otherwise it is a manual food.
  */
 export const nuovoAlimentoSchema = z.object({
-  nome: z.string().trim().min(1).max(255),
+  nome: z.string().trim().min(1, "Inserisci il nome").max(255),
   marca: testoFacoltativo(255),
   barcode: z
     .string()
@@ -119,8 +126,8 @@ export const modificaAlimentoSchema = z
 
 export type ModificaAlimento = z.input<typeof modificaAlimentoSchema>;
 
-/** Orders of `GET /alimenti`: by use (frequency, then recency), most recent, by name. */
-export const ordineAlimentiSchema = z.enum(["uso", "recenti", "nome"]);
+/** Orders of `GET /alimenti`: last used, by use (frequency, then recency), by name. */
+export const ordineAlimentiSchema = z.enum(["recenti", "uso", "nome", "nomeDesc"]);
 
 export type OrdineAlimenti = z.infer<typeof ordineAlimentiSchema>;
 
@@ -129,7 +136,7 @@ export const filtriAlimentiSchema = z.object({
   q: z.string().trim().max(100).optional(),
   ordine: ordineAlimentiSchema.default("uso"),
   archiviati: z.stringbool().default(false),
-  limite: z.coerce.number().int().min(1).max(200).default(100),
+  ...paginazioneSchema.shape,
 });
 
 /** Filters as the client sends them (the query string carries them as text). */

@@ -6,6 +6,7 @@ import {
   valoriSchema,
   voceSuggeritaSchema,
 } from "./diario.js";
+import { paginaSchema, paginazioneSchema } from "./paginazione.js";
 
 /**
  * A saved composition of foods, reusable in any day. Every user sees and uses all of them;
@@ -23,7 +24,7 @@ export const pastoPreferitoSchema = z.object({
 
 export type PastoPreferito = z.infer<typeof pastoPreferitoSchema>;
 
-export const listaPastiPreferitiSchema = z.array(pastoPreferitoSchema);
+export const paginaPastiPreferitiSchema = paginaSchema(pastoPreferitoSchema);
 
 /** Body of `POST /pasti-preferiti` and `PUT /pasti-preferiti/:id` (which replaces the entries). */
 export const nuovoPastoPreferitoSchema = z.object({
@@ -35,10 +36,22 @@ export type NuovoPastoPreferito = z.infer<typeof nuovoPastoPreferitoSchema>;
 
 export const autorePastiPreferitiSchema = z.enum(["miei", "tutti"]);
 
+/** Orders of `GET /pasti-preferiti`: by name, or by when the meal was inserted. */
+export const ordinePastiPreferitiSchema = z.enum([
+  "nome",
+  "nomeDesc",
+  "inseritiRecenti",
+  "inseritiLontani",
+]);
+
+export type OrdinePastiPreferiti = z.infer<typeof ordinePastiPreferitiSchema>;
+
 /** Query of `GET /pasti-preferiti`. */
 export const filtriPastiPreferitiSchema = z.object({
   q: z.string().trim().max(100).optional(),
   autore: autorePastiPreferitiSchema.default("tutti"),
+  ordine: ordinePastiPreferitiSchema.default("nome"),
+  ...paginazioneSchema.shape,
 });
 
 /** Filters as the client sends them. */

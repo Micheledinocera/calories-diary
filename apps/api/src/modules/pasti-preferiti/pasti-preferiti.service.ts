@@ -2,11 +2,13 @@ import type { FilterQuery } from "@mikro-orm/core";
 import type { EntityManager } from "@mikro-orm/postgresql";
 import type {
   NuovoPastoPreferito,
+  OrdinePastiPreferiti,
   PastoPreferito as PastoPreferitoDto,
   filtriPastiPreferitiSchema,
 } from "@calories-diary/shared";
 import type { z } from "zod";
 import { ErroreApp, nonTrovato } from "../../lib/errori.js";
+import { paginata } from "../../lib/paginazione.js";
 import { escapeLike } from "../../lib/testo.js";
 import { Alimento } from "../alimenti/alimento.entity.js";
 import { Pasto } from "../diario/pasto.entity.js";
@@ -30,6 +32,17 @@ const versoDto = (pasto: PastoPreferito, utenteId: string): PastoPreferitoDto =>
     aggiornatoIl: pasto.aggiornatoIl.toISOString(),
   };
 };
+
+const perNome = (x: PastoPreferito, y: PastoPreferito) => x.nome.localeCompare(y.nome, "it");
+const inserito = (p: PastoPreferito) => p.creatoIl.getTime();
+
+const ordinamenti: Record<OrdinePastiPreferiti, (x: PastoPreferito, y: PastoPreferito) => number> =
+  {
+    nome: perNome,
+    nomeDesc: (x, y) => perNome(y, x),
+    inseritiRecenti: (x, y) => inserito(y) - inserito(x) || perNome(x, y),
+    inseritiLontani: (x, y) => inserito(x) - inserito(y) || perNome(x, y),
+  };
 
 export function creaPastiPreferitiService(em: EntityManager) {
   async function carica(id: string) {
@@ -68,14 +81,14 @@ export function creaPastiPreferitiService(em: EntityManager) {
   }
 
   return {
-    async elenca(utenteId: string, { q, autore }: Filtri): Promise<PastoPreferitoDto[]> {
+    async elenca(utenteId: string, { q, autore, ordine, ...paginazione }: Filtri) {
       const filtro: FilterQuery<PastoPreferito> = {};
       if (q) filtro.nome = { $ilike: `%${escapeLike(q)}%` };
       if (autore === "miei") filtro.autore = utenteId;
       const pasti = await em.find(PastoPreferito, filtro, { populate });
-      return pasti
-        .sort((x, y) => x.nome.localeCompare(y.nome, "it"))
-        .map((pasto) => versoDto(pasto, utenteId));
+      return paginata(pasti.sort(ordinamenti[ordine]), paginazione, (pasto) =>
+        versoDto(pasto, utenteId),
+      );
     },
 
     async trova(utenteId: string, id: string): Promise<PastoPreferitoDto> {

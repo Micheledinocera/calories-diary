@@ -27,9 +27,10 @@ onBeforeUnmount(() => clearTimeout(timer));
 // a key of its own, and nothing loaded until it is opened.
 const { data, status, error, refresh } = useAsyncData(
   `scelta-alimento-${useId()}`,
-  () => {
+  async () => {
     const q = testo.value.trim() || undefined;
-    return elenca(q ? { q, ordine: "nome", limite: 50 } : { ordine: "uso", limite: 50 });
+    const ordine = q ? "nome" : "uso";
+    return (await elenca({ q, ordine, limite: 50 })).elementi;
   },
   { watch: [testo], immediate: false },
 );
@@ -106,7 +107,7 @@ function conferma() {
 const scansione = ref(false);
 async function letto(codice: string) {
   try {
-    const trovati = await elenca({ q: codice, ordine: "nome", limite: 5 });
+    const { elementi: trovati } = await elenca({ q: codice, ordine: "nome", limite: 5 });
     const alimento = trovati.find((a) => a.barcode === codice);
     if (alimento) return scegli(alimento);
     aperto.value = false;
@@ -183,6 +184,7 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
             v-model="quantita"
             :min="0"
             :step="10"
+            :step-snapping="false"
             :format-options="{ maximumFractionDigits: 1 }"
             locale="it-IT"
             size="xl"

@@ -20,7 +20,7 @@ const autore = ref<"miei" | "tutti">("miei");
 // One instance per meal: a key of its own, and nothing loaded until it is opened.
 const { data, status, error, refresh } = useAsyncData(
   `scelta-preferito-${useId()}`,
-  () => elenca({ q: testo.value.trim() || undefined, autore: autore.value }),
+  async () => (await elenca({ q: testo.value.trim() || undefined, autore: autore.value })).elementi,
   { watch: [testo, autore], immediate: false },
 );
 

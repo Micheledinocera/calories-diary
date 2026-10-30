@@ -4,6 +4,7 @@ import type {
   LookupBarcode,
   ModificaAlimento,
   NuovoAlimento,
+  Pagina,
 } from "@calories-diary/shared";
 
 /** Calls of the user's foods (`/alimenti`) and of the barcode lookup in the shared catalog. */
@@ -13,7 +14,7 @@ export function useAlimenti() {
   const scrivi = { retry: 0 } as const;
 
   return {
-    elenca: (filtri: FiltriAlimenti = {}) => api<Alimento[]>("/alimenti", { query: filtri }),
+    elenca: (filtri: FiltriAlimenti = {}) => api<Pagina<Alimento>>("/alimenti", { query: filtri }),
     trova: (id: string) => api<Alimento>(`/alimenti/${id}`),
     crea: (dati: NuovoAlimento) =>
       api<Alimento>("/alimenti", { method: "POST", body: dati, ...scrivi }),

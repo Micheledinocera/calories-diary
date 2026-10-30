@@ -7,4 +7,5 @@ export * from "./catalogo.js";
 export * from "./alimenti.js";
 export * from "./utenti.js";
 export * from "./condivisioni.js";
+export * from "./paginazione.js";
 export * from "./pasti-preferiti.js";
