@@ -1,7 +1,8 @@
 ---
 tipo: info
-aggiornato: 2026-10-27
+aggiornato: 2026-10-30
 fonti:
+  - raw/compiled/meals/2026-10-30-pasti-preferiti.md
   - raw/compiled/auth/2026-10-25-implementazione.md
   - raw/compiled/diary/2026-10-25-decisioni-diario.md
   - raw/compiled/user-login/2026-10-27-implementazione.md
@@ -44,7 +45,7 @@ Gli utenti normali li crea un admin dall'app (`POST /utenti`). Da CLI (dalla roo
 
 `src/modules/utenti/utenti.service.ts`, usato da CLI e rotte: `crea`, `promuoviAdmin`, `lista` (per username), `modifica` (username e/o password), `cambiaPassword` (verifica quella attuale, altrimenti 400 `PASSWORD_ERRATA`), `elimina`. Ogni nuova password incrementa `versioneSessione`.
 
-`elimina(id, richiedenteId)`: 400 `AUTO_ELIMINAZIONE` su sé stessi, 404 se l'utente non c'è. In una transazione: cancella i pasti dell'utente (voci in cascata), poi i suoi alimenti (`autore`) che non hanno più voci, cioè non usati nel diario di nessun altro, poi l'utente (`uso_alimento` in cascata; gli alimenti rimasti perdono l'autore con `set null`).
+`elimina(id, richiedenteId)`: 400 `AUTO_ELIMINAZIONE` su sé stessi, 404 se l'utente non c'è. In una transazione: cancella i pasti e i pasti preferiti dell'utente (voci in cascata), poi i suoi alimenti (`autore`) che non hanno più voci, cioè non usati nel diario o nei pasti preferiti di nessun altro, poi l'utente (`uso_alimento` in cascata; gli alimenti rimasti perdono l'autore con `set null`).
 
 ## Password
 
