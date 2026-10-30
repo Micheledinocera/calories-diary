@@ -1,6 +1,6 @@
 # Come contribuire
 
-Convenzioni del repo, valide per le persone e per gli agenti AI (anche per le skill `/start`, `/ingest`, `/close`).
+Convenzioni del repo, valide per le persone e per gli agenti AI (anche per le skill `/start`, `/ingest`, `/close`, `/release`).
 
 ## Rami (git-flow)
 
@@ -65,6 +65,8 @@ pnpm build
 
 Versioni [SemVer](https://semver.org/) (`MAJOR.MINOR.PATCH`). Il campo `version` dei pacchetti del workspace (`apps/api`, `apps/web`, `packages/shared`) è sempre quello dell'ultima release; la root non ha versione.
 
+La skill `/release` esegue tutta la procedura, con i controlli prima (migrazioni, variabili d'ambiente, check) e l'attesa dei deploy dopo. A mano:
+
 1. Da `develop` aggiornato: `git flow release start <versione>` (es. `0.1.0`, senza `v`).
 2. Sul ramo `release/<versione>`, allinea le versioni e committa:
    ```bash
@@ -73,6 +75,9 @@ Versioni [SemVer](https://semver.org/) (`MAJOR.MINOR.PATCH`). Il campo `version`
    ```
 3. `git flow release finish <versione>`: merge normale su `main`, tag `v<versione>`, ritorno su `develop`.
 4. `git push origin main develop --tags`. Il push su `main` pubblica API e web (vedi `docs/wiki/progetto/deploy.md`).
+5. Quando i deploy sono andati a buon fine: `gh release create v<versione> --verify-tag --title "v<versione>" --notes-file <note>`, con le novità in italiano.
+
+**Hotfix**: per correggere la produzione senza portarsi dietro `develop`. `git flow hotfix start <versione>` parte da `main` (con `/release hotfix <versione>`); si committa la correzione, poi si continua dal punto 2 con `git flow hotfix finish <versione>` (con `/release` sul ramo `hotfix/<versione>`). La versione è quella dell'ultimo tag con PATCH + 1.
 
 ## Documentazione
 
