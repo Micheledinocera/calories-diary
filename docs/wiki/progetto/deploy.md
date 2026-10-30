@@ -1,6 +1,6 @@
 ---
 tipo: info
-aggiornato: 2026-10-27
+aggiornato: 2026-10-30
 fonti:
   - raw/compiled/deploy/2026-10-26-obiettivo.md
   - raw/compiled/deploy/2026-10-26-roadmap.md
@@ -8,6 +8,8 @@ fonti:
   - raw/compiled/ui-tweaks/2026-10-27-decisioni.md
   - raw/compiled/ui-tweaks/2026-10-27-task.md
   - raw/compiled/user-login/2026-10-27-implementazione.md
+  - raw/compiled/skill-release/2026-10-30-obiettivo.md
+  - raw/compiled/skill-release/2026-10-30-decisioni.md
 ---
 
 # Deploy
@@ -71,6 +73,10 @@ Il primo comando decifra l'artifact scaricato, il secondo ne elenca il contenuto
 
 Flusso git-flow ([CONTRIBUTING.md](../../../CONTRIBUTING.md)): la release porta `develop` su `main` con il tag `v<versione>`; il push su `main` pubblica l'API (workflow) e il web (Vercel). La prima è `v0.1.0`.
 
+La skill `/release` esegue la procedura e la avvia solo l'utente, con una conferma esplicita prima del merge su `main`: prima controlla le migrazioni nuove (girano sul database prima che parta la nuova API, senza rollback automatico), le variabili d'ambiente nuove da impostare su Render o Vercel e le modifiche a pipeline e hosting; dopo il push aspetta il workflow `Deploy API` e lo stato `Vercel` del commit. Se un deploy fallisce si ferma, senza retry o revert. Gli hotfix seguono lo stesso percorso partendo da `main`.
+
+Ogni versione ha una GitHub Release con le novità in italiano, creata a deploy riusciti: è l'unico changelog del progetto, non c'è un file `CHANGELOG.md`.
+
 ## Limiti dei piani gratuiti
 
 Verificati sulla documentazione dei provider il 2026-10-26.
@@ -83,6 +89,7 @@ Verificati sulla documentazione dei provider il 2026-10-26.
 
 ## Domande aperte
 
+- La skill `/release` è stata provata in locale per i comandi git-flow e l'allineamento delle versioni, non ancora su una release vera (push, attesa dei deploy, GitHub Release).
 - Il ripristino di un backup reale (decifrare l'artifact con la chiave age e leggerlo con `pg_restore`) non è ancora stato provato; il resto della pipeline ha funzionato al deploy della `v0.1.1`. L'utente lo considera non prioritario.
 - Costo di `/health`: ogni chiamata fa una query su Neon e un `PING` su Redis. Se l'health check di Render è frequente consuma comandi Upstash e tiene sveglio Neon. Da misurare; se serve, un `/health` leggero per Render e quello completo per lo smoke test.
 - MCP ufficiali dei provider (Render, Neon, Vercel; per Upstash non ne risulta uno ufficiale): utili per log e stato, non aggiunti a `.mcp.json`. Da decidere.
