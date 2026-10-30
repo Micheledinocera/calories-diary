@@ -2,6 +2,7 @@
 tipo: info
 aggiornato: 2026-10-30
 fonti:
+  - raw/compiled/minor-fixes/2026-10-30-obiettivo.md
   - raw/compiled/meals/2026-10-30-pasti-preferiti.md
   - raw/compiled/meals/2026-10-30-decisioni-collegamento.md
   - raw/compiled/first-develop/analisi-iniziale-calorie-tracker.md
@@ -65,7 +66,7 @@ Chi può fare cosa su un alimento del pool:
 - Il lookup restituisce, insieme al prodotto, gli avvisi su valori assenti, parziali (manca una tra kcal, proteine, carboidrati, grassi) o incoerenti.
 - Prima di salvare un prodotto del provider tra i propri alimenti: anteprima dei valori per 100 g, correggibili.
 - La copia salvata registra la fonte, il codice a barre e la data di import.
-- Flag **verificato**: l'utente conferma che i valori corrispondono all'etichetta.
+- Flag **verificato**: l'utente conferma che i valori corrispondono all'etichetta. Un prodotto trovato da barcode parte già verificato, anche con avvisi: l'utente può spegnerlo prima di salvare.
 - **Controllo di coerenza**: kcal stimate = 4 × proteine + 4 × carboidrati + 9 × grassi. Se lo scarto rispetto alle kcal dichiarate supera il **20%**, l'app mostra un avviso.
 - Ri-sincronizzazione manuale dal provider, con diff da confermare (fase 3).
 

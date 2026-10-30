@@ -2,6 +2,7 @@
 tipo: info
 aggiornato: 2026-10-30
 fonti:
+  - raw/compiled/minor-fixes/2026-10-30-ordinamenti.md
   - raw/compiled/meals/2026-10-30-pasti-preferiti.md
   - raw/compiled/foods/2026-10-25-obiettivo.md
   - raw/compiled/foods/2026-10-25-decisioni-utente.md
@@ -50,13 +51,13 @@ Tutte dietro `richiediAutenticazione`. Il DTO mostra l'alimento **come lo vede l
 
 | Rotta | Risposta |
 |---|---|
-| `GET /alimenti` | Lista di `Alimento`. Query (`filtriAlimentiSchema`): `q` (nome o marca, senza distinzione di maiuscole; barcode se sono solo cifre), `ordine` (`uso`: utilizzi, poi ultimo uso, poi nome; `recenti`: solo alimenti già usati dall'utente; `nome`), `archiviati` (`true`: solo quelli archiviati dall'utente; default gli altri), `limite` (default 100, max 200) |
+| `GET /alimenti` | Pagina di `Alimento` (`{ elementi, totale, pagina }`). Query (`filtriAlimentiSchema`): `q` (nome o marca, senza distinzione di maiuscole; barcode se sono solo cifre), `ordine` (`uso`, il default: utilizzi, poi ultimo uso, poi nome; `recenti`: ultimo uso dell'utente, poi nome, con i mai usati in fondo; `nome`; `nomeDesc`), `archiviati` (`true`: solo quelli archiviati dall'utente; default gli altri), `pagina` (default 1), `limite` (default 100, max 200) |
 | `POST /alimenti` | 201 con l'`Alimento` creato (`nuovoAlimentoSchema`), autore l'utente corrente. Un barcode già nel catalogo collega l'alimento al prodotto (`fonte: off`, `importatoIl`); altrimenti è `manuale` |
 | `GET /alimenti/:id` | Un `Alimento` |
 | `PATCH /alimenti/:id` | `Alimento` aggiornato (`modificaAlimentoSchema`, campi tutti facoltativi; `porzioni` sostituisce la lista; il barcode non si modifica). Chiunque modifica, per tutti; `archiviato` vale solo per l'utente corrente |
 | `DELETE /alimenti/:id` | 204; 403 `ALIMENTO_NON_TUO` se l'utente non è l'autore; 409 `ALIMENTO_IN_USO` se un diario o un pasto preferito lo usa: va archiviato |
 
-Filtro per archiviati e ordinamento si fanno in memoria, dopo la query su `q`, perché dipendono dall'uso dell'utente: il pool sono gli alimenti di una famiglia, poche centinaia al massimo.
+Filtro per archiviati, ordinamento e paginazione si fanno in memoria, dopo la query su `q`, perché dipendono dall'uso dell'utente: il pool sono gli alimenti di una famiglia, poche centinaia al massimo.
 
 Errori propri: 409 `ALIMENTO_ESISTENTE` se esiste già un alimento con lo stesso barcode (`dettagli.id`: quello esistente); 404 `NON_TROVATO` se l'alimento non esiste.
 
