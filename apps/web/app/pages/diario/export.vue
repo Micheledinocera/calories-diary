@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { CalendarDate, type DateValue } from "@internationalized/date";
+import { MAX_GIORNI_EXPORT } from "@calories-diary/shared";
 
 const diario = useDiario();
+const condivisioni = useCondivisioni();
 const toast = useToast();
 
 const [a, m, g] = giornoLocale().split("-").map(Number) as [number, number, number];
@@ -60,23 +62,20 @@ function scarica() {
   URL.revokeObjectURL(url);
 }
 
-// Sharing a file (Android share sheet) needs the Web Share API level 2.
-const condivisibile = computed(
-  () => import.meta.client && !!navigator.canShare?.({ files: [new File([""], "x.md")] }),
+const condivisioneAperta = ref(false);
+const { data: link, refresh: aggiornaLink } = useAsyncData("condivisioni", () =>
+  condivisioni.elenca(),
 );
 
-async function condividi() {
+async function revoca(id: string) {
+  if (!confirm("Revocare il link? Chi lo ha ricevuto non potrà più aprirlo.")) return;
   try {
-    await navigator.share({ files: [file()], title: "Diario alimentare" });
+    await condivisioni.revoca(id);
+    toast.add({ title: "Link revocato", color: "success", icon: "i-lucide-check" });
+    await aggiornaLink();
   } catch (err) {
-    // Closing the share sheet is not an error.
-    if ((err as DOMException).name !== "AbortError") {
-      toast.add({
-        title: "Condivisione non riuscita",
-        color: "error",
-        icon: "i-lucide-circle-alert",
-      });
-    }
+    const errore = err as ErroreNormalizzato;
+    toast.add({ title: errore.messaggio, color: "error", icon: "i-lucide-circle-alert" });
   }
 }
 
@@ -128,9 +127,7 @@ async function copia() {
 
     <template v-if="markdown">
       <div class="flex flex-wrap gap-2">
-        <UButton v-if="condivisibile" icon="i-lucide-share-2" @click="condividi">
-          Condividi
-        </UButton>
+        <UButton icon="i-lucide-share-2" @click="condivisioneAperta = true">Condividi</UButton>
         <UButton icon="i-lucide-download" variant="subtle" @click="scarica">Scarica .md</UButton>
         <UButton icon="i-lucide-copy" variant="subtle" color="neutral" @click="copia">
           Copia
@@ -139,6 +136,42 @@ async function copia() {
       <pre
         class="text-xs whitespace-pre-wrap break-words bg-elevated rounded-md p-3 max-h-[60vh] overflow-auto"
         >{{ markdown }}</pre>
+      <ModaleCondivisione
+        v-model:open="condivisioneAperta"
+        :da="giorni[0]!"
+        :a="giorni.at(-1)!"
+        @creata="aggiornaLink"
+      />
     </template>
+
+    <section v-if="link?.length" class="space-y-2">
+      <h2 class="font-semibold text-highlighted">Link attivi</h2>
+      <UCard :ui="{ body: 'py-0 sm:py-0 sm:px-4' }">
+        <div class="divide-y divide-default">
+          <div v-for="l in link" :key="l.id" class="flex items-center gap-2 py-3 min-h-14">
+            <div class="flex-1 min-w-0">
+              <p class="truncate font-medium text-highlighted">
+                {{ periodoCondiviso(l.da, l.a) }}
+              </p>
+              <p class="text-xs text-muted">{{ testoScadenza(l.scadeIl) }}</p>
+            </div>
+            <UButton
+              icon="i-lucide-copy"
+              variant="ghost"
+              color="neutral"
+              aria-label="Copia link"
+              @click="condivisioni.copiaLink(l.token)"
+            />
+            <UButton
+              icon="i-lucide-trash-2"
+              variant="ghost"
+              color="error"
+              aria-label="Revoca link"
+              @click="revoca(l.id)"
+            />
+          </div>
+        </div>
+      </UCard>
+    </section>
   </UContainer>
 </template>

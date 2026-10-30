@@ -13,6 +13,7 @@ import { authRouter } from "./modules/auth/auth.routes.js";
 import { creaGestoreToken } from "./modules/auth/token.js";
 import { catalogoRouter } from "./modules/catalogo/catalogo.routes.js";
 import type { ProviderAlimenti } from "./modules/catalogo/provider.js";
+import { condivisioniRouter, pubblicoRouter } from "./modules/condivisioni/condivisioni.routes.js";
 import { diarioRouter } from "./modules/diario/diario.routes.js";
 import { healthRouter } from "./modules/health/health.routes.js";
 import { obiettiviRouter } from "./modules/obiettivi/obiettivi.routes.js";
@@ -50,6 +51,8 @@ export function creaApp({ env, orm, redis, logger, provider }: DipendenzeApp): E
   app.use("/alimenti", autenticazione, alimentiRouter(orm.em));
   app.use("/catalogo", autenticazione, catalogoRouter({ em: orm.em, redis, logger, provider }));
   app.use("/utenti", autenticazione, richiediAdmin, utentiRouter(orm.em));
+  app.use("/condivisioni", autenticazione, condivisioniRouter(orm.em));
+  app.use("/pubblico", pubblicoRouter(orm.em));
 
   app.use(rottaNonTrovata);
   app.use(gestoreErrori);

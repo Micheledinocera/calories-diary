@@ -6,3 +6,4 @@ export * from "./auth.js";
 export * from "./catalogo.js";
 export * from "./alimenti.js";
 export * from "./utenti.js";
+export * from "./condivisioni.js";

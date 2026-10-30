@@ -5,7 +5,7 @@ import { utenteCorrente } from "../../middlewares/autenticazione.js";
 import { datiValidati, valida } from "../../middlewares/valida.js";
 import { Utente } from "../utenti/utente.entity.js";
 
-const versoDto = (u: Utente): Obiettivi => ({
+export const versoDtoObiettivi = (u: Utente): Obiettivi => ({
   fabbisogno: u.fabbisogno ?? null,
   ripartizione: {
     carboidrati: u.quotaCarboidrati,
@@ -24,7 +24,7 @@ export function obiettiviRouter(em: EntityManager): Router {
     em.findOneOrFail(Utente, { id: utenteCorrente(res).id });
 
   router.get("/", async (_req, res) => {
-    res.json(versoDto(await carica(res)));
+    res.json(versoDtoObiettivi(await carica(res)));
   });
 
   router.put("/", valida({ body: obiettiviSchema }), async (_req, res) => {
@@ -37,7 +37,7 @@ export function obiettiviRouter(em: EntityManager): Router {
       quotaProteine: ripartizione.proteine,
     });
     await em.flush();
-    res.json(versoDto(utente));
+    res.json(versoDtoObiettivi(utente));
   });
 
   return router;
