@@ -40,6 +40,13 @@ export function formattaGiorno(giorno: string): string {
   return formatoGiorno.format(new Date(a, m - 1, g));
 }
 
+const formatoGiornoBreve = new Intl.DateTimeFormat("it-IT", { day: "numeric", month: "short" });
+
+export function formattaGiornoBreve(giorno: string): string {
+  const [a, m, g] = giorno.split("-").map(Number) as [number, number, number];
+  return formatoGiornoBreve.format(new Date(a, m - 1, g));
+}
+
 export type ChiaveMacro = keyof RipartizioneMacro;
 
 /** The macros in display order, everywhere: carbohydrates, proteins, fats. */
@@ -122,6 +129,14 @@ export function statoGiornata(totali: Valori, obiettivi: Obiettivi): StatoGiorna
   const sforati = macro.filter((m) => totali[m.chiave] > grammi[m.chiave]).map((m) => m.chiave);
   return sforati.length ? { tipo: "attenzione", sforati } : { tipo: "ok" };
 }
+
+/** Colours of the day's dot and their legend, in the calendar and in the shared page. */
+export const pallini = { ok: "bg-ok", attenzione: "bg-attenzione", oltre: "bg-oltre" } as const;
+export const descrizioniStato = {
+  ok: "entro il fabbisogno",
+  attenzione: "macro oltre l'obiettivo",
+  oltre: "oltre il fabbisogno",
+} as const;
 
 /** The meal with the most kcal (the first one in the day on a tie), null if nothing was eaten. */
 export function pastoPiuPesante(pasti: Pasto[]): Pasto | null {

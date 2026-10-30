@@ -28,13 +28,6 @@ const totaliPerGiorno = computed(
 );
 
 // Same rule as the day (statoGiornata): a dot per day with entries, none without a need.
-const pallini = { ok: "bg-ok", attenzione: "bg-attenzione", oltre: "bg-oltre" } as const;
-const descrizioni = {
-  ok: "entro il fabbisogno",
-  attenzione: "macro oltre l'obiettivo",
-  oltre: "oltre il fabbisogno",
-} as const;
-
 function stato(giorno: string) {
   const totali = totaliPerGiorno.value.get(giorno);
   return totali && obiettivi.value ? statoGiornata(totali, obiettivi.value) : null;
@@ -79,7 +72,7 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
             class="flex flex-col items-center gap-1 leading-tight tabular-nums"
             :aria-label="
               stato(day.toString())
-                ? `${day.day}, ${descrizioni[stato(day.toString())!.tipo]}`
+                ? `${day.day}, ${descrizioniStato[stato(day.toString())!.tipo]}`
                 : undefined
             "
           >
@@ -99,7 +92,7 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
         class="flex flex-wrap gap-x-4 gap-y-2 mt-3 text-[13px] text-muted"
       >
         <span
-          v-for="(descrizione, tipo) in descrizioni"
+          v-for="(descrizione, tipo) in descrizioniStato"
           :key="tipo"
           class="inline-flex items-center gap-1.5"
         >
