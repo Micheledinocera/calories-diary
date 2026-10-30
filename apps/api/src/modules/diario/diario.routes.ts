@@ -1,9 +1,12 @@
 import {
+  aggiuntaPreferitoSchema,
+  copiaGiornoSchema,
   giornoSchema,
   intervalloGiorniSchema,
   modificaVoceSchema,
   nuovaVoceSchema,
   nuovoPastoSchema,
+  nuovoPreferitoDaPastoSchema,
   ordinePastiSchema,
 } from "@calories-diary/shared";
 import type { EntityManager } from "@mikro-orm/postgresql";
@@ -44,6 +47,26 @@ export function diarioRouter(em: EntityManager): Router {
     },
   );
 
+  router.post(
+    "/:giorno/preferiti",
+    valida({ params: parametriGiorno, body: aggiuntaPreferitoSchema }),
+    async (_req, res) => {
+      const { giorno } = datiValidati<typeof parametriGiorno>(res, "params");
+      const dati = datiValidati<typeof aggiuntaPreferitoSchema>(res, "body");
+      res.json(await service.aggiungiPreferito(utenteCorrente(res).id, giorno, dati));
+    },
+  );
+
+  router.post(
+    "/:giorno/copia",
+    valida({ params: parametriGiorno, body: copiaGiornoSchema }),
+    async (_req, res) => {
+      const { giorno } = datiValidati<typeof parametriGiorno>(res, "params");
+      const { da } = datiValidati<typeof copiaGiornoSchema>(res, "body");
+      res.json(await service.copiaGiorno(utenteCorrente(res).id, giorno, da));
+    },
+  );
+
   router.put(
     "/:giorno/ordine",
     valida({ params: parametriGiorno, body: ordinePastiSchema }),
@@ -68,6 +91,21 @@ export function diarioRouter(em: EntityManager): Router {
       res.json(await service.aggiungiVoce(utenteCorrente(res).id, id, voce));
     },
   );
+
+  router.post(
+    "/pasti/:id/preferito",
+    valida({ params: parametriId, body: nuovoPreferitoDaPastoSchema }),
+    async (_req, res) => {
+      const { id } = datiValidati<typeof parametriId>(res, "params");
+      const { nome } = datiValidati<typeof nuovoPreferitoDaPastoSchema>(res, "body");
+      res.json(await service.salvaPreferito(utenteCorrente(res).id, id, nome));
+    },
+  );
+
+  router.delete("/pasti/:id/preferito", valida({ params: parametriId }), async (_req, res) => {
+    const { id } = datiValidati<typeof parametriId>(res, "params");
+    res.json(await service.togliPreferito(utenteCorrente(res).id, id));
+  });
 
   router.patch(
     "/voci/:id",

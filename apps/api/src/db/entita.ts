@@ -5,6 +5,8 @@ import { ProdottoCatalogo } from "../modules/catalogo/prodotto-catalogo.entity.j
 import { Condivisione } from "../modules/condivisioni/condivisione.entity.js";
 import { Pasto } from "../modules/diario/pasto.entity.js";
 import { Voce } from "../modules/diario/voce.entity.js";
+import { PastoPreferito } from "../modules/pasti-preferiti/pasto-preferito.entity.js";
+import { VocePreferita } from "../modules/pasti-preferiti/voce-preferita.entity.js";
 import { Utente } from "../modules/utenti/utente.entity.js";
 
 /** Every entity of the app, one import per module. */
@@ -17,4 +19,6 @@ export const entita = [
   Porzione,
   UsoAlimento,
   Condivisione,
+  PastoPreferito,
+  VocePreferita,
 ];

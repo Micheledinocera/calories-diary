@@ -49,6 +49,16 @@ function aggiungi(pasto: Pasto, voci: NuovaVoce[]) {
   );
 }
 
+// The API picks the meal like `aggiungi`: a saved snack by id, a main meal by type.
+function aggiungiPreferito(pasto: Pasto, preferito: string) {
+  const spuntino = pasto.tipo === "spuntino" && pasto.id ? pasto.id : undefined;
+  return esegui(() =>
+    diario.aggiungiPreferito(props.giorno, { preferito, tipo: pasto.tipo, pasto: spuntino }),
+  );
+}
+
+const copiaAperta = ref(false);
+
 const aggiungiSpuntino = () =>
   esegui(() => diario.aggiungiPasto(props.giorno, { tipo: "spuntino" }));
 
@@ -111,6 +121,9 @@ const erroreCaricamento = computed(() => (error.value ? normalizzaErrore(error.v
           :totali-giorno="totali"
           :fabbisogno="obiettivi?.fabbisogno ?? null"
           @aggiungi="aggiungi(pasto, $event)"
+          @aggiungi-preferito="aggiungiPreferito(pasto, $event)"
+          @salva-preferito="(nome) => esegui(() => diario.salvaPreferito(pasto.id!, nome))"
+          @togli-preferito="esegui(() => diario.togliPreferito(pasto.id!))"
           @modifica-voce="(id, q) => esegui(() => diario.modificaVoce(id, q))"
           @elimina-voce="(id) => esegui(() => diario.eliminaVoce(id))"
           @elimina="eliminaSpuntino(pasto)"
@@ -128,6 +141,24 @@ const erroreCaricamento = computed(() => (error.value ? normalizzaErrore(error.v
       >
         Aggiungi spuntino
       </UButton>
+      <UButton
+        v-if="modificabile"
+        icon="i-lucide-copy-plus"
+        variant="ghost"
+        color="neutral"
+        size="lg"
+        block
+        :disabled="inCorso"
+        @click="copiaAperta = true"
+      >
+        Copia da un altro giorno
+      </UButton>
+      <ModaleCopiaGiorno
+        v-model:open="copiaAperta"
+        :giorno="giorno"
+        :in-corso="inCorso"
+        @copia="(da) => esegui(() => diario.copiaGiorno(giorno, da))"
+      />
     </template>
 
     <div v-else class="space-y-3">

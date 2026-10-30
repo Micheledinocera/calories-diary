@@ -2,6 +2,9 @@
 tipo: info
 aggiornato: 2026-10-30
 fonti:
+  - raw/compiled/meals/2026-10-30-pasti-preferiti.md
+  - raw/compiled/meals/2026-10-30-decisioni-utente.md
+  - raw/compiled/meals/2026-10-30-modifiche.md
   - raw/compiled/export-rework/2026-10-30-condividi.md
   - raw/compiled/pre-deploy/2026-10-25-tasks.md
   - raw/compiled/pre-deploy/2026-10-25-design.md
@@ -31,6 +34,8 @@ Interfaccia pulita e silenziosa, ispirata a Yazio ma con meno decorazione: card 
 - **Font** Figtree, una sola famiglia; cifre tabellari dove i numeri si allineano.
 - **Tema** chiaro, scuro o come il sistema (predefinito), scelto sul dispositivo dal menu account o dalla pagina Profilo.
 - **Aggiungere un alimento** è l'azione più frequente: foglio dal basso, ricerca con scansione, porzioni come scorciatoie, anteprima prima di confermare.
+- **Navigazione**: su telefono barra fissa in basso con quattro voci, icona e nome intero (entrano anche a 320 px, niente nomi accorciati); dai 640 px tab in alto. Il pulsante account resta nell'header.
+- **Stella dei pasti preferiti**: una sola azione per volta. Il pasto vuoto propone "Aggiungi preferito", quello con alimenti ha la stella fissa, piena se è collegato a un preferito. La conferma per toglierlo è una modale dell'app.
 - Testi in italiano, seconda persona, frasi brevi, niente emoji.
 
 ## Domande aperte

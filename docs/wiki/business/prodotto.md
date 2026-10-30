@@ -2,6 +2,11 @@
 tipo: info
 aggiornato: 2026-10-30
 fonti:
+  - raw/compiled/meals/2026-10-30-obiettivo.md
+  - raw/compiled/meals/2026-10-30-pasti-preferiti.md
+  - raw/compiled/meals/2026-10-30-decisioni-utente.md
+  - raw/compiled/meals/2026-10-30-modifiche.md
+  - raw/compiled/meals/2026-10-30-decisioni-collegamento.md
   - raw/compiled/export-rework/2026-10-30-condividi.md
   - raw/compiled/export-rework/2026-10-30-decisioni-utente.md
   - raw/compiled/first-develop/analisi-iniziale-calorie-tracker.md
@@ -67,6 +72,14 @@ Applicazione **personale** per tracciare ogni giorno calorie e macronutrienti. �
 3. ricerca testuale presso il provider (fase 2);
 4. creazione manuale.
 
+**Pasti preferiti** (in `meals`): composizioni di alimenti salvate per riusarle in altri giorni.
+- Un pasto con alimenti ha una **stella**: vuota lo salva tra i preferiti con un nome, piena dice che è identico a un preferito. Un pasto vuoto propone invece "Aggiungi preferito": un preferito si aggiunge **solo a un pasto vuoto**.
+- Il **collegamento** tra pasto e preferito si perde quando cambiano le voci del pasto, o quando l'autore cambia quelle del preferito. Cambiare solo il nome del preferito non lo toglie. Un preferito aggiunto saltando alimenti archiviati non collega il pasto, perché non è identico.
+- Toccare la stella piena elimina il preferito se è proprio, dopo una conferma: tutti i pasti collegati perdono il collegamento e il diario non cambia. Su un preferito di un altro utente toglie solo il collegamento di quel pasto.
+- Schermata **Pasti preferiti**, come Alimenti: ci sono i pasti di tutti gli utenti, filtrati di base su "I miei pasti". Tutti li vedono, con lo username dell'autore, e li aggiungono al diario; solo l'autore li modifica o li elimina.
+
+**Copia di una giornata** (in `meals`): si valorizza una giornata con i pasti di un'altra del proprio diario. Le voci si **aggiungono** a quelle presenti: ogni pasto principale riceve quelle del pasto corrispondente, gli spuntini vanno in fondo. Non si cancella nulla.
+
 **Porzioni**: porzioni personalizzate per alimento (es. "1 vasetto = 125 g"); se il provider fornisce la porzione, viene proposta come predefinita.
 
 **Export di condivisione** (in `export`): si sceglie un intervallo di giorni, **al massimo una settimana**, e si ottiene un file **markdown**, facile da mandare in giro o da convertire in PDF. Contiene gli obiettivi (fabbisogno e ripartizione dei macro), un riepilogo dei giorni e, per ogni giorno, i totali di consumo rispetto agli obiettivi e il dettaglio di cosa si è mangiato per pasto, con kcal e macro di ogni alimento. Lo genera il front-end dai dati del diario.
@@ -97,3 +110,4 @@ Ordine delle feature dell'MVP: `first-develop` (scaffolding), `auth`, `food-cata
 
 - La UI dell'MVP è provvisoria: flussi ed esperienza si validano con un giro di design verso la fine dell'MVP.
 - I **non obiettivi** escludono la condivisione tra utenti ("ognuno vede solo i propri dati"), mentre il link pubblico mostra i dati di un utente a chiunque abbia il link: da chiarire se riformulare il non obiettivo (ad esempio escludendo solo le interazioni tra utenti dentro l'app).
+- Lo stesso non obiettivo si scontra con i **pasti preferiti** (`meals`), visibili a tutti gli utenti con lo username dell'autore: va riformulato insieme al punto precedente.

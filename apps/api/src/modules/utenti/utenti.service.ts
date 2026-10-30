@@ -3,6 +3,7 @@ import type { ModificaUtente, Ruolo, Utente as UtenteDto } from "@calories-diary
 import { ErroreApp, nonTrovato } from "../../lib/errori.js";
 import { hashPassword, verificaPassword } from "../../lib/password.js";
 import { Pasto } from "../diario/pasto.entity.js";
+import { PastoPreferito } from "../pasti-preferiti/pasto-preferito.entity.js";
 import { chiaveUsername, Utente } from "./utente.entity.js";
 
 export const versoDtoUtente = ({ id, username, ruolo }: Utente): UtenteDto => ({
@@ -102,8 +103,9 @@ export function creaUtentiService(em: EntityManager) {
       await em.transactional(async (tem) => {
         // Meals first (entries go in cascade): then any entry left is another user's.
         await tem.nativeDelete(Pasto, { utente: id });
+        await tem.nativeDelete(PastoPreferito, { autore: id });
         await tem.execute(
-          `delete from "alimento" as "a" where "a"."autore_id" = ? and not exists (select 1 from "voce" as "v" where "v"."alimento_id" = "a"."id")`,
+          `delete from "alimento" as "a" where "a"."autore_id" = ? and not exists (select 1 from "voce" as "v" where "v"."alimento_id" = "a"."id") and not exists (select 1 from "voce_preferita" as "vp" where "vp"."alimento_id" = "a"."id")`,
           [id],
         );
         await tem.nativeDelete(Utente, { id });

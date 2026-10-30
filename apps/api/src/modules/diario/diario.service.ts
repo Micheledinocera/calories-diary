@@ -3,6 +3,7 @@ import type { EntityManager } from "@mikro-orm/postgresql";
 import {
   tipiPasto,
   tipiPastoPrincipali,
+  type AggiuntaPreferito,
   type Giornata,
   type NuovaVoce,
   type Pasto as PastoDto,
@@ -10,49 +11,15 @@ import {
   type TipoPasto,
   type Valori,
   type Voce as VoceDto,
-  type VoceSuggerita,
 } from "@calories-diary/shared";
 import { ErroreApp, nonTrovato } from "../../lib/errori.js";
 import { Alimento } from "../alimenti/alimento.entity.js";
 import { usoDi, usoPer } from "../alimenti/uso.js";
+import { PastoPreferito } from "../pasti-preferiti/pasto-preferito.entity.js";
+import { VocePreferita } from "../pasti-preferiti/voce-preferita.entity.js";
 import { Pasto } from "./pasto.entity.js";
+import { archiviatoPer, somma, valoriVoce, versoDtoVoce, zero } from "./valori.js";
 import { Voce } from "./voce.entity.js";
-
-const zero = (): Valori => ({ kcal: 0, proteine: 0, carboidrati: 0, grassi: 0 });
-
-const somma = (valori: Valori[]): Valori =>
-  valori.reduce(
-    (tot, v) => ({
-      kcal: tot.kcal + v.kcal,
-      proteine: tot.proteine + v.proteine,
-      carboidrati: tot.carboidrati + v.carboidrati,
-      grassi: tot.grassi + v.grassi,
-    }),
-    zero(),
-  );
-
-/** `valore_per_100 × quantità / 100`, from the food's current values. Rounded only when shown. */
-const valoriVoce = (a: Alimento, quantita: number): Valori => ({
-  kcal: (a.kcal * quantita) / 100,
-  proteine: (a.proteine * quantita) / 100,
-  carboidrati: (a.carboidrati * quantita) / 100,
-  grassi: (a.grassi * quantita) / 100,
-});
-
-/** Archived for `utenteId`, the only one who sees the entry. `a.usi` must be populated. */
-const archiviatoPer = (a: Alimento, utenteId: string) => usoDi(a, utenteId)?.archiviato ?? false;
-
-const versoDtoVoce = (a: Alimento, quantita: number, utenteId: string): VoceSuggerita => ({
-  alimento: {
-    id: a.id,
-    nome: a.nome,
-    marca: a.marca ?? null,
-    unitaBase: a.unitaBase,
-    archiviato: archiviatoPer(a, utenteId),
-  },
-  quantita,
-  valori: valoriVoce(a, quantita),
-});
 
 const principale = (tipo: TipoPasto) => tipo !== "spuntino";
 
@@ -74,7 +41,10 @@ export function creaDiarioService(em: EntityManager) {
     em.find(
       Pasto,
       { utente: utenteId, giorno },
-      { populate: ["voci.alimento.usi"], orderBy: { ordine: "asc", creatoIl: "asc" } },
+      {
+        populate: ["voci.alimento.usi", "preferito"],
+        orderBy: { ordine: "asc", creatoIl: "asc" },
+      },
     );
 
   /** The day as the client shows it: main meals not yet saved are added empty, in their place. */
@@ -90,12 +60,26 @@ export function creaDiarioService(em: EntityManager) {
         voci,
         totali: somma(voci.map((v) => v.valori)),
         suggerite: [],
+        preferito: pasto.preferito
+          ? {
+              id: pasto.preferito.id,
+              nome: pasto.preferito.nome,
+              mio: pasto.preferito.autore.id === utenteId,
+            }
+          : null,
       };
     });
 
     for (const tipo of tipiPastoPrincipali) {
       if (pasti.some((p) => p.tipo === tipo)) continue;
-      const vuoto: PastoDto = { id: null, tipo, voci: [], totali: zero(), suggerite: [] };
+      const vuoto: PastoDto = {
+        id: null,
+        tipo,
+        voci: [],
+        totali: zero(),
+        suggerite: [],
+        preferito: null,
+      };
       const dopo = pasti.findIndex((p) => principale(p.tipo) && rango(p.tipo) > rango(tipo));
       pasti.splice(dopo === -1 ? pasti.length : dopo, 0, vuoto);
     }
@@ -115,6 +99,18 @@ export function creaDiarioService(em: EntityManager) {
     return { giorno, pasti, totali: somma(pasti.map((p) => p.totali)) };
   }
 
+  /** The saved meals of the day, with the missing main meals created, and the next free position. */
+  async function pastiConPrincipali(utenteId: string, giorno: string) {
+    const pasti: Pasto[] = await pastiDelGiorno(utenteId, giorno);
+    let ordine = pasti.reduce((max, p) => Math.max(max, p.ordine + 1), 0);
+    for (const tipo of tipiPastoPrincipali) {
+      if (!pasti.some((p) => p.tipo === tipo)) {
+        pasti.push(em.create(Pasto, { utente: utenteId, giorno, tipo, ordine: ordine++ }));
+      }
+    }
+    return { pasti, ordine };
+  }
+
   /** Foods of the shared pool, by id, with their uses: a missing one is "not found". */
   async function alimentiDaId(voci: NuovaVoce[]) {
     const ids = [...new Set(voci.map((v) => v.alimento))];
@@ -124,10 +120,14 @@ export function creaDiarioService(em: EntityManager) {
     return new Map(alimenti.map((a) => [a.id, a]));
   }
 
-  /** Adds the entries and updates "Recenti" and "Più usati" of their foods (flush is up to the caller). */
+  /**
+   * Adds the entries and updates "Recenti" and "Più usati" of their foods (flush is up to the
+   * caller). The meal changes, so it no longer matches its favorite meal.
+   */
   async function aggiungiVoci(utenteId: string, pasto: Pasto, voci: NuovaVoce[]) {
     const alimenti = await alimentiDaId(voci);
     const adesso = new Date();
+    pasto.preferito = null;
     voci.forEach(({ alimento: id, quantita }, i) => {
       const alimento = alimenti.get(id)!;
       // Entries are listed by creation time: 1 ms apart, those added together keep their order.
@@ -158,7 +158,7 @@ export function creaDiarioService(em: EntityManager) {
     const pasto = await em.findOne(
       Pasto,
       { id, utente: utenteId },
-      { populate: ["voci.alimento.usi"] },
+      { populate: ["voci.alimento.usi", "preferito"] },
     );
     // Another user's meal is "not found", to avoid revealing that it exists.
     if (!pasto) throw pastoNonTrovato();
@@ -207,18 +207,130 @@ export function creaDiarioService(em: EntityManager) {
       tipo: TipoPasto,
       voci: NuovaVoce[],
     ): Promise<Giornata> {
-      const pasti: Pasto[] = await pastiDelGiorno(utenteId, giorno);
-      let ordine = pasti.reduce((max, p) => Math.max(max, p.ordine + 1), 0);
-      for (const t of tipiPastoPrincipali) {
-        if (!pasti.some((p) => p.tipo === t)) {
-          pasti.push(em.create(Pasto, { utente: utenteId, giorno, tipo: t, ordine: ordine++ }));
-        }
-      }
+      const { pasti, ordine } = await pastiConPrincipali(utenteId, giorno);
       const pasto =
         tipo === "spuntino"
           ? em.create(Pasto, { utente: utenteId, giorno, tipo, ordine })
           : pasti.find((p) => p.tipo === tipo)!;
       await aggiungiVoci(utenteId, pasto, voci);
+      await salva();
+      em.clear();
+      return giornata(utenteId, giorno);
+    },
+
+    /**
+     * Fills an empty meal, a saved snack (`pasto`) or the meal `tipo`, with a favorite meal, also
+     * another user's. Foods archived by the user are left out, as in "Come ieri": the meal is then
+     * not identical to the favorite, so it stays unlinked.
+     */
+    async aggiungiPreferito(
+      utenteId: string,
+      giorno: string,
+      { preferito, tipo, pasto: pastoId }: AggiuntaPreferito,
+    ): Promise<Giornata> {
+      const salvato = await em.findOne(
+        PastoPreferito,
+        { id: preferito },
+        { populate: ["voci.alimento.usi"] },
+      );
+      if (!salvato) throw nonTrovato("Pasto preferito non trovato");
+      const voci = salvato.voci
+        .getItems()
+        .filter((v) => !archiviatoPer(v.alimento, utenteId))
+        .map((v) => ({ alimento: v.alimento.id, quantita: v.quantita }));
+      if (!voci.length) {
+        throw new ErroreApp(409, "PREFERITO_VUOTO", "Hai archiviato tutti gli alimenti del pasto");
+      }
+
+      let pasto: Pasto;
+      if (pastoId) {
+        pasto = await caricaPasto(utenteId, pastoId);
+      } else {
+        const { pasti, ordine } = await pastiConPrincipali(utenteId, giorno);
+        pasto =
+          tipo === "spuntino"
+            ? em.create(Pasto, { utente: utenteId, giorno, tipo, ordine })
+            : pasti.find((p) => p.tipo === tipo)!;
+      }
+      if (pasto.voci.length) {
+        throw new ErroreApp(
+          409,
+          "PASTO_NON_VUOTO",
+          "Un pasto preferito si aggiunge solo a un pasto vuoto",
+        );
+      }
+      await aggiungiVoci(utenteId, pasto, voci);
+      if (voci.length === salvato.voci.length) pasto.preferito = salvato;
+      await salva();
+      em.clear();
+      return giornata(utenteId, pasto.giorno);
+    },
+
+    /** Saves the meal as a new favorite meal and links them. Already linked: nothing to do. */
+    async salvaPreferito(utenteId: string, id: string, nome: string): Promise<Giornata> {
+      const pasto = await caricaPasto(utenteId, id);
+      if (!pasto.voci.length) {
+        throw new ErroreApp(409, "PASTO_VUOTO", "Il pasto non ha alimenti da salvare");
+      }
+      if (!pasto.preferito) {
+        const preferito = em.create(PastoPreferito, { autore: utenteId, nome });
+        pasto.voci.getItems().forEach(({ alimento, quantita }, ordine) => {
+          em.create(VocePreferita, { pastoPreferito: preferito, alimento, quantita, ordine });
+        });
+        pasto.preferito = preferito;
+        await em.flush();
+        em.clear();
+      }
+      return giornata(utenteId, pasto.giorno);
+    },
+
+    /**
+     * The star off. The user's own favorite meal is deleted (the meals linked to it just lose the
+     * link); another user's stays, so only this meal is unlinked.
+     */
+    async togliPreferito(utenteId: string, id: string): Promise<Giornata> {
+      const pasto = await caricaPasto(utenteId, id);
+      const { preferito } = pasto;
+      if (preferito) {
+        pasto.preferito = null;
+        if (preferito.autore.id === utenteId) em.remove(preferito);
+        await em.flush();
+        em.clear();
+      }
+      return giornata(utenteId, pasto.giorno);
+    },
+
+    /**
+     * Adds the entries of the day `da` to `giorno`, keeping what is already there: each main meal
+     * goes into the same meal, each snack becomes a new snack at the end. Foods archived by the
+     * user are left out, as in "Come ieri".
+     */
+    async copiaGiorno(utenteId: string, giorno: string, da: string): Promise<Giornata> {
+      if (da === giorno) {
+        throw new ErroreApp(400, "STESSO_GIORNO", "Scegli un giorno diverso da questo");
+      }
+      const origine = (await pastiDelGiorno(utenteId, da))
+        .map((pasto) => ({
+          tipo: pasto.tipo,
+          voci: pasto.voci
+            .getItems()
+            .filter((v) => !archiviatoPer(v.alimento, utenteId))
+            .map((v) => ({ alimento: v.alimento.id, quantita: v.quantita })),
+        }))
+        .filter(({ voci }) => voci.length);
+      if (!origine.length) {
+        throw new ErroreApp(409, "GIORNO_VUOTO", "Il giorno scelto non ha alimenti da copiare");
+      }
+
+      const destinazione = await pastiConPrincipali(utenteId, giorno);
+      let ordine = destinazione.ordine;
+      for (const { tipo, voci } of origine) {
+        const pasto =
+          tipo === "spuntino"
+            ? em.create(Pasto, { utente: utenteId, giorno, tipo, ordine: ordine++ })
+            : destinazione.pasti.find((p) => p.tipo === tipo)!;
+        await aggiungiVoci(utenteId, pasto, voci);
+      }
       await salva();
       em.clear();
       return giornata(utenteId, giorno);
@@ -270,6 +382,7 @@ export function creaDiarioService(em: EntityManager) {
 
     async modificaVoce(utenteId: string, id: string, quantita: number): Promise<Giornata> {
       const voce = await caricaVoce(utenteId, id);
+      if (voce.quantita !== quantita) voce.pasto.preferito = null;
       voce.quantita = quantita;
       await em.flush();
       em.clear();
@@ -279,6 +392,7 @@ export function creaDiarioService(em: EntityManager) {
     async eliminaVoce(utenteId: string, id: string): Promise<Giornata> {
       const voce = await caricaVoce(utenteId, id);
       togliUtilizzo(utenteId, voce.alimento);
+      voce.pasto.preferito = null;
       em.remove(voce);
       await em.flush();
       em.clear();

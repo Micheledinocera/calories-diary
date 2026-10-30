@@ -53,6 +53,8 @@ export const pastoSchema = z.object({
   totali: valoriSchema,
   /** Only for an empty main meal: what the same meal had the previous day. */
   suggerite: z.array(voceSuggeritaSchema),
+  /** The favorite meal this meal is identical to: any change to the entries of either unlinks it. */
+  preferito: z.object({ id: z.uuid(), nome: z.string(), mio: z.boolean() }).nullable(),
 });
 
 export type Pasto = z.infer<typeof pastoSchema>;

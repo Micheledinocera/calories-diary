@@ -10,6 +10,9 @@ export const usoDi = (alimento: Alimento, utenteId: string): UsoAlimento | undef
 export const usoPer = (em: EntityManager, alimento: Alimento, utenteId: string): UsoAlimento =>
   usoDi(alimento, utenteId) ?? em.create(UsoAlimento, { utente: utenteId, alimento });
 
-/** Some diary, of any user, uses the food: it can no longer be deleted. */
+/**
+ * Some diary or favorite meal, of any user, uses the food: it can no longer be deleted.
+ * `alimento.usi` and `alimento.vociPreferite` must be populated.
+ */
 export const inUso = (alimento: Alimento): boolean =>
-  alimento.usi.getItems().some((uso) => uso.utilizzi > 0);
+  alimento.vociPreferite.length > 0 || alimento.usi.getItems().some((uso) => uso.utilizzi > 0);

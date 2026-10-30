@@ -44,7 +44,7 @@ export const alimentoSchema = z.object({
   archiviato: z.boolean(),
   ultimoUso: z.iso.datetime().nullable(),
   utilizzi: z.int().nonnegative(),
-  /** Only its author can delete a food, and only while no diary uses it. */
+  /** Only its author can delete a food, and only while no diary or favorite meal uses it. */
   eliminabile: z.boolean(),
   /** Only KCAL_INCOERENTI can apply: the four values are always present. */
   avvisi: z.array(avvisoCatalogoSchema),

@@ -1,4 +1,5 @@
 import type {
+  AggiuntaPreferito,
   Giornata,
   NuovaVoce,
   NuovoPasto,
@@ -19,6 +20,18 @@ export function useDiario() {
       api<Giornata>(`/diario/${giorno}/pasti`, { method: "POST", body: dati, ...scrivi }),
     eliminaPasto: (id: string) =>
       api<Giornata>(`/diario/pasti/${id}`, { method: "DELETE", ...scrivi }),
+    aggiungiPreferito: (giorno: string, dati: AggiuntaPreferito) =>
+      api<Giornata>(`/diario/${giorno}/preferiti`, { method: "POST", body: dati, ...scrivi }),
+    salvaPreferito: (pastoId: string, nome: string) =>
+      api<Giornata>(`/diario/pasti/${pastoId}/preferito`, {
+        method: "POST",
+        body: { nome },
+        ...scrivi,
+      }),
+    togliPreferito: (pastoId: string) =>
+      api<Giornata>(`/diario/pasti/${pastoId}/preferito`, { method: "DELETE", ...scrivi }),
+    copiaGiorno: (giorno: string, da: string) =>
+      api<Giornata>(`/diario/${giorno}/copia`, { method: "POST", body: { da }, ...scrivi }),
     ordina: (giorno: string, pasti: string[]) =>
       api<Giornata>(`/diario/${giorno}/ordine`, { method: "PUT", body: { pasti }, ...scrivi }),
     aggiungiVoce: (pastoId: string, voce: NuovaVoce) =>
