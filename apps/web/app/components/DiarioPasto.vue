@@ -20,19 +20,28 @@ const emit = defineEmits<{
   togliPreferito: [];
   modificaVoce: [id: string, quantita: number];
   eliminaVoce: [id: string];
+  /** Removes every entry; the meal stays in the day. */
+  svuota: [];
   elimina: [];
 }>();
 
 const scelta = ref(false);
 const sceltaPreferito = ref(false);
 const salvaPreferito = ref(false);
-const togliPreferito = ref(false);
+const conferma = useConferma();
 
 /** The star: saves the meal; on, it deletes the user's own favorite (after asking) or unlinks. */
-function tocca() {
-  if (!props.pasto.preferito) salvaPreferito.value = true;
-  else if (props.pasto.preferito.mio) togliPreferito.value = true;
-  else emit("togliPreferito");
+async function tocca() {
+  const { preferito } = props.pasto;
+  if (!preferito) salvaPreferito.value = true;
+  else if (!preferito.mio) emit("togliPreferito");
+  else if (
+    await conferma({
+      titolo: "Togliere dai pasti preferiti?",
+      descrizione: `"${preferito.nome}" viene eliminato per tutti. Il diario non cambia.`,
+    })
+  )
+    emit("togliPreferito");
 }
 
 // Quantity of an entry, edited in a modal.
@@ -99,6 +108,16 @@ const spuntino = computed(() => props.pasto.tipo === "spuntino");
         >
           {{ formattaValore(Math.round(pasto.totali.kcal)) }} kcal
         </span>
+        <UButton
+          v-if="modificabile && pasto.voci.length"
+          icon="i-lucide-brush-cleaning"
+          variant="ghost"
+          color="neutral"
+          size="sm"
+          :aria-label="`Svuota ${nomiPasti[pasto.tipo].toLowerCase()}`"
+          :disabled="inCorso"
+          @click="emit('svuota')"
+        />
         <UButton
           v-if="modificabile && pasto.voci.length"
           variant="ghost"
@@ -236,26 +255,12 @@ const spuntino = computed(() => props.pasto.tipo === "spuntino");
       :pasto="pasto"
       @salva="emit('salvaPreferito', $event)"
     />
-    <ModaleTogliPreferito
-      v-model:open="togliPreferito"
-      :nome="pasto.preferito?.nome ?? ''"
-      @conferma="emit('togliPreferito')"
-    />
 
     <UModal v-model:open="modificaAperta" :title="inModifica?.alimento.nome">
       <template #body>
         <form v-if="inModifica" class="space-y-4" @submit.prevent="salvaQuantita">
           <UFormField :label="`Quantità (${inModifica.alimento.unitaBase})`">
-            <UInputNumber
-              v-model="quantita"
-              :min="0"
-              :step="10"
-              :step-snapping="false"
-              :format-options="{ maximumFractionDigits: 1 }"
-              locale="it-IT"
-              class="w-full"
-              autofocus
-            />
+            <InputDecimale v-model="quantita" :passo="10" class="w-full" autofocus />
           </UFormField>
           <div class="flex gap-2">
             <UButton

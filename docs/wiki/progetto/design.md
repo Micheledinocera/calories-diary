@@ -1,7 +1,9 @@
 ---
 tipo: info
-aggiornato: 2026-10-30
+aggiornato: 2026-11-04
 fonti:
+  - raw/compiled/other-fixes/2026-11-04-obiettivo.md
+  - raw/compiled/other-fixes/2026-11-04-implementazione.md
   - raw/compiled/meals/2026-10-30-pasti-preferiti.md
   - raw/compiled/meals/2026-10-30-decisioni-utente.md
   - raw/compiled/meals/2026-10-30-modifiche.md
@@ -35,7 +37,9 @@ Interfaccia pulita e silenziosa, ispirata a Yazio ma con meno decorazione: card 
 - **Tema** chiaro, scuro o come il sistema (predefinito), scelto sul dispositivo dal menu account o dalla pagina Profilo.
 - **Aggiungere un alimento** è l'azione più frequente: foglio dal basso, ricerca con scansione, porzioni come scorciatoie, anteprima prima di confermare.
 - **Navigazione**: su telefono barra fissa in basso con quattro voci, icona e nome intero (entrano anche a 320 px, niente nomi accorciati); dai 640 px tab in alto. Il pulsante account resta nell'header.
-- **Stella dei pasti preferiti**: una sola azione per volta. Il pasto vuoto propone "Aggiungi preferito", quello con alimenti ha la stella fissa, piena se è collegato a un preferito. La conferma per toglierlo è una modale dell'app.
+- **Stella dei pasti preferiti**: una sola azione per volta. Il pasto vuoto propone "Aggiungi preferito", quello con alimenti ha la stella fissa, piena se è collegato a un preferito. Accanto, la scopa per svuotare il pasto.
+- **Conferme sempre con la modale dell'app**, mai con il `confirm()` del browser: titolo, una frase su cosa succede, "Annulla" e il pulsante rosso dell'azione ("Elimina", "Svuota", "Revoca"…).
+- **Campi numerici tutti uguali**: virgola o punto come decimale, pulsanti − e + solo dove c'è un passo naturale (quantità, fabbisogno).
 - Testi in italiano, seconda persona, frasi brevi, niente emoji.
 
 ## Domande aperte

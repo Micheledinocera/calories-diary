@@ -32,8 +32,14 @@ function salva(dati: NuovoPastoPreferito) {
   });
 }
 
-function eliminaPasto() {
-  if (!confirm("Eliminare il pasto preferito? Il diario non cambia.")) return;
+const conferma = useConferma();
+
+async function eliminaPasto() {
+  const ok = await conferma({
+    titolo: "Eliminare il pasto preferito?",
+    descrizione: "Il diario non cambia.",
+  });
+  if (!ok) return;
   return esegui(async () => {
     await elimina(id);
     await navigateTo("/pasti-preferiti", { replace: true });

@@ -1,7 +1,9 @@
 ---
 tipo: info
-aggiornato: 2026-10-30
+aggiornato: 2026-11-04
 fonti:
+  - raw/compiled/other-fixes/2026-11-04-obiettivo.md
+  - raw/compiled/other-fixes/2026-11-04-implementazione.md
   - raw/compiled/meals/2026-10-30-decisioni-utente.md
   - raw/compiled/meals/2026-10-30-modifiche.md
   - raw/compiled/meals/2026-10-30-decisioni-collegamento.md
@@ -41,7 +43,7 @@ Le voci si elencano per `creatoIl`: quelle aggiunte nella stessa richiesta ricev
 
 **Niente valori salvati**: kcal e macro di voci, pasti e giorni si calcolano a ogni lettura dai valori attuali dell'alimento (`valore_per_100 × quantità / 100`), anche per i giorni passati.
 
-Aggiungere una voce incrementa `utilizzi` e aggiorna `ultimoUso` nell'[uso dell'alimento](./alimenti.md#entità-usoalimento) dell'utente (la riga si crea al primo uso); eliminarla (anche con lo spuntino che la contiene) decrementa `utilizzi`, così un alimento non più in nessun diario torna eliminabile dall'autore.
+Aggiungere una voce incrementa `utilizzi` e aggiorna `ultimoUso` nell'[uso dell'alimento](./alimenti.md#entità-usoalimento) dell'utente (la riga si crea al primo uso); eliminarla (anche svuotando il pasto o con lo spuntino che la contiene) decrementa `utilizzi`, così un alimento non più in nessun diario torna eliminabile dall'autore.
 
 ## Rotte
 
@@ -56,6 +58,7 @@ Tutte dietro `richiediAutenticazione`, sempre sul diario dell'utente corrente. O
 | `POST /diario/:giorno/copia` | Body `{ da }`: aggiunge al giorno le voci del giorno `da`, senza togliere quelle presenti. Ogni principale va nello stesso pasto, ogni spuntino diventa un nuovo spuntino in fondo. Alimenti archiviati dall'utente esclusi; il collegamento ai preferiti non si copia. 400 `STESSO_GIORNO`, 409 `GIORNO_VUOTO` |
 | `PUT /diario/:giorno/ordine` | Body `{ pasti: id[] }`: tutti i pasti salvati del giorno nel nuovo ordine. 400 `ORDINE_NON_VALIDO` se ne manca uno o se colazione, pranzo e cena cambiano ordine tra loro |
 | `DELETE /diario/pasti/:id` | Elimina uno spuntino con le sue voci; 409 `PASTO_NON_ELIMINABILE` per un pasto principale |
+| `DELETE /diario/pasti/:id/voci` | Svuota il pasto: toglie tutte le voci, il pasto resta nel giorno (anche uno spuntino) e perde il collegamento al preferito, che non viene eliminato |
 | `POST /diario/pasti/:id/voci` | Body `{ alimento, quantita }`: aggiunge una voce a un pasto salvato (usata per gli spuntini) |
 | `POST /diario/pasti/:id/preferito` | Body `{ nome }`: salva il pasto come pasto preferito e li collega. 409 `PASTO_VUOTO` senza voci |
 | `DELETE /diario/pasti/:id/preferito` | Stella spenta: elimina il preferito se è dell'utente, altrimenti toglie solo il collegamento di questo pasto |
@@ -69,4 +72,4 @@ Errori propri: 404 `NON_TROVATO` per pasti o voci inesistenti o di un altro uten
 `Pasto.preferito` vuol dire "questo pasto è identico a quel preferito"; nel DTO è `{ id, nome, mio }` oppure `null`.
 
 - **Si collega** salvando il pasto come preferito, o aggiungendo un preferito a un pasto vuoto. Un preferito si aggiunge solo a un pasto vuoto: altrimenti 409 `PASTO_NON_VUOTO`. Gli alimenti archiviati dall'utente si saltano, come in "Come ieri": in quel caso il pasto non è identico e resta scollegato; se non resta nulla, 409 `PREFERITO_VUOTO`.
-- **Si scollega** quando cambiano le voci: aggiunta, rimozione, quantità diversa (`aggiungiVoci`, `modificaVoce`, `eliminaVoce`), oppure quando l'autore cambia le voci del preferito. Salvare la stessa quantità o rinominare il preferito non scollega.
+- **Si scollega** quando cambiano le voci: aggiunta, rimozione, quantità diversa, pasto svuotato (`aggiungiVoci`, `modificaVoce`, `eliminaVoce`, `svuotaPasto`), oppure quando l'autore cambia le voci del preferito. Salvare la stessa quantità o rinominare il preferito non scollega.

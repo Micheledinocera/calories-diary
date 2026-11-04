@@ -62,9 +62,28 @@ const copiaAperta = ref(false);
 const aggiungiSpuntino = () =>
   esegui(() => diario.aggiungiPasto(props.giorno, { tipo: "spuntino" }));
 
-function eliminaSpuntino(pasto: Pasto) {
-  if (pasto.voci.length && !confirm("Eliminare lo spuntino e i suoi alimenti?")) return;
+const conferma = useConferma();
+
+async function eliminaSpuntino(pasto: Pasto) {
+  if (
+    pasto.voci.length &&
+    !(await conferma({
+      titolo: "Eliminare lo spuntino?",
+      descrizione: "Lo spuntino viene tolto dal giorno insieme ai suoi alimenti.",
+    }))
+  )
+    return;
   return esegui(() => diario.eliminaPasto(pasto.id!));
+}
+
+async function svuota(pasto: Pasto) {
+  const ok = await conferma({
+    titolo: `Svuotare ${nomiPasti[pasto.tipo].toLowerCase()}?`,
+    descrizione: "Tutti i suoi alimenti vengono tolti; il pasto resta nel giorno.",
+    azione: "Svuota",
+    icona: "i-lucide-brush-cleaning",
+  });
+  if (ok) return esegui(() => diario.svuotaPasto(pasto.id!));
 }
 
 // Snacks are dragged by their handle and can go anywhere; main meals stay in order.
@@ -126,6 +145,7 @@ const erroreCaricamento = computed(() => (error.value ? normalizzaErrore(error.v
           @togli-preferito="esegui(() => diario.togliPreferito(pasto.id!))"
           @modifica-voce="(id, q) => esegui(() => diario.modificaVoce(id, q))"
           @elimina-voce="(id) => esegui(() => diario.eliminaVoce(id))"
+          @svuota="svuota(pasto)"
           @elimina="eliminaSpuntino(pasto)"
         />
       </div>
