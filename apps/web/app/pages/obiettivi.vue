@@ -78,11 +78,10 @@ const erroreCaricamento = computed(() => (error.value ? normalizzaErrore(error.v
           name="fabbisogno"
           description="In kcal: lo confronti ogni giorno con quanto hai mangiato."
         >
-          <UInputNumber
+          <InputDecimale
             :model-value="stato.fabbisogno ?? undefined"
-            :min="0"
-            :step="50"
-            locale="it-IT"
+            :decimali="0"
+            :passo="50"
             size="xl"
             class="w-full"
             placeholder="es. 2000"
@@ -107,16 +106,12 @@ const erroreCaricamento = computed(() => (error.value ? normalizzaErrore(error.v
                   {{ m.etichetta }}
                 </span>
               </template>
-              <UInputNumber
+              <InputDecimale
                 v-model="stato.ripartizione[m.chiave]"
-                :min="0"
+                :decimali="0"
                 :max="100"
-                locale="it-IT"
-                :format-options="{ maximumFractionDigits: 0 }"
                 size="lg"
                 class="w-full"
-                :increment="false"
-                :decrement="false"
               />
             </UFormField>
           </div>

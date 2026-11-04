@@ -1,6 +1,7 @@
 import type { ProdottoCatalogo } from "@calories-diary/shared";
 import { describe, expect, it } from "vitest";
 import {
+  arrotonda,
   formattaDecimale,
   formattaValore,
   leggiDecimale,
@@ -48,6 +49,13 @@ describe("statoDaProdotto", () => {
   });
 });
 
+describe("arrotonda", () => {
+  it("toglie il rumore dei float", () => {
+    expect(arrotonda(0.1 + 0.2)).toBe(0.3);
+    expect(arrotonda(12.34, 0)).toBe(12);
+  });
+});
+
 describe("leggiDecimale", () => {
   it("accetta virgola e punto, anche a metà digitazione", () => {
     expect(leggiDecimale("47,5")).toBe(47.5);
@@ -58,6 +66,12 @@ describe("leggiDecimale", () => {
 
   it("tiene al massimo tre decimali", () => {
     expect(leggiDecimale("1,23456")).toBe(1.235);
+  });
+
+  it("con zero decimali arrotonda all'intero: il punto non separa le migliaia", () => {
+    expect(leggiDecimale("2.000", 0)).toBe(2);
+    expect(leggiDecimale("1,5", 0)).toBe(2);
+    expect(leggiDecimale("1800", 0)).toBe(1800);
   });
 
   it("lascia vuoto ciò che non è un numero", () => {

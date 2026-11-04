@@ -70,20 +70,36 @@ const formatoNumero = new Intl.NumberFormat("it-IT", { maximumFractionDigits: 1 
 /** Rounding only when shown: stored values keep their precision. */
 export const formattaValore = (v: number) => formatoNumero.format(v);
 
-// Same precision as the database (numeric(10,3)); no grouping, the text is edited by hand.
-const formatoDecimale = new Intl.NumberFormat("it-IT", {
-  maximumFractionDigits: 3,
-  useGrouping: false,
-});
+// Default precision is the database's (numeric(10,3)); no grouping, the text is edited by hand.
+const formatiDecimali = new Map<number, Intl.NumberFormat>();
 
-export const formattaDecimale = (v: number | undefined) =>
-  v === undefined ? "" : formatoDecimale.format(v);
+export function formattaDecimale(v: number | undefined, decimali = 3) {
+  if (v === undefined) return "";
+  let formato = formatiDecimali.get(decimali);
+  if (!formato) {
+    formato = new Intl.NumberFormat("it-IT", {
+      maximumFractionDigits: decimali,
+      useGrouping: false,
+    });
+    formatiDecimali.set(decimali, formato);
+  }
+  return formato.format(v);
+}
 
-/** Number typed in a form, with comma or dot; `undefined` if it is empty or not a number. */
-export function leggiDecimale(testo: string): number | undefined {
+/** Rounds to `decimali` digits, without the float noise of `0.1 + 0.2`. */
+export function arrotonda(v: number, decimali = 3) {
+  const fattore = 10 ** decimali;
+  return Math.round(v * fattore) / fattore;
+}
+
+/**
+ * Number typed in a form, with comma or dot as decimal separator (never as thousands separator),
+ * rounded to `decimali` digits; `undefined` if it is empty or not a number.
+ */
+export function leggiDecimale(testo: string, decimali = 3): number | undefined {
   const numero = testo.trim().replace(",", ".");
   if (!/^(\d+\.?\d*|\.\d+)$/.test(numero)) return undefined;
-  return Math.round(Number(numero) * 1000) / 1000;
+  return arrotonda(Number(numero), decimali);
 }
 
 export const messaggiAvvisi: Record<string, string> = {

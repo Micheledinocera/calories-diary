@@ -180,13 +180,9 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
         </div>
 
         <UFormField :label="`Quantità (${scelto.unitaBase})`">
-          <UInputNumber
+          <InputDecimale
             v-model="quantita"
-            :min="0"
-            :step="10"
-            :step-snapping="false"
-            :format-options="{ maximumFractionDigits: 1 }"
-            locale="it-IT"
+            :passo="10"
             size="xl"
             class="w-full"
             :ui="{ base: 'text-center text-xl font-bold tabular-nums' }"
