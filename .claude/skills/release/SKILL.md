@@ -39,7 +39,8 @@ Check `git branch --show-current`:
 4. **Up to date**: `git fetch origin --tags`, then local `develop` and `main` must match `origin/develop` and `origin/main` (fast-forward them if they are only behind; stop if they diverged).
 5. **Nothing to publish**: with `<last>` = `git describe --tags --abbrev=0 origin/main`, `git log --no-merges --oneline <last>..<base>` must not be empty.
 6. **No other release open**: no `release/*` or `hotfix/*` branch, local or remote, other than the current one.
-7. **CI green** (release only): CI does not run on `develop`, only on the PRs. Every PR merged in `<last>..origin/develop` passed its checks: for each commit of check 5, its PR is `gh api repos/<repo>/commits/<sha>/pulls --jq '.[0].number'`, and `gh pr checks <n>` must show only `pass` (or `skipping`). A commit without a PR (pushed straight to `develop`) is listed for the user. The code put together is checked in step 5. A hotfix branch has no CI: its proof is step 5.
+
+There is no CI on GitHub: the proof that the code works is step 5, run locally on exactly what gets published.
 
 Also list the PRs still open toward `develop` (`gh pr list --base develop`): they do not block, but the user sees what is left out.
 
@@ -59,6 +60,8 @@ Compare `<last>..<base>` and collect what the release changes outside the code:
 ## 5. Repo checks and notes
 
 From the repo root, run the commands in the **Comandi di check** section of `CONTRIBUTING.md`, in order, stopping at the first failure and reporting its output. The API tests need `docker compose up -d`.
+
+Then build the API image as the deploy will (`docker build -f apps/api/Dockerfile -t calories-diary-api:release-check .`): a broken image would otherwise show up only in the `Deploy API` run, after the push, with the web already published by Vercel. Remove the image afterwards (`docker image rm calories-diary-api:release-check`).
 
 Then write the release notes to a temporary file in the scratchpad, not in the repo. Italian, for the user who reads what is new, from the commits of check 5: sections `## Novità`, `## Correzioni`, `## Note` (migrations, manual steps), each only if it has something. One line per change, in plain words, not the commit titles; no commit lists. End with `**Confronto**: https://github.com/<repo>/compare/<last>...v<version>`.
 
