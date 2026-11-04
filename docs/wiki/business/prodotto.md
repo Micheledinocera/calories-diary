@@ -1,7 +1,8 @@
 ---
 tipo: info
-aggiornato: 2026-10-30
+aggiornato: 2026-11-04
 fonti:
+  - raw/compiled/other-fixes/2026-11-04-obiettivo.md
   - raw/compiled/minor-fixes/2026-10-30-obiettivo.md
   - raw/compiled/minor-fixes/2026-10-30-ordinamenti.md
   - raw/compiled/minor-fixes/2026-10-30-toast-pwa.md
@@ -52,6 +53,8 @@ Applicazione **personale** per tracciare ogni giorno calorie e macronutrienti. �
 - Colazione, Pranzo e Cena: **uno per giorno**, visibili vuoti anche prima di aggiungerli. Lo **Spuntino** può essere più di uno, si aggiunge con un bottone e si **sposta** in qualsiasi posizione, anche tra gli altri pasti (drag and drop). Gli altri pasti restano nel loro ordine.
 - In un pasto vuoto l'app propone gli alimenti dello stesso pasto del giorno prima, da accettare e poi modificare.
 - Aggiunta di una voce: alimento e quantità, sempre **in grammi o ml**. Le porzioni dell'alimento sono scorciatoie che impostano la quantità (la predefinita è già scelta); prima di confermare si vedono kcal e macro di quella quantità e come cambia la giornata. Modifica della quantità ed eliminazione.
+- Un pasto con alimenti si può **svuotare** in un colpo (pulsante con la scopa accanto alla stella), dopo una conferma: il pasto resta nella giornata, vuoto.
+- Nei campi numerici virgola e punto valgono sempre come **separatore decimale**, in tutta l'app.
 - Calcolo automatico di kcal e macro; totali per pasto e per giorno: kcal, proteine, carboidrati, grassi.
 - Navigazione tra i giorni.
 

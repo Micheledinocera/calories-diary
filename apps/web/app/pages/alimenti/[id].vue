@@ -49,8 +49,10 @@ function archivia(archiviato: boolean) {
   return esegui(async () => aggiorna(await modifica(id, { archiviato })));
 }
 
-function eliminaAlimento() {
-  if (!confirm("Eliminare l'alimento?")) return;
+const conferma = useConferma();
+
+async function eliminaAlimento() {
+  if (!(await conferma({ titolo: "Eliminare l'alimento?" }))) return;
   return esegui(async () => {
     await elimina(id);
     await navigateTo("/alimenti", { replace: true });

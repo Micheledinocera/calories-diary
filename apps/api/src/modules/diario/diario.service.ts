@@ -349,6 +349,19 @@ export function creaDiarioService(em: EntityManager) {
       return giornata(utenteId, pasto.giorno);
     },
 
+    /** Removes every entry of the meal, which stays in the day (a snack too) and loses its favorite. */
+    async svuotaPasto(utenteId: string, id: string): Promise<Giornata> {
+      const pasto = await caricaPasto(utenteId, id);
+      for (const voce of pasto.voci.getItems()) {
+        togliUtilizzo(utenteId, voce.alimento);
+        em.remove(voce);
+      }
+      pasto.preferito = null;
+      await em.flush();
+      em.clear();
+      return giornata(utenteId, pasto.giorno);
+    },
+
     /** `ids` must be every saved meal of the day, with colazione, pranzo and cena in order. */
     async ordina(utenteId: string, giorno: string, ids: string[]): Promise<Giornata> {
       const pasti = await pastiDelGiorno(utenteId, giorno);

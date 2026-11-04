@@ -92,6 +92,11 @@ export function diarioRouter(em: EntityManager): Router {
     },
   );
 
+  router.delete("/pasti/:id/voci", valida({ params: parametriId }), async (_req, res) => {
+    const { id } = datiValidati<typeof parametriId>(res, "params");
+    res.json(await service.svuotaPasto(utenteCorrente(res).id, id));
+  });
+
   router.post(
     "/pasti/:id/preferito",
     valida({ params: parametriId, body: nuovoPreferitoDaPastoSchema }),

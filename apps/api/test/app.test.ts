@@ -645,6 +645,40 @@ describe("/diario", () => {
     expect(await uso(auth)).toMatchObject({ eliminabile: true });
   });
 
+  it("svuota un pasto: resta nel giorno, senza voci né preferito", async () => {
+    const g = giornataSchema.parse(
+      (
+        await aggiungiPasto("2026-01-20", {
+          tipo: "cena",
+          voci: [
+            { alimento: olio, quantita: 5 },
+            { alimento: olio, quantita: 10 },
+          ],
+        }).expect(200)
+      ).body,
+    );
+    const cena = g.pasti.find((p) => p.tipo === "cena")!;
+    await request(app)
+      .post(`/diario/pasti/${cena.id}/preferito`)
+      .set(auth)
+      .send({ nome: "Cena da svuotare" })
+      .expect(200);
+    const utilizzi = async () =>
+      (await request(app).get(`/alimenti/${olio}`).set(auth).expect(200)).body.utilizzi as number;
+    const prima = await utilizzi();
+
+    const res = await request(app).delete(`/diario/pasti/${cena.id}/voci`).set(auth).expect(200);
+    const svuotata = giornataSchema.parse(res.body).pasti.find((p) => p.id === cena.id)!;
+    expect(svuotata).toMatchObject({ voci: [], preferito: null, totali: { kcal: 0 } });
+    expect(await utilizzi()).toBe(prima - 2);
+
+    const altrui = await request(app)
+      .delete(`/diario/pasti/${cena.id}/voci`)
+      .set(altro)
+      .expect(404);
+    expect(altrui.body.errore.codice).toBe("NON_TROVATO");
+  });
+
   it("risponde 400 con un giorno o una voce non validi", async () => {
     for (const req of [
       request(app).get("/diario/2026-13-01"),

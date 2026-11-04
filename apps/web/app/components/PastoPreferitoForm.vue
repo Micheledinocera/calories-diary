@@ -61,13 +61,9 @@ function salva() {
         <li v-for="(voce, i) in voci" :key="i" class="py-2 space-y-1">
           <span class="block truncate">{{ voce.alimento.nome }}</span>
           <div class="flex items-center gap-2">
-            <UInputNumber
+            <InputDecimale
               :model-value="voce.quantita"
-              :min="0"
-              :step="10"
-              :step-snapping="false"
-              :format-options="{ maximumFractionDigits: 1 }"
-              locale="it-IT"
+              :passo="10"
               class="w-32 shrink-0"
               :aria-label="`Quantità di ${voce.alimento.nome} in ${voce.alimento.unitaBase}`"
               @update:model-value="cambiaQuantita(i, $event)"
