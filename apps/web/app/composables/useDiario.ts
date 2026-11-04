@@ -34,6 +34,8 @@ export function useDiario() {
       api<Giornata>(`/diario/${giorno}/copia`, { method: "POST", body: { da }, ...scrivi }),
     ordina: (giorno: string, pasti: string[]) =>
       api<Giornata>(`/diario/${giorno}/ordine`, { method: "PUT", body: { pasti }, ...scrivi }),
+    svuotaPasto: (pastoId: string) =>
+      api<Giornata>(`/diario/pasti/${pastoId}/voci`, { method: "DELETE", ...scrivi }),
     aggiungiVoce: (pastoId: string, voce: NuovaVoce) =>
       api<Giornata>(`/diario/pasti/${pastoId}/voci`, { method: "POST", body: voce, ...scrivi }),
     modificaVoce: (id: string, quantita: number) =>
