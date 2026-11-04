@@ -10,12 +10,12 @@ fonti:
   - raw/compiled/user-login/2026-10-27-implementazione.md
   - raw/compiled/skill-release/2026-10-30-obiettivo.md
   - raw/compiled/skill-release/2026-10-30-decisioni.md
-  - raw/compiled/ci-skip-merge-tag/2026-11-04-implementazione.md
+  - raw/compiled/workflows-main-only/2026-11-04-implementazione.md
 ---
 
 # Deploy
 
-Dove gira l'app in produzione, come ci arriva il codice e come si protegge il database. Il perché delle scelte è in [Scelte di deploy](./decisione-deploy.md); gli ambienti in [Sviluppo, CI e ambienti](./sviluppo-e-ambienti.md).
+Dove gira l'app in produzione, come ci arriva il codice e come si protegge il database. Il perché delle scelte è in [Scelte di deploy](./decisione-deploy.md); gli ambienti in [Sviluppo, check e ambienti](./sviluppo-e-ambienti.md).
 
 ## Mappa
 
@@ -40,7 +40,7 @@ Il web chiama l'API direttamente (dominio diverso, CORS con `CORS_ORIGINS`; la w
 3. deploy hook di Render con `imgURL=<immagine>:<sha>`: Render non ridistribuisce da solo le immagini al push;
 4. smoke test: chiama `/health` fino a 10 minuti (cold start compreso) finché risponde `ok` con la versione del commit.
 
-Lo staging (push a `develop`, environment `staging`) è predisposto ma spento: parte solo con la variabile di repo `STAGING_ENABLED=true`, e richiederebbe un secondo servizio Render e un branch Neon. Come la CI, salta il commit `Merge tag 'v…' into develop` della release.
+Non c'è staging, e su `develop` il workflow non parte. Anche l'avvio manuale (`workflow_dispatch`) pubblica solo se lanciato su `main`.
 
 ## Configurazione
 

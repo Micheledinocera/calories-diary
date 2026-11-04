@@ -10,11 +10,12 @@ fonti:
   - raw/compiled/deploy/2026-10-26-roadmap.md
   - raw/compiled/ui-tweaks/2026-10-27-decisioni.md
   - raw/compiled/user-login/2026-10-27-implementazione.md
-  - raw/compiled/ci-skip-merge-tag/2026-11-04-obiettivo.md
-  - raw/compiled/ci-skip-merge-tag/2026-11-04-implementazione.md
+  - raw/compiled/workflows-main-only/2026-11-04-obiettivo.md
+  - raw/compiled/workflows-main-only/2026-11-04-implementazione.md
+  - raw/compiled/workflows-main-only/2026-11-04-ci-solo-locale.md
 ---
 
-# Sviluppo, CI e ambienti
+# Sviluppo, check e ambienti
 
 ## Priorità: prima lo sviluppo locale
 
@@ -31,12 +32,11 @@ Ogni funzionalità si realizza e si verifica prima in locale con Docker. Il depl
 - **Da telefono** (stessa rete): il web ascolta su `0.0.0.0`, quindi si apre `http://<ip-del-pc>:3000`; l'API passa dal proxy di Nuxt (vedi [App web](../tecnico/web/app.md)). La fotocamera richiede HTTPS: `pnpm dev:https` (task turbo `@calories-diary/web#dev:https`, con API e shared via `with`) usa un certificato autofirmato da accettare sul telefono. Il dev server è raggiungibile da chiunque sia sulla stessa rete: va bene a casa, non su reti pubbliche.
 - Gli utenti si creano con `pnpm utente:crea <username> [--admin]` (o dall'app, da un admin); l'API richiede `JWT_SECRET` nel `.env` (vedi `apps/api/.env.example`).
 
-## Test e CI
+## Test e check
 
-- I test dell'API girano su PostgreSQL e Redis reali (in CI: service container), sul database di test ricreato dalle migrazioni a ogni esecuzione.
-- `ci.yml` (su ogni PR e sui push a `main` e `develop`): lint, typecheck, test e build di tutti i pacchetti, più la build dell'immagine Docker dell'API senza push.
-- Sul commit `Merge tag 'v…' into develop`, creato da `git flow release/hotfix finish`, i job vengono saltati: il codice è quello appena verificato su `main`, e il run in più accoderebbe lavoro su Actions proprio durante la release. Il run compare in Actions con i job `skipped`. Non si può evitare del tutto: servirebbe `[skip ci]` nel messaggio del merge, e git-flow non permette di sceglierlo.
-- Check da lanciare prima di ogni PR: sezione *Comandi di check* di `CONTRIBUTING.md`.
+- I test dell'API girano su PostgreSQL e Redis reali (quelli di `docker compose`), sul database di test ricreato dalle migrazioni a ogni esecuzione.
+- Niente CI su GitHub (vedi [Scelte di deploy](./decisione-deploy.md)): i check (sezione *Comandi di check* di `CONTRIBUTING.md`) girano in locale, con `/close` prima di ogni PR e con `/release` prima di pubblicare. `/release` costruisce anche l'immagine Docker dell'API.
+- Su GitHub Actions girano solo il deploy dell'API (push su `main`) e il backup notturno. Il backup parte da `develop` perché GitHub fa girare i workflow `schedule` sul branch di default (vedi [Deploy](./deploy.md#backup-del-database)).
 
 ## Ambienti
 
@@ -47,7 +47,7 @@ Hosting interamente gratuito (senza carta di credito né crediti a scadenza); co
 | Locale | — | localhost:3000 (anche dalla rete locale) | localhost:3001 (dal web: `/api`) | Docker | Docker |
 | Production | `main` | Vercel | Render (immagine da GHCR) | Neon | Upstash |
 
-- Staging facoltativo (branch `develop`, secondo servizio Render, branch Neon dedicato): predisposto nel workflow di deploy, spento.
+- Niente staging: su `develop` non è collegato nessun ambiente.
 - Niente preview: Vercel fa il deploy solo da `main` (vedi [Deploy](./deploy.md#configurazione)); feature e PR si provano in locale.
 - Pipeline di deploy dell'API, configurazione e backup: [Deploy](./deploy.md).
 - Le migrazioni non girano mai all'avvio del container: le lancia la pipeline di deploy.
