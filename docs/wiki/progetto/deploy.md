@@ -15,7 +15,7 @@ fonti:
 
 # Deploy
 
-Dove gira l'app in produzione, come ci arriva il codice e come si protegge il database. Il perché delle scelte è in [Scelte di deploy](./decisione-deploy.md); gli ambienti in [Sviluppo, CI e ambienti](./sviluppo-e-ambienti.md).
+Dove gira l'app in produzione, come ci arriva il codice e come si protegge il database. Il perché delle scelte è in [Scelte di deploy](./decisione-deploy.md); gli ambienti in [Sviluppo, check e ambienti](./sviluppo-e-ambienti.md).
 
 ## Mappa
 

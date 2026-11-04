@@ -7,6 +7,7 @@ fonti:
   - raw/compiled/ui-tweaks/2026-10-27-decisioni.md
   - raw/compiled/ui-tweaks/2026-10-27-task.md
   - raw/compiled/workflows-main-only/2026-11-04-obiettivo.md
+  - raw/compiled/workflows-main-only/2026-11-04-ci-solo-locale.md
 ---
 
 # Scelte di deploy
@@ -20,8 +21,8 @@ Come è fatto il [deploy](./deploy.md). Confermate dall'utente il 2026-10-26.
 - **Backup**: dump notturno cifrato con age, artifact di GitHub Actions con retention di 90 giorni.
 - **Chiamate dirette dal web all'API**, con CORS, invece di un rewrite `/api` su Vercel.
 - **Niente staging**: non è nemmeno predisposto nei workflow.
-- **Deploy solo da `main`**, cioè quando si chiude una release o un hotfix: niente build Vercel su `develop`, feature e PR. Tutto il resto si prova in locale.
-- **Niente workflow su `develop`**: né CI né deploy. La CI gira sulle PR e su `main`. I tag `v<versione>` servono solo a leggere la storia: il deploy parte dal push su `main`, non dal tag. (Prima le PR avevano una preview Vercel che puntava all'API di produzione; cambiato su richiesta dell'utente nella feature `ui-tweaks`.)
+- **Deploy solo da `main`**, cioè quando si chiude una release o un hotfix: niente build Vercel su `develop`, feature e PR. Tutto il resto si prova in locale. (Prima le PR avevano una preview Vercel che puntava all'API di produzione; cambiato su richiesta dell'utente nella feature `ui-tweaks`.)
+- **Niente CI su GitHub**: i check girano solo in locale, con `/close` prima di ogni PR e con `/release` prima di pubblicare. `/release` costruisce anche l'immagine Docker dell'API. Su GitHub Actions restano solo il deploy dell'API dal push su `main` e il backup notturno. I tag `v<versione>` servono solo a leggere la storia: il deploy parte dal push su `main`, non dal tag.
 
 ## Perché
 
@@ -29,7 +30,7 @@ Come è fatto il [deploy](./deploy.md). Confermate dall'utente il 2026-10-26.
 - Backup: il restore di Neon Free copre solo le ultime 6 ore. La cifratura è obbligatoria perché gli artifact di un repo pubblico sono scaricabili da qualunque account GitHub; la chiave privata resta solo al maintainer.
 - Chiamate dirette: il CORS era già pronto (con wildcard per le preview). Il rewrite eviterebbe il CORS ma aggiunge un passaggio, Vercel non dichiara il timeout verso l'origine esterna (rischio con il cold start di Render) e dai progetti creati da aprile 2026 mette in cache le risposte esterne con intestazioni di cache.
 - Niente staging: per un'app personale non serve, e costerebbe un secondo servizio e un branch Neon.
-- Niente su `develop`: non c'è nessun ambiente collegato. La CI ripeteva i controlli già fatti sulla PR, e il deploy saltato lasciava comunque un run in coda su Actions, che durante le release le intasava.
+- Niente CI su GitHub: gli stessi check girano già in locale, e i run in più (sulle PR, su `develop`, sul merge del tag della release) restavano in coda o bloccati a ogni rallentamento di Actions, intasando le release. L'unico controllo in più della CI, la build dell'immagine Docker, è passato in `/release`. Limite accettato: niente installazione pulita su Linux a ogni PR, ma l'immagine si costruisce comunque su Linux con il lockfile bloccato.
 - Solo `main`: le build degli altri branch mandavano mail di errore a ogni push e non servivano, visto che si prova tutto in locale.
 
 ## Alternative scartate
