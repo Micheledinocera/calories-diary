@@ -12,9 +12,12 @@ concurrency:
 permissions:
   contents: read
 
+# Both jobs skip the "Merge tag 'v…' into develop" commit made by `git flow release/hotfix finish`:
+# its code is the one just checked on main.
 jobs:
   check:
     name: Lint, typecheck, test, build
+    if: ${{ !(github.ref_name == 'develop' && startsWith(github.event.head_commit.message, 'Merge tag ''v')) }}
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -48,6 +51,7 @@ jobs:
 
   docker:
     name: API Docker image
+    if: ${{ !(github.ref_name == 'develop' && startsWith(github.event.head_commit.message, 'Merge tag ''v')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

@@ -1,5 +1,6 @@
 # Builds the API image, pushes it to GHCR, runs the migrations and deploys it on Render.
-# main → environment "production"; develop → "staging", only when the variable STAGING_ENABLED is "true".
+# main → environment "production"; develop → "staging", only when the variable STAGING_ENABLED is "true",
+# and never on the "Merge tag 'v…' into develop" commit made by `git flow release/hotfix finish`.
 name: Deploy API
 
 on:
@@ -21,7 +22,10 @@ env:
 jobs:
   deploy:
     name: Deploy (${{ github.ref_name == 'main' && 'production' || 'staging' }})
-    if: github.ref_name == 'main' || (github.ref_name == 'develop' && vars.STAGING_ENABLED == 'true')
+    if: >-
+      github.ref_name == 'main' ||
+      (github.ref_name == 'develop' && vars.STAGING_ENABLED == 'true' &&
+       !startsWith(github.event.head_commit.message, 'Merge tag ''v'))
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
