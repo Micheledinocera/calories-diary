@@ -1,6 +1,6 @@
 ---
 tipo: info
-aggiornato: 2026-10-27
+aggiornato: 2026-11-04
 fonti:
   - raw/compiled/first-develop/setup-progetto.md
   - raw/compiled/first-develop/2026-10-25-decisioni-e-piano.md
@@ -10,6 +10,8 @@ fonti:
   - raw/compiled/deploy/2026-10-26-roadmap.md
   - raw/compiled/ui-tweaks/2026-10-27-decisioni.md
   - raw/compiled/user-login/2026-10-27-implementazione.md
+  - raw/compiled/ci-skip-merge-tag/2026-11-04-obiettivo.md
+  - raw/compiled/ci-skip-merge-tag/2026-11-04-implementazione.md
 ---
 
 # Sviluppo, CI e ambienti
@@ -33,6 +35,7 @@ Ogni funzionalità si realizza e si verifica prima in locale con Docker. Il depl
 
 - I test dell'API girano su PostgreSQL e Redis reali (in CI: service container), sul database di test ricreato dalle migrazioni a ogni esecuzione.
 - `ci.yml` (su ogni PR e sui push a `main` e `develop`): lint, typecheck, test e build di tutti i pacchetti, più la build dell'immagine Docker dell'API senza push.
+- Sul commit `Merge tag 'v…' into develop`, creato da `git flow release/hotfix finish`, i job vengono saltati: il codice è quello appena verificato su `main`, e il run in più accoderebbe lavoro su Actions proprio durante la release. Il run compare in Actions con i job `skipped`. Non si può evitare del tutto: servirebbe `[skip ci]` nel messaggio del merge, e git-flow non permette di sceglierlo.
 - Check da lanciare prima di ogni PR: sezione *Comandi di check* di `CONTRIBUTING.md`.
 
 ## Ambienti
