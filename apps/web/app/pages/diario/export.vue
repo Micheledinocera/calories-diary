@@ -67,8 +67,16 @@ const { data: link, refresh: aggiornaLink } = useAsyncData("condivisioni", () =>
   condivisioni.elenca(),
 );
 
+const conferma = useConferma();
+
 async function revoca(id: string) {
-  if (!confirm("Revocare il link? Chi lo ha ricevuto non potrà più aprirlo.")) return;
+  const ok = await conferma({
+    titolo: "Revocare il link?",
+    descrizione: "Chi lo ha ricevuto non potrà più aprirlo.",
+    azione: "Revoca",
+    icona: "i-lucide-link-2-off",
+  });
+  if (!ok) return;
   try {
     await condivisioni.revoca(id);
     toast.add({ title: "Link revocato", color: "success", icon: "i-lucide-check" });

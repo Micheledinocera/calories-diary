@@ -67,13 +67,18 @@ function salva({ data: dati }: FormSubmitEvent<{ username: string; password: str
   }, "Utente aggiornato");
 }
 
-function elimina() {
+const conferma = useConferma();
+
+async function elimina() {
   const utente = inModifica.value;
   if (!utente) return;
-  const conferma =
-    `Eliminare ${utente.username}? Il suo diario viene cancellato per sempre, ` +
-    "insieme agli alimenti che ha creato e che nessun altro ha usato.";
-  if (!confirm(conferma)) return;
+  const ok = await conferma({
+    titolo: `Eliminare ${utente.username}?`,
+    descrizione:
+      "Il suo diario viene cancellato per sempre, insieme agli alimenti che ha creato e che " +
+      "nessun altro ha usato.",
+  });
+  if (!ok) return;
   return esegui(() => utenti.elimina(utente.id), "Utente eliminato");
 }
 
