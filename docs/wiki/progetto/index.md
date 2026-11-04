@@ -13,4 +13,4 @@ Come è costruito e gestito il progetto: repo, stack, ambienti, git-flow, wiki.
 - [Stack e strumenti](./stack.md): tecnologie, vincoli sulle versioni, server MCP.
 - [Sviluppo, CI e ambienti](./sviluppo-e-ambienti.md): Docker locale, CI, ambienti.
 - [Deploy](./deploy.md): mappa dei servizi, pipeline dell'API, configurazione, backup e restore, release, limiti dei piani gratuiti.
-- [Scelte di deploy](./decisione-deploy.md): GHCR pubblico, domini gratuiti, backup cifrato, chiamate dirette all'API, staging spento, deploy solo da `main` · presa
+- [Scelte di deploy](./decisione-deploy.md): GHCR pubblico, domini gratuiti, backup cifrato, chiamate dirette all'API, niente staging, nessun workflow su `develop`, deploy solo da `main` · presa
