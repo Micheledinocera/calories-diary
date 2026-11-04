@@ -1,6 +1,6 @@
 ---
 tipo: info
-aggiornato: 2026-10-30
+aggiornato: 2026-11-04
 fonti:
   - raw/compiled/deploy/2026-10-26-obiettivo.md
   - raw/compiled/deploy/2026-10-26-roadmap.md
@@ -10,6 +10,7 @@ fonti:
   - raw/compiled/user-login/2026-10-27-implementazione.md
   - raw/compiled/skill-release/2026-10-30-obiettivo.md
   - raw/compiled/skill-release/2026-10-30-decisioni.md
+  - raw/compiled/ci-skip-merge-tag/2026-11-04-implementazione.md
 ---
 
 # Deploy
@@ -39,7 +40,7 @@ Il web chiama l'API direttamente (dominio diverso, CORS con `CORS_ORIGINS`; la w
 3. deploy hook di Render con `imgURL=<immagine>:<sha>`: Render non ridistribuisce da solo le immagini al push;
 4. smoke test: chiama `/health` fino a 10 minuti (cold start compreso) finché risponde `ok` con la versione del commit.
 
-Lo staging (push a `develop`, environment `staging`) è predisposto ma spento: parte solo con la variabile di repo `STAGING_ENABLED=true`, e richiederebbe un secondo servizio Render e un branch Neon.
+Lo staging (push a `develop`, environment `staging`) è predisposto ma spento: parte solo con la variabile di repo `STAGING_ENABLED=true`, e richiederebbe un secondo servizio Render e un branch Neon. Come la CI, salta il commit `Merge tag 'v…' into develop` della release.
 
 ## Configurazione
 
