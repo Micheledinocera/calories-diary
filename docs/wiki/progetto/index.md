@@ -12,5 +12,6 @@ Come è costruito e gestito il progetto: repo, stack, ambienti, git-flow, wiki.
 - [Design](./design.md): design system su Claude Design, colori e loro significato, anello dei macro, tema chiaro/scuro.
 - [Stack e strumenti](./stack.md): tecnologie, vincoli sulle versioni, server MCP.
 - [Sviluppo, check e ambienti](./sviluppo-e-ambienti.md): Docker locale, check in locale, ambienti.
+- [Flusso di una feature e del wiki](./flusso-feature.md): `/start`, `/close` con squash merge automatico, ingest in `feature/ingest-<nome>` dopo il merge.
 - [Deploy](./deploy.md): mappa dei servizi, pipeline dell'API, configurazione, backup e restore, release, limiti dei piani gratuiti.
 - [Scelte di deploy](./decisione-deploy.md): GHCR pubblico, domini gratuiti, backup cifrato, chiamate dirette all'API, niente staging, niente CI su GitHub, deploy solo da `main` · presa
