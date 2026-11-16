@@ -41,7 +41,7 @@ The wiki is split by **area** (topic), not by kind of page: an area holds both t
 - Raw files are **never edited**. If something changes, add a new file.
 - File names: `YYYY-MM-DD-topic.md`. Free format inside.
 - A feature's sources live in `raw/<feature-name>/`; its first note is the task goal. Tasks are features.
-- **Study features** (analysis only) are named `study-<topic>` (e.g. `feature/study-payouts`). They **touch no code**: only `docs/`, `.claude/` and `*.md` files; `/close` checks it and skips the code checks. To implement what a study decided, close it and start a new feature. Keep features short: close a study even when the analysis is partial, and resume it later with a new feature.
+- **Study features** (analysis only) are named `study-<topic>` (e.g. `feature/study-payouts`). They **touch no code**: only `docs/`, `.claude/` and `*.md` files; `/close` checks it and skips the code checks. The same holds for `ingest-<feature-name>` features, reserved for the wiki update after a merge. To implement what a study decided, close it and start a new feature. Keep features short: close a study even when the analysis is partial, and resume it later with a new feature.
 - There is **no backlog**: a task exists only as a feature (its goal note) and its PR. Knowledge that never reaches the wiki through an ingest was not worth keeping.
 - `raw/` is versioned: no secrets or personal data. If you find any, report them and do not copy them into the wiki.
 - Never read `raw/compiled/` or `output/` when processing. `raw/compiled/` is history, read it only to trace where a page came from.
@@ -64,7 +64,7 @@ The wiki is split by **area** (topic), not by kind of page: an area holds both t
   - `wiki/index.md` lists the areas, one line each, and the **radar**: every decision `aperta` or `in analisi`, with its status;
   - every folder has an `index.md` listing its pages (`- [Title](./page.md): one-line description`, plus ` · <stato>` for decisions) and its sub-folders' indexes. A folder with no pages says so ("Nessuna pagina." / "No pages.").
 - **Sub-folders**: split an area when it passes ~12 pages, or when a sub-topic reaches 4 pages (e.g. `<area>/<sub-topic>/`). At most one level below an area (`tecnico/` has one more: the app). Don't split ahead of time.
-- **Lint**: `/lint-wiki` checks links, indexes, frontmatter and radar. `/ingest` runs it before its commit, `/close` after the ingest.
+- **Lint**: `/lint-wiki` checks links, indexes, frontmatter and radar. `/ingest` runs it before its commit.
 - Unknowns go in a final `## Domande aperte` section. Never guess.
 - The page format for `tecnico/` is not fixed yet: keep pages consistent with the existing ones of the same kind.
 
@@ -110,16 +110,19 @@ Leave out:
 
 Update pages **in place**: rewrite the section that changed, never append a chronological log. If a source adds nothing that passes this filter, it changes no page (it still moves to `compiled/`). A large task should not mean a large wiki diff.
 
+### When
+
+The ingest runs **after** a feature is merged, never inside it. `/close` squash-merges `feature/<feature-name>` into `develop`, then opens `feature/ingest-<feature-name>` from the updated `develop`, runs `/ingest` there and closes it with its own PR. The feature's PR holds only its work and its raw notes; the ingest PR holds only the wiki commit.
+
 ### Steps
 
 What the ingest does, in order:
 
-1. Collect what to process: the files in `raw/<feature-name>/` (or the loose files in `raw/`) not yet in `compiled/`, plus the feature's commits, to know what custom code was added, changed or removed:
+1. Collect what to process: the files in `raw/<feature-name>/` (or the loose files in `raw/`) not yet in `compiled/`, plus the **squash commit** of the feature's merged PR, to know what custom code was added, changed or removed:
    ```bash
-   git fetch origin
-   git log --no-merges origin/develop..HEAD
+   gh pr list --state merged --base develop --head feature/<feature-name> --json mergeCommit --limit 1
+   git show --stat <squash-sha>
    ```
-   Always compare with `origin/develop` after a fetch, never with the local `develop` (it may be stale, and then other features' merged commits look like this feature's). `--no-merges` drops the merges of `develop` into the feature. Commits of other open features are never in this range.
 2. Read `wiki/index.md`, the index of each area involved, and the pages involved.
 3. For technical pages, check the framework docs listed in `AGENTS.md`: link what they already cover.
 4. Update or create the pages, the `index.md` of their folders and the radar in `wiki/index.md`. Update or delete the technical pages of code the feature changed or removed.
@@ -130,7 +133,7 @@ What the ingest does, in order:
 
 If there is nothing new to process (no new raw, no custom code), make no changes and no commit.
 
-Wiki changes never reach `develop` directly: they go through the feature's PR, reviewed by the project maintainer.
+Wiki changes never reach `develop` directly: they go through the PR of `feature/ingest-<feature-name>`, squash-merged by `/close`.
 
 ## Using the wiki during development
 
