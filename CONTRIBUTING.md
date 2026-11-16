@@ -11,6 +11,8 @@ Convenzioni del repo, valide per le persone e per gli agenti AI (anche per le sk
 
 `<nome>` è breve, in inglese, in kebab-case: `wishlist`, `llm-wiki`. Le feature di sola analisi hanno il prefisso `study-` (`study-payouts`): si chiudono anche con l'analisi parziale e si riprendono con una feature nuova. **Non toccano il codice**: solo `docs/`, `.claude/` e file `*.md`. Per implementare ciò che uno studio ha deciso si chiude lo studio e si apre una feature nuova.
 
+Il prefisso `ingest-` è riservato: `feature/ingest-<nome>` contiene solo l'aggiornamento del wiki dopo il merge di `feature/<nome>`, e lo creano `/close` o `/ingest <nome>`. Come gli studi, non tocca il codice.
+
 ## Commit
 
 Formato [Conventional Commits](https://www.conventionalcommits.org/): tipo e ambito come da standard, descrizione in **italiano**:
@@ -39,7 +41,7 @@ Esempi: `feat(api): aggiungi modulo alimenti`, `fix(web): gestisci kcal mancanti
 
 ## Comandi di check
 
-Da lanciare dalla root prima di ogni PR (`/close` li esegue in quest'ordine). Gli script nascono con lo scaffolding (feature `first-develop`); i test dell'API richiedono `docker compose up -d`.
+Da lanciare dalla root prima di ogni PR (`/close` li esegue in quest'ordine, prima del merge). Gli script nascono con lo scaffolding (feature `first-develop`); i test dell'API richiedono `docker compose up -d`.
 
 ```bash
 pnpm typecheck
@@ -50,16 +52,16 @@ pnpm build
 
 ## Pull request
 
-1. Prima di aprirla, in locale, i [comandi di check](#comandi-di-check). Per le feature `study-` non servono: `/close` verifica invece che non abbiano toccato codice.
-2. Si apre verso `develop` con `/close`, che aggiorna il wiki (commit `docs(wiki): …`), fa il push e crea la PR. A mano: `gh pr create --base develop`.
+1. Prima di aprirla, in locale, i [comandi di check](#comandi-di-check). Per le feature `study-` e `ingest-` non servono: `/close` verifica invece che non abbiano toccato codice.
+2. Si apre verso `develop` con `/close`, che fa il push, crea la PR, la unisce subito con **squash** e cancella il ramo (locale e remoto). A mano: `gh pr create --base develop`, poi `gh pr merge --squash --delete-branch`.
 3. Titolo nello stesso formato dei commit; descrizione dal template (`.github/pull_request_template.md`).
-4. Nessun merge senza revisione. Nella revisione si rilegge anche il commit del wiki.
+4. **Dopo il merge, il wiki**: `/close` apre `feature/ingest-<nome>` dal `develop` aggiornato, esegue `/ingest` (un solo commit `docs(wiki): aggiorna da <nome>`) e chiude anche questa con PR e squash. Se nella feature non c'è niente da documentare, non nasce nessuna PR di ingest.
 
 **Merge**:
 
-- feature e bugfix verso `develop`: **squash** (un commit per feature, con il titolo della PR);
+- feature e bugfix verso `develop`: **squash** (un commit per feature, con il titolo della PR), automatico con `/close`;
 - release e hotfix verso `main`, e il loro ritorno su `develop`: **merge normale**, altrimenti `main` e `develop` divergono;
-- dopo lo squash il ramo locale si cancella con `git branch -D feature/<nome>` (git non lo vede come unito).
+- dopo lo squash il ramo locale si cancella con `git branch -D feature/<nome>` (git non lo vede come unito); `/close` lo fa da sé.
 
 ## Release
 
