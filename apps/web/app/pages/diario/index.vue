@@ -27,10 +27,21 @@ const totaliPerGiorno = computed(
   () => new Map((riepiloghi.value ?? []).map((r) => [r.giorno, r.totali])),
 );
 
-// Same rule as the day (statoGiornata): a dot per day with entries, none without a need.
-function stato(giorno: string) {
+// Under each day with entries: its kcal and, with a need, the dot of how it went (statoGiornata).
+function riepilogo(giorno: string) {
   const totali = totaliPerGiorno.value.get(giorno);
-  return totali && obiettivi.value ? statoGiornata(totali, obiettivi.value) : null;
+  if (!totali || totali.kcal <= 0) return null;
+  return {
+    kcal: totali.kcal,
+    stato: obiettivi.value ? statoGiornata(totali, obiettivi.value) : null,
+  };
+}
+
+function etichetta(giorno: DateValue) {
+  const r = riepilogo(giorno.toString());
+  if (!r) return undefined;
+  const kcal = `${formattaValore(Math.round(r.kcal))} kcal`;
+  return `${giorno.day}, ${kcal}${r.stato ? `, ${descrizioniStato[r.stato.tipo]}` : ""}`;
 }
 
 function apri(giorno: DateValue | undefined) {
@@ -68,20 +79,12 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
         @update:model-value="apri($event as DateValue | undefined)"
       >
         <template #day="{ day }">
-          <span
-            class="leading-tight tabular-nums"
-            :aria-label="
-              stato(day.toString())
-                ? `${day.day}, ${descrizioniStato[stato(day.toString())!.tipo]}`
-                : undefined
-            "
-          >
+          <span class="leading-tight tabular-nums" :aria-label="etichetta(day)">
             <span>{{ day.day }}</span>
-            <span
-              class="absolute top-full left-1/2 -translate-x-1/2 size-3 rounded-full"
-              :class="
-                stato(day.toString()) ? pallini[stato(day.toString())!.tipo] : 'bg-transparent'
-              "
+            <KcalGiorno
+              v-if="riepilogo(day.toString())"
+              v-bind="riepilogo(day.toString())!"
+              class="absolute top-full left-1/2 -translate-x-1/2 mt-0.5 whitespace-nowrap"
             />
           </span>
         </template>
@@ -96,7 +99,7 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
           :key="tipo"
           class="inline-flex items-center gap-1.5"
         >
-          <span class="size-3 rounded-full" :class="pallini[tipo]" />
+          <span class="size-2 rounded-full" :class="pallini[tipo]" />
           <span class="first-letter:uppercase">{{ descrizione }}</span>
         </span>
       </div>
