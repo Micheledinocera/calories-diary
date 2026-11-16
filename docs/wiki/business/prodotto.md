@@ -1,7 +1,8 @@
 ---
 tipo: info
-aggiornato: 2026-11-04
+aggiornato: 2026-11-16
 fonti:
+  - raw/compiled/new-reports-fixes/2026-11-16-obiettivo.md
   - raw/compiled/other-fixes/2026-11-04-obiettivo.md
   - raw/compiled/minor-fixes/2026-10-30-obiettivo.md
   - raw/compiled/minor-fixes/2026-10-30-ordinamenti.md
@@ -70,7 +71,7 @@ Applicazione **personale** per tracciare ogni giorno calorie e macronutrienti. �
 - **Pasto più pesante**: solo quando la giornata è oltre il fabbisogno, l'app segnala il pasto con più kcal (a parità, il primo della giornata), con la sua quota sul totale.
 
 **Storico** (in `diary`)
-- Vista a **calendario** per il colpo d'occhio (un pallino per giorno nel colore del suo stato), poi il dettaglio giorno per giorno: stessa identica visualizzazione della pagina "Oggi", in sola lettura, con un tasto "Modifica".
+- Vista a **calendario** per il colpo d'occhio (sotto ogni giorno con voci le kcal consumate, sulla stessa riga di un pallino nel colore del suo stato: a colpo d'occhio colore e numero), poi il dettaglio giorno per giorno: stessa identica visualizzazione della pagina "Oggi", in sola lettura, con un tasto "Modifica".
 
 **Ricerca e aggiunta alimenti**, in quest'ordine:
 1. alimenti locali, ordinati per frequenza e recenza d'uso;

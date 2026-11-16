@@ -126,7 +126,8 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
     v-model:open="aperto"
     :title="scelto ? scelto.nome : `Aggiungi a ${nomePasto}`"
     :ui="{
-      content: 'sm:max-w-xl sm:mx-auto sm:w-full',
+      content: 'h-[90dvh] sm:max-w-xl sm:mx-auto sm:w-full',
+      container: 'flex-1 min-h-0',
       body: 'flex flex-col gap-3 min-h-0',
     }"
   >
@@ -264,7 +265,7 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
           <p class="text-xs font-semibold tracking-wide uppercase text-muted mt-1">
             {{ testo.trim() ? "Risultati" : "Più usati" }}
           </p>
-          <div class="divide-y divide-default max-h-[45dvh] overflow-y-auto">
+          <div class="divide-y divide-default flex-1 min-h-0 overflow-y-auto">
             <AlimentoRiga v-for="a in data ?? []" :key="a.id" :alimento="a" @click="scegli(a)" />
             <p v-if="status === 'success' && !data?.length" class="text-sm text-muted py-3">
               Nessun alimento trovato.

@@ -117,12 +117,8 @@ const legenda = computed(() => {
               {{ nomeGiorno(g.giorno) }}
             </span>
             <span class="text-sm text-highlighted">{{ Number(g.giorno.slice(8)) }}</span>
-            <span
-              v-if="data.obiettivi"
-              class="size-3 rounded-full"
-              :class="stato(g) ? pallini[stato(g)!.tipo] : 'bg-transparent'"
-            />
-            <span class="text-xs text-muted">{{ g.pasti.length ? kcal(g.totali.kcal) : "–" }}</span>
+            <KcalGiorno v-if="g.totali.kcal > 0" :kcal="g.totali.kcal" :stato="stato(g)" />
+            <span v-else class="text-[11px] leading-none text-muted">–</span>
           </button>
         </div>
 
@@ -135,7 +131,7 @@ const legenda = computed(() => {
             :key="tipo"
             class="inline-flex items-center gap-1.5"
           >
-            <span class="size-3 rounded-full" :class="pallini[tipo]" />
+            <span class="size-2 rounded-full" :class="pallini[tipo]" />
             <span class="first-letter:uppercase">{{ descrizione }}</span>
           </span>
         </div>
