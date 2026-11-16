@@ -18,7 +18,7 @@ Conventions (branch names, commit format) are in `CONTRIBUTING.md`; raw rules ar
 
 ## 1. Inputs
 
-- **Feature name**: from the arguments. Short, English, kebab-case (`wishlist`). Analysis-only features use the `study-` prefix (`study-payouts`). If missing or not in that form, propose one and ask the user to confirm.
+- **Feature name**: from the arguments. Short, English, kebab-case (`wishlist`). Analysis-only features use the `study-` prefix (`study-payouts`). The `ingest-` prefix is reserved for the wiki update after a merge (`/close` and `/ingest` create it): refuse it here and point to `/ingest <name>`. If missing or not in that form, propose one and ask the user to confirm.
 - **Goal**: what the task is about and why. If not in the arguments, ask the user. It is written in **Italian**, in their words; don't invent requirements.
 - **Resuming a topic**: if the wiki has a decision on the same topic, e.g. a study left `in analisi` (radar in `docs/wiki/index.md`, or `grep -rl "tipo: decisione" docs/wiki`), mention it to the user and link it in the goal note, so the work starts from there.
 
@@ -46,7 +46,7 @@ Create `docs/raw/<name>/YYYY-MM-DD-obiettivo.md` (today's date):
 <the goal, as given by the user>
 ```
 
-It is the task description and the first source for `/ingest`. It also keeps the folder in git, which does not track empty folders.
+It is the task description and the first source for the ingest after the merge. It also keeps the folder in git, which does not track empty folders.
 
 ## 5. Commit and push
 
@@ -60,4 +60,4 @@ End the commit message with the attribution line required by the session.
 
 ## 6. Report
 
-Branch created, path of the goal note, and a reminder: add notes to `docs/raw/<name>/` whenever needed; `/close` will process them. For a `study-` feature, also remind that it touches no code (only `docs/`, `.claude/`, `*.md`).
+Branch created, path of the goal note, and a reminder: add notes to `docs/raw/<name>/` whenever needed; `/close` merges the feature and then processes them into the wiki in `feature/ingest-<name>`. For a `study-` feature, also remind that it touches no code (only `docs/`, `.claude/`, `*.md`).
