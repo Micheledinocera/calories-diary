@@ -10,7 +10,7 @@
 
 ## Wiki
 
-<!-- Pagine create / aggiornate / eliminate dal commit `docs(wiki): ...`, con eventuali conflitti o domande aperte segnalati. "Nessuna" se non è cambiato nulla. -->
+<!-- Feature: "Aggiornato dopo il merge, in feature/ingest-<nome>". PR di ingest: pagine create / aggiornate / eliminate dal commit `docs(wiki): ...`, con eventuali conflitti o domande aperte segnalati. -->
 
 -
 

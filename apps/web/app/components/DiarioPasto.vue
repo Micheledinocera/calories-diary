@@ -78,6 +78,12 @@ const accettaSuggerite = () =>
     props.pasto.suggerite.map((v) => ({ alimento: v.alimento.id, quantita: v.quantita })),
   );
 
+const coloriMacro = {
+  carboidrati: "bg-carboidrati",
+  proteine: "bg-proteine",
+  grassi: "bg-grassi",
+} as const;
+
 const kcalSuggerite = computed(() => props.pasto.suggerite.reduce((t, v) => t + v.valori.kcal, 0));
 const spuntino = computed(() => props.pasto.tipo === "spuntino");
 </script>
@@ -154,6 +160,18 @@ const spuntino = computed(() => props.pasto.tipo === "spuntino");
           @click="emit('elimina')"
         />
       </div>
+      <p
+        v-if="pasto.voci.length"
+        class="flex flex-wrap gap-x-3 mt-0.5 text-xs text-muted tabular-nums"
+        :class="spuntino && modificabile && 'ps-7'"
+      >
+        <span v-for="m in macro" :key="m.chiave" class="inline-flex items-center gap-1">
+          <span class="size-1.5 rounded-full" :class="coloriMacro[m.chiave]" />
+          <span class="sr-only">{{ m.etichetta }}</span>
+          <span aria-hidden="true">{{ m.sigla }}</span>
+          {{ formattaValore(pasto.totali[m.chiave]) }} g
+        </span>
+      </p>
     </template>
 
     <div class="divide-y divide-default">

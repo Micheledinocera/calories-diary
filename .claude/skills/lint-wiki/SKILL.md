@@ -1,6 +1,6 @@
 ---
 name: lint-wiki
-description: Check the project wiki (docs/wiki) for broken links, pages missing from their folder index, folders without index.md, invalid frontmatter and open decisions missing from the root radar, then fix what it can. Use when the user runs /lint-wiki; /ingest runs it before its commit and /close after the ingest.
+description: Check the project wiki (docs/wiki) for broken links, pages missing from their folder index, folders without index.md, invalid frontmatter and open decisions missing from the root radar, then fix what it can. Use when the user runs /lint-wiki; /ingest runs it before its commit.
 ---
 
 # /lint-wiki — check the wiki
@@ -43,7 +43,7 @@ Run the script again until it reports no errors, or only errors you cannot fix.
 ## 3. Commit
 
 - **Called by `/ingest`**: no commit of its own; the fixes go into the ingest commit.
-- **Called by `/close`, or by the user** on a `feature/*` branch, with changes: one commit with only the wiki:
+- **Called by the user** on a `feature/*` branch, with changes: one commit with only the wiki:
   ```bash
   git add -A docs/wiki
   git commit -m "docs(wiki): correggi errori di lint" -- docs/wiki

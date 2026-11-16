@@ -44,7 +44,8 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
     v-model:open="aperto"
     :title="`Pasto preferito in ${nomePasto}`"
     :ui="{
-      content: 'sm:max-w-xl sm:mx-auto sm:w-full',
+      content: 'h-[90dvh] sm:max-w-xl sm:mx-auto sm:w-full',
+      container: 'flex-1 min-h-0',
       body: 'flex flex-col gap-3 min-h-0',
     }"
   >
@@ -66,7 +67,7 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
         :title="errore.messaggio"
         :actions="[{ label: 'Riprova', onClick: () => refresh() }]"
       />
-      <div v-else class="divide-y divide-default max-h-[45dvh] overflow-y-auto">
+      <div v-else class="divide-y divide-default flex-1 min-h-0 overflow-y-auto">
         <PastoPreferitoRiga v-for="p in data ?? []" :key="p.id" :pasto="p" @click="scegli(p.id)" />
         <p v-if="status === 'success' && !data?.length" class="text-sm text-muted py-3">
           Nessun pasto preferito trovato.
