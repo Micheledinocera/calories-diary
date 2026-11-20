@@ -6,6 +6,7 @@ import { Condivisione } from "../modules/condivisioni/condivisione.entity.js";
 import { Pasto } from "../modules/diario/pasto.entity.js";
 import { Voce } from "../modules/diario/voce.entity.js";
 import { PastoPreferito } from "../modules/pasti-preferiti/pasto-preferito.entity.js";
+import { Tag } from "../modules/pasti-preferiti/tag.entity.js";
 import { VocePreferita } from "../modules/pasti-preferiti/voce-preferita.entity.js";
 import { Utente } from "../modules/utenti/utente.entity.js";
 
@@ -21,4 +22,5 @@ export const entita = [
   Condivisione,
   PastoPreferito,
   VocePreferita,
+  Tag,
 ];

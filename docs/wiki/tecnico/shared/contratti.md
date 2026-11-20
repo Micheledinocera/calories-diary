@@ -1,7 +1,8 @@
 ---
 tipo: info
-aggiornato: 2026-10-30
+aggiornato: 2026-11-20
 fonti:
+  - raw/compiled/tag-system/2026-11-20-implementazione.md
   - raw/compiled/minor-fixes/2026-10-30-ordinamenti.md
   - raw/compiled/meals/2026-10-30-modifiche.md
   - raw/compiled/export-rework/2026-10-30-decisioni-utente.md
@@ -27,7 +28,7 @@ fonti:
 | `src/diario.ts` | `tipiPasto`, `tipiPastoPrincipali`, `tipoPastoSchema`, `giornoSchema`, `valoriSchema`, `voceSchema`, `pastoSchema`, `giornataSchema`, `intervalloGiorniSchema`, `riepilogoGiornoSchema`, `nuovaVoceSchema`, `nuovoPastoSchema`, `modificaVoceSchema`, `ordinePastiSchema` e tipi | DTO e body di `/diario` (vedi [Diario](../api/diario.md)); i tipi di pasto fissi stanno qui |
 | `src/obiettivi.ts` | `ripartizioneMacroSchema`, `ripartizionePredefinita` (50/30/20), `obiettiviSchema` e tipi | Body e risposta di `/obiettivi` (vedi [Obiettivi](../api/obiettivi.md)) |
 | `src/condivisioni.ts` | `MAX_GIORNI_EXPORT` (7), `durateCondivisione`, `nuovaCondivisioneSchema`, `condivisioneSchema`, `listaCondivisioniSchema`, `giornoCondivisoSchema`, `datiCondivisiSchema`, `vistaCondivisaSchema` e tipi | Body e risposte di `/condivisioni` e `/pubblico/:token` (vedi [Condivisioni](../api/condivisioni.md)); il limite di giorni vale anche per l'export |
-| `src/pasti-preferiti.ts` | `pastoPreferitoSchema`, `paginaPastiPreferitiSchema`, `nuovoPastoPreferitoSchema`, `autorePastiPreferitiSchema`, `ordinePastiPreferitiSchema`, `filtriPastiPreferitiSchema`, `nuovoPreferitoDaPastoSchema`, `aggiuntaPreferitoSchema`, `copiaGiornoSchema` e tipi | DTO e body di `/pasti-preferiti` (vedi [Pasti preferiti](../api/pasti-preferiti.md)) e delle rotte del diario che li usano, più la copia di una giornata |
+| `src/pasti-preferiti.ts` | `tagSchema`, `tagUsatoSchema`, `pastoPreferitoSchema`, `paginaPastiPreferitiSchema`, `nuovoPastoPreferitoSchema`, `autorePastiPreferitiSchema`, `ordinePastiPreferitiSchema`, `filtriPastiPreferitiSchema`, `nuovoPreferitoDaPastoSchema`, `aggiuntaPreferitoSchema`, `copiaGiornoSchema` e tipi | DTO e body di `/pasti-preferiti` (vedi [Pasti preferiti](../api/pasti-preferiti.md)) e delle rotte del diario che li usano, più la copia di una giornata. `tagSchema` normalizza un tag (trim, minuscolo, spazi singoli, 1–30 caratteri); `NuovoPastoPreferito` è il tipo di input (`tags` facoltativo) |
 | `src/paginazione.ts` | `paginazioneSchema`, `paginaSchema(elemento)`, `Paginazione`, `Pagina<T>` | Query `pagina` e `limite` e risposta `{ elementi, totale, pagina }` delle liste paginate |
 | `src/errori.ts` | `erroreApiSchema`, `ErroreApi` | Corpo di ogni risposta di errore |
 | `src/auth.ts` | `LUNGHEZZA_MINIMA_PASSWORD` (12), `usernameSchema`, `nuovaPasswordSchema`, `credenzialiSchema`, `ruoli`, `ruoloSchema`, `utenteSchema`, `sessioneSchema`, `modificaProfiloSchema`, `cambioPasswordSchema` e tipi | Username di un utente nuovo o rinominato (trim, 3–32 caratteri, maiuscole conservate), password nuova, body del login (username con trim, qualsiasi lunghezza per gli utenti migrati), utente (`id`, `username`, `ruolo`), risposta di login e rinnovo, body di `PATCH /auth/io` e `PUT /auth/password` |

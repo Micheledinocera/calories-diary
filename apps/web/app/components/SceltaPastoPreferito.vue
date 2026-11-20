@@ -16,18 +16,22 @@ watch(cerca, (valore) => {
 onBeforeUnmount(() => clearTimeout(timer));
 
 const autore = ref<"miei" | "tutti">("miei");
+const tag = ref<string[]>([]);
 
 // One instance per meal: a key of its own, and nothing loaded until it is opened.
 const { data, status, error, refresh } = useAsyncData(
   `scelta-preferito-${useId()}`,
-  async () => (await elenca({ q: testo.value.trim() || undefined, autore: autore.value })).elementi,
-  { watch: [testo, autore], immediate: false },
+  async () =>
+    (await elenca({ q: testo.value.trim() || undefined, autore: autore.value, tag: tag.value }))
+      .elementi,
+  { watch: [testo, autore, tag], immediate: false },
 );
 
 watch(aperto, (a) => {
   if (!a) return;
   cerca.value = "";
   testo.value = "";
+  tag.value = [];
   refresh();
 });
 
@@ -59,6 +63,7 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
         :loading="status === 'pending'"
       />
       <FiltroPastiPreferiti v-model="autore" />
+      <FiltroTag v-model="tag" />
       <UAlert
         v-if="errore"
         color="error"

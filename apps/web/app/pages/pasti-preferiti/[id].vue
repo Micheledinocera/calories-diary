@@ -82,6 +82,7 @@ const erroreCaricamento = computed(() => (error.value ? normalizzaErrore(error.v
         <PastoPreferitoForm
           :nome="pasto.nome"
           :voci="pasto.voci"
+          :tags="pasto.tags"
           :in-corso="inCorso"
           @salva="salva"
         >
@@ -108,6 +109,17 @@ const erroreCaricamento = computed(() => (error.value ? normalizzaErrore(error.v
       </template>
 
       <template v-else>
+        <div v-if="pasto.tags.length" class="flex flex-wrap gap-1.5" aria-label="Tag">
+          <UBadge
+            v-for="t in pasto.tags"
+            :key="t"
+            :label="t"
+            icon="i-lucide-tag"
+            color="neutral"
+            variant="subtle"
+          />
+        </div>
+
         <UCard :ui="{ body: 'space-y-3 sm:p-4' }">
           <div class="grid grid-cols-[1.2fr_repeat(3,1fr)] gap-2">
             <div class="rounded-md bg-elevated px-3 py-2">

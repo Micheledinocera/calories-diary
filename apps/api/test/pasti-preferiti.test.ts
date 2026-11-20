@@ -5,6 +5,7 @@ import {
   paginaPastiPreferitiSchema,
   pastoPreferitoSchema,
   sessioneSchema,
+  tagUsatoSchema,
 } from "@calories-diary/shared";
 import type { Express } from "express";
 import type { Redis } from "ioredis";
@@ -219,6 +220,89 @@ describe("/pasti-preferiti", () => {
   });
 });
 
+describe("tag dei pasti preferiti", () => {
+  // A function: `pane` exists only after beforeAll.
+  const voci = () => [{ alimento: pane, quantita: 100 }];
+  // Tags are shared by every test of the run: each test uses names of its own.
+  const unico = () => randomUUID().slice(0, 8);
+  const conTag = (nome: string, tags: string[], a: Auth = auth) =>
+    request(app).post("/pasti-preferiti").set(a).send({ nome, voci: voci(), tags });
+  const tagUsati = async () =>
+    tagUsatoSchema
+      .array()
+      .parse((await request(app).get("/pasti-preferiti/tag").set(auth).expect(200)).body);
+
+  it("salva i tag normalizzati, senza doppioni e in ordine alfabetico", async () => {
+    const t = unico();
+    const res = await conTag("Con tag", [` Veloce  ${t} `, `ZUPPA ${t}`, `veloce ${t}`]).expect(
+      201,
+    );
+    expect(pastoPreferitoSchema.parse(res.body).tags).toEqual([`veloce ${t}`, `zuppa ${t}`]);
+    const senza = await crea("Senza tag", voci()).expect(201);
+    expect(senza.body.tags).toEqual([]);
+  });
+
+  it("rifiuta tag vuoti, troppo lunghi o più di 10", async () => {
+    await conTag("No", [" "]).expect(400);
+    await conTag("No", ["x".repeat(31)]).expect(400);
+    await conTag(
+      "No",
+      Array.from({ length: 11 }, (_, i) => `t${i}`),
+    ).expect(400);
+  });
+
+  it("condivide i tag tra gli utenti e li conta su tutti i pasti, i più usati prima", async () => {
+    const t = unico();
+    await conTag("Mio", [`a ${t}`, `b ${t}`]).expect(201);
+    await conTag("Suo", [`B ${t}`], altro).expect(201);
+
+    const miei = (await tagUsati()).filter((u) => u.nome.endsWith(t));
+    expect(miei).toEqual([
+      { nome: `b ${t}`, pasti: 2 },
+      { nome: `a ${t}`, pasti: 1 },
+    ]);
+  });
+
+  it("filtra i pasti che hanno tutti i tag scelti", async () => {
+    const t = unico();
+    const uno = (await conTag(`Uno ${t}`, [`x ${t}`, `y ${t}`]).expect(201)).body.id;
+    const due = (await conTag(`Due ${t}`, [`x ${t}`], altro).expect(201)).body.id;
+    const ids = async (query: Record<string, string | string[]>) =>
+      paginaPastiPreferitiSchema
+        .parse((await request(app).get("/pasti-preferiti").query(query).set(auth).expect(200)).body)
+        .elementi.map((p) => p.id)
+        .sort();
+
+    expect(await ids({ tag: `X ${t}` })).toEqual([uno, due].sort());
+    expect(await ids({ tag: [`x ${t}`, `y ${t}`] })).toEqual([uno]);
+    expect(await ids({ tag: [`x ${t}`, `y ${t}`], autore: "miei" })).toEqual([uno]);
+    expect(await ids({ tag: `nessuno ${t}` })).toEqual([]);
+  });
+
+  it("solo l'autore cambia i tag; un tag senza più pasti non si elenca", async () => {
+    const t = unico();
+    const { id } = (await conTag("Da ritaggare", [`vecchio ${t}`]).expect(201)).body;
+
+    await request(app)
+      .put(`/pasti-preferiti/${id}`)
+      .set(altro)
+      .send({ nome: "Da ritaggare", voci: voci(), tags: [`altrui ${t}`] })
+      .expect(403);
+    const res = await request(app)
+      .put(`/pasti-preferiti/${id}`)
+      .set(auth)
+      .send({ nome: "Da ritaggare", voci: voci(), tags: [`nuovo ${t}`] })
+      .expect(200);
+    expect(res.body.tags).toEqual([`nuovo ${t}`]);
+    expect((await tagUsati()).map((u) => u.nome).filter((n) => n.endsWith(t))).toEqual([
+      `nuovo ${t}`,
+    ]);
+
+    await request(app).delete(`/pasti-preferiti/${id}`).set(auth).expect(204);
+    expect((await tagUsati()).some((u) => u.nome.endsWith(t))).toBe(false);
+  });
+});
+
 describe("POST /diario/:giorno/preferiti", () => {
   it("aggiunge un pasto preferito, anche altrui, a un pasto principale e conta l'uso", async () => {
     const alimento = await creaAlimento(auth, "Per il diario altrui");
@@ -399,7 +483,7 @@ describe("collegamento tra pasto del giorno e pasto preferito", () => {
     expect(pranzo.preferito).not.toBeNull();
   });
 
-  it("modificando il preferito il collegamento resta solo se cambia il nome", async () => {
+  it("modificando il preferito il collegamento resta solo se cambiano nome o tag", async () => {
     const pranzo = await salva("2026-07-08", "Da rinominare");
     const id = pranzo.preferito!.id;
     const voci = [{ alimento: pane, quantita: 100 }];
@@ -407,7 +491,7 @@ describe("collegamento tra pasto del giorno e pasto preferito", () => {
     await request(app)
       .put(`/pasti-preferiti/${id}`)
       .set(auth)
-      .send({ nome: "Rinominato", voci })
+      .send({ nome: "Rinominato", voci, tags: ["ritaggato"] })
       .expect(200);
     const rinominato = await request(app).get("/diario/2026-07-08").set(auth).expect(200);
     expect(pranzoDi(rinominato.body).preferito).toMatchObject({ nome: "Rinominato" });
