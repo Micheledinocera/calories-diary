@@ -1,7 +1,11 @@
 ---
 tipo: info
-aggiornato: 2026-11-16
+aggiornato: 2026-11-20
 fonti:
+  - raw/compiled/tag-system/2026-11-20-obiettivo.md
+  - raw/compiled/tag-system/2026-11-20-task.md
+  - raw/compiled/tag-system/2026-11-20-decisioni-utente.md
+  - raw/compiled/tag-system/2026-11-20-implementazione.md
   - raw/compiled/new-reports-fixes/2026-11-16-obiettivo.md
   - raw/compiled/other-fixes/2026-11-04-obiettivo.md
   - raw/compiled/minor-fixes/2026-10-30-obiettivo.md
@@ -83,9 +87,11 @@ Applicazione **personale** per tracciare ogni giorno calorie e macronutrienti. �
 
 **Pasti preferiti** (in `meals`): composizioni di alimenti salvate per riusarle in altri giorni.
 - Un pasto con alimenti ha una **stella**: vuota lo salva tra i preferiti con un nome, piena dice che è identico a un preferito. Un pasto vuoto propone invece "Aggiungi preferito": un preferito si aggiunge **solo a un pasto vuoto**.
-- Il **collegamento** tra pasto e preferito si perde quando cambiano le voci del pasto, o quando l'autore cambia quelle del preferito. Cambiare solo il nome del preferito non lo toglie. Un preferito aggiunto saltando alimenti archiviati non collega il pasto, perché non è identico.
+- Il **collegamento** tra pasto e preferito si perde quando cambiano le voci del pasto, o quando l'autore cambia quelle del preferito. Cambiare solo il nome o i tag del preferito non lo toglie. Un preferito aggiunto saltando alimenti archiviati non collega il pasto, perché non è identico.
 - Toccare la stella piena elimina il preferito se è proprio, dopo una conferma: tutti i pasti collegati perdono il collegamento e il diario non cambia. Su un preferito di un altro utente toglie solo il collegamento di quel pasto.
 - Schermata **Pasti preferiti**, come Alimenti: ci sono i pasti di tutti gli utenti, filtrati di base su "I miei pasti". Tutti li vedono, con lo username dell'autore, e li aggiungono al diario; solo l'autore li modifica o li elimina. L'elenco si ordina per **A-Z** (predefinito), **Z-A**, **Più recenti** e **Meno recenti**, cioè per data di creazione del pasto.
+- **Tag** (in `tag-system`): un solo vocabolario **condiviso** tra tutti gli utenti. Solo l'autore aggiunge o toglie i tag di un preferito, nella sua schermata, scegliendo tra quelli esistenti o creandone di nuovi. Un tag si salva in minuscolo con spazi singoli ("Pre Allenamento" e "pre allenamento" sono lo stesso), da 1 a 30 caratteri, al massimo 10 per pasto. Un tag che nessun pasto ha più non si propone. "Salva come preferito" dal diario crea il pasto senza tag.
+- **Filtro per tag**, sempre visibile nella ricerca dei pasti (schermata Pasti preferiti e "Aggiungi preferito" del diario): i **5 tag più usati**, contati sui pasti di tutti gli utenti, e gli altri dietro "Altri tag", che espande l'elenco. Con più tag scelti si vedono solo i pasti che li hanno **tutti**.
 
 **Copia di una giornata** (in `meals`): si valorizza una giornata con i pasti di un'altra del proprio diario. Le voci si **aggiungono** a quelle presenti: ogni pasto principale riceve quelle del pasto corrispondente, gli spuntini vanno in fondo. Non si cancella nulla.
 
