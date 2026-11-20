@@ -1,7 +1,8 @@
 ---
 tipo: info
-aggiornato: 2026-10-30
+aggiornato: 2026-11-20
 fonti:
+  - raw/compiled/tag-system/2026-11-20-decisioni-utente.md
   - raw/compiled/minor-fixes/2026-10-30-obiettivo.md
   - raw/compiled/meals/2026-10-30-pasti-preferiti.md
   - raw/compiled/meals/2026-10-30-decisioni-collegamento.md
@@ -87,7 +88,8 @@ Catalogo, alimenti e diario sono definiti (vedi [Catalogo](../tecnico/api/catalo
 - **porzione**: alimento, nome (es. "1 vasetto"), quantità nell'unità base dell'alimento, predefinita.
 - **pasto**: un pasto di un giorno dell'utente: giorno, tipo (colazione, pranzo, cena, spuntino), ordine nella giornata.
 - **voce**: pasto, alimento, quantità in g o ml. Niente valori salvati: si ricalcolano dall'alimento.
-- **pasto preferito** (condiviso): autore, nome, voci (alimento e quantità). Un pasto del giorno resta collegato al preferito finché è identico.
+- **pasto preferito** (condiviso): autore, nome, voci (alimento e quantità), tag. Un pasto del giorno resta collegato al preferito finché è identico.
+- **tag** (condiviso): nome normalizzato e unico; un pasto preferito ne ha fino a 10.
 - Fase 2: **ricetta** (nome, peso finale, esposta come alimento) e **ingrediente della ricetta** (alimento, grammi).
 
 ## Domande aperte
