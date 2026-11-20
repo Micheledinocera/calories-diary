@@ -18,6 +18,11 @@ export function pastiPreferitiRouter(em: EntityManager): Router {
     res.json(await service.elenca(utenteCorrente(res).id, filtri));
   });
 
+  // Before `/:id`, or "tag" would be read as an id.
+  router.get("/tag", async (_req, res) => {
+    res.json(await service.tagUsati());
+  });
+
   router.get("/:id", valida({ params: parametriId }), async (_req, res) => {
     const { id } = datiValidati<typeof parametriId>(res, "params");
     res.json(await service.trova(utenteCorrente(res).id, id));

@@ -16,6 +16,7 @@ onBeforeUnmount(() => clearTimeout(timer));
 // Every user's meals are here: the screen opens on the user's own.
 const autore = ref<"miei" | "tutti">("miei");
 const ordine = ref<OrdinePastiPreferiti>("nome");
+const tag = ref<string[]>([]);
 
 const ordinamenti: { label: string; value: OrdinePastiPreferiti }[] = [
   { label: "A-Z", value: "nome" },
@@ -32,9 +33,10 @@ const { elementi, totale, caricata, pagina, perPagina, desktop, status, error, r
         q: testo.value.trim() || undefined,
         autore: autore.value,
         ordine: ordine.value,
+        tag: tag.value,
         ...paginazione,
       }),
-    [testo, autore, ordine],
+    [testo, autore, ordine, tag],
   );
 
 const errore = computed(() => (error.value ? normalizzaErrore(error.value) : null));
@@ -60,6 +62,7 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
       <FiltroPastiPreferiti v-model="autore" />
       <SelettoreOrdine v-model="ordine" :opzioni="ordinamenti" />
     </div>
+    <FiltroTag v-model="tag" />
 
     <UAlert
       v-if="errore"
@@ -98,7 +101,7 @@ const errore = computed(() => (error.value ? normalizzaErrore(error.value) : nul
     <UEmpty
       v-else
       icon="i-lucide-star"
-      :title="cerca ? 'Nessun pasto trovato' : 'Ancora nessun pasto preferito'"
+      :title="cerca || tag.length ? 'Nessun pasto trovato' : 'Ancora nessun pasto preferito'"
       description="Salvane uno dal diario con la stella, o crealo qui."
       :actions="[{ label: 'Nuovo pasto', icon: 'i-lucide-plus', to: '/pasti-preferiti/nuovo' }]"
     />

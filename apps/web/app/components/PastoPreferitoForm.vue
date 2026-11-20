@@ -1,18 +1,43 @@
 <script setup lang="ts">
 import {
   nuovoPastoPreferitoSchema,
+  tagSchema,
   type Alimento,
   type NuovaVoce,
   type NuovoPastoPreferito,
   type VoceSuggerita,
 } from "@calories-diary/shared";
 
-const props = defineProps<{ nome?: string; voci?: VoceSuggerita[]; inCorso?: boolean }>();
+const props = defineProps<{
+  nome?: string;
+  voci?: VoceSuggerita[];
+  tags?: string[];
+  inCorso?: boolean;
+}>();
 const emit = defineEmits<{ salva: [dati: NuovoPastoPreferito] }>();
 
 const nome = ref(props.nome ?? "");
 const voci = ref<VoceSuggerita[]>([...(props.voci ?? [])]);
 const scelta = ref(false);
+const tags = ref<string[]>([...(props.tags ?? [])]);
+
+// The shared vocabulary as suggestions; a new tag is normalized as the API stores it.
+const { tagUsati } = usePastiPreferiti();
+const { data: vocabolario } = useAsyncData("tag-pasti-preferiti", tagUsati, { server: false });
+const suggerimenti = computed(() => [
+  ...new Set([...(vocabolario.value ?? []).map((t) => t.nome), ...tags.value]),
+]);
+
+// The text being typed: emptied once the new tag is added.
+const cercaTag = ref("");
+
+function creaTag(testo: string) {
+  cercaTag.value = "";
+  const tag = tagSchema.safeParse(testo);
+  if (tag.success && !tags.value.includes(tag.data) && tags.value.length < 10) {
+    tags.value.push(tag.data);
+  }
+}
 
 function aggiungi({ quantita }: NuovaVoce, alimento: Alimento) {
   voci.value.push(voceDaAlimento(alimento, quantita));
@@ -27,6 +52,7 @@ const totali = computed(() => totaliVoci(voci.value));
 const dati = computed(() => ({
   nome: nome.value,
   voci: voci.value.map((v) => ({ alimento: v.alimento.id, quantita: v.quantita })),
+  tags: tags.value,
 }));
 const valido = computed(() => nuovoPastoPreferitoSchema.safeParse(dati.value).success);
 
@@ -45,6 +71,20 @@ function salva() {
           maxlength="100"
           size="xl"
           class="w-full"
+        />
+      </UFormField>
+      <UFormField label="Tag" hint="Fino a 10">
+        <UInputMenu
+          v-model="tags"
+          v-model:search-term="cercaTag"
+          multiple
+          create-item
+          :items="suggerimenti"
+          placeholder="Es. colazione, veloce"
+          size="xl"
+          class="w-full"
+          :content="{ hideWhenEmpty: true }"
+          @create="creaTag"
         />
       </UFormField>
     </UCard>

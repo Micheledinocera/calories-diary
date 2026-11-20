@@ -3,6 +3,7 @@ import type {
   NuovoPastoPreferito,
   Pagina,
   PastoPreferito,
+  TagUsato,
 } from "@calories-diary/shared";
 
 /** Calls of the favorite meals (`/pasti-preferiti`): shared among users, only the author writes. */
@@ -14,6 +15,8 @@ export function usePastiPreferiti() {
   return {
     elenca: (filtri: FiltriPastiPreferiti = {}) =>
       api<Pagina<PastoPreferito>>("/pasti-preferiti", { query: filtri }),
+    /** Tags of every user's meals, most used first. */
+    tagUsati: () => api<TagUsato[]>("/pasti-preferiti/tag"),
     trova: (id: string) => api<PastoPreferito>(`/pasti-preferiti/${id}`),
     crea: (dati: NuovoPastoPreferito) =>
       api<PastoPreferito>("/pasti-preferiti", { method: "POST", body: dati, ...scrivi }),
