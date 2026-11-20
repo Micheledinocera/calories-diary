@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { defineEntity, p } from "@mikro-orm/core";
 import { Utente } from "../utenti/utente.entity.js";
+import { Tag } from "./tag.entity.js";
 import { VocePreferita } from "./voce-preferita.entity.js";
 
 /** A saved composition of foods: every user sees it and uses it, only the author changes it. */
@@ -19,6 +20,7 @@ export const PastoPreferitoSchema = defineEntity({
         .mappedBy("pastoPreferito")
         .orphanRemoval()
         .orderBy({ ordine: "asc" }),
+    tags: () => p.manyToMany(Tag).owner(),
     creatoIl: p.datetime().onCreate(() => new Date()),
     aggiornatoIl: p
       .datetime()

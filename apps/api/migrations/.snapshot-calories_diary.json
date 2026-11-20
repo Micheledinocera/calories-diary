@@ -824,6 +824,79 @@
       "comment": null
     },
     {
+      "name": "pasto_preferito_tags",
+      "schema": "public",
+      "columns": {
+        "pasto_preferito_id": {
+          "name": "pasto_preferito_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "tag_id": {
+          "name": "tag_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": ["pasto_preferito_id", "tag_id"],
+          "composite": true,
+          "constraint": true,
+          "keyName": "pasto_preferito_tags_pkey",
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "triggers": [],
+      "foreignKeys": {
+        "pasto_preferito_tags_pasto_preferito_id_foreign": {
+          "columnNames": ["pasto_preferito_id"],
+          "constraintName": "pasto_preferito_tags_pasto_preferito_id_foreign",
+          "localTableName": "public.pasto_preferito_tags",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.pasto_preferito",
+          "updateRule": "cascade",
+          "deleteRule": "cascade"
+        },
+        "pasto_preferito_tags_tag_id_foreign": {
+          "columnNames": ["tag_id"],
+          "constraintName": "pasto_preferito_tags_tag_id_foreign",
+          "localTableName": "public.pasto_preferito_tags",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.tag",
+          "updateRule": "cascade",
+          "deleteRule": "cascade"
+        }
+      },
+      "comment": null
+    },
+    {
       "name": "porzione",
       "schema": "public",
       "columns": {
@@ -1322,6 +1395,68 @@
           "columnName": "unita_base"
         }
       ],
+      "triggers": [],
+      "foreignKeys": {},
+      "comment": null
+    },
+    {
+      "name": "tag",
+      "schema": "public",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "varchar(30)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": true,
+          "length": 30,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": ["nome"],
+          "composite": false,
+          "constraint": true,
+          "keyName": "tag_nome_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "keyName": "tag_pkey",
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
       "triggers": [],
       "foreignKeys": {},
       "comment": null
